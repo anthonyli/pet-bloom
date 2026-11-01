@@ -1,0 +1,955 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T00:00:00Z",
+  "title": "Design System: 班级宠物园 · Class Pet Garden",
+  "extensions": {
+    "recording": {
+      "mode": "scan",
+      "authority": "用户已选择的 Operate 班级宠物工作台方向；代码为令牌事实来源。",
+      "traceSeed": "702ed94f961a311b",
+      "seedPurpose": "仅可追溯，不替换用户确认的参考方向。",
+      "reviewStatus": "此前 ship 仅覆盖上轮五项修复；协调方报告本轮浏览器行为验证、37 测试通过，不等于本轮新增需求已复审。本次仅记录，不启服务、不运行审查。",
+      "notCanonized": "鼠/牛/蛇的 24 张独立阶段图已由 Codex 原生工具生成并接入目录，当前 50 种宠物、完整 12 属相；工具未披露实际图片模型，不标称特定模型。临时单图 14 种已撤下。截图开发指示器不是产品视觉规则。",
+      "sources": [
+        "/Users/anthonyli/code/github/class-pet-garden-next/PRODUCT.md",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/surfaces/app-locale-page-tsx.md",
+        "/Users/anthonyli/code/github/class-pet-garden-next/app/globals.css",
+        "/Users/anthonyli/code/github/class-pet-garden-next/tailwind.config.ts",
+        "/Users/anthonyli/code/github/class-pet-garden-next/components/ui/index.tsx",
+        "/Users/anthonyli/code/github/class-pet-garden-next/components/workspace.tsx",
+        "/Users/anthonyli/code/github/class-pet-garden-next/components/auth-screen.tsx",
+        "/Users/anthonyli/code/github/class-pet-garden-next/components/pet-dialogs.tsx",
+        "/Users/anthonyli/code/github/class-pet-garden-next/components/level-up-celebration.tsx",
+        "/Users/anthonyli/code/github/class-pet-garden-next/components/pet-feedback.tsx",
+        "/Users/anthonyli/code/github/class-pet-garden-next/components/pet-picker.tsx"
+      ],
+      "renderedEvidence": [
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/desktop.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/mobile.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/auth.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/auth-en.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/class-select.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/sort-select.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/mobile-sort-select.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/score-positive.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/score-negative.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/score-batch.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/celebration-desktop.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/celebration-graduation.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/celebration-mobile.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/catalog-shanhai.png",
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/catalog-zodiac.png"
+      ],
+      "unavailableEvidence": [
+        "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/review/catalog-mobile.png"
+      ]
+    },
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "成长紫",
+        "tonalRamp": [
+          "oklch(15% .04 285)",
+          "oklch(26% .10 285)",
+          "oklch(38% .17 285)",
+          "oklch(50% .23 285)",
+          "oklch(62% .20 285)",
+          "oklch(74% .14 285)",
+          "oklch(85% .08 285)",
+          "oklch(95% .025 285)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "深成长紫",
+        "tonalRamp": [
+          "oklch(15% .04 285)",
+          "oklch(26% .10 285)",
+          "oklch(38% .17 285)",
+          "oklch(50% .23 285)",
+          "oklch(62% .20 285)",
+          "oklch(74% .14 285)",
+          "oklch(85% .08 285)",
+          "oklch(95% .025 285)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "深紫墨",
+        "tonalRamp": [
+          "oklch(15% .015 290)",
+          "oklch(26% .035 290)",
+          "oklch(38% .04 290)",
+          "oklch(50% .04 290)",
+          "oklch(62% .035 290)",
+          "oklch(74% .03 290)",
+          "oklch(85% .02 290)",
+          "oklch(95% .008 290)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "柔紫灰",
+        "tonalRamp": [
+          "oklch(15% .01 295)",
+          "oklch(26% .02 295)",
+          "oklch(38% .03 295)",
+          "oklch(50% .035 295)",
+          "oklch(62% .03 295)",
+          "oklch(74% .025 295)",
+          "oklch(85% .015 295)",
+          "oklch(95% .006 295)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "浅紫线",
+        "tonalRamp": [
+          "oklch(15% .01 300)",
+          "oklch(26% .02 300)",
+          "oklch(38% .03 300)",
+          "oklch(50% .035 300)",
+          "oklch(62% .03 300)",
+          "oklch(74% .025 300)",
+          "oklch(85% .015 300)",
+          "oklch(95% .006 300)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "紫灰画布",
+        "tonalRamp": [
+          "oklch(15% .005 285)",
+          "oklch(26% .01 285)",
+          "oklch(38% .015 285)",
+          "oklch(50% .02 285)",
+          "oklch(62% .018 285)",
+          "oklch(74% .015 285)",
+          "oklch(85% .01 285)",
+          "oklch(95% .004 285)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "白色表面",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(50% 0 0)",
+          "oklch(62% 0 0)",
+          "oklch(74% 0 0)",
+          "oklch(85% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "success": {
+        "role": "secondary",
+        "displayName": "正向绿",
+        "tonalRamp": [
+          "oklch(15% .02 155)",
+          "oklch(26% .045 155)",
+          "oklch(38% .075 155)",
+          "oklch(50% .11 155)",
+          "oklch(62% .12 155)",
+          "oklch(74% .09 155)",
+          "oklch(85% .05 155)",
+          "oklch(95% .015 155)"
+        ]
+      },
+      "danger": {
+        "role": "secondary",
+        "displayName": "警示红",
+        "tonalRamp": [
+          "oklch(15% .025 15)",
+          "oklch(26% .065 15)",
+          "oklch(38% .12 15)",
+          "oklch(50% .17 15)",
+          "oklch(62% .18 15)",
+          "oklch(74% .13 15)",
+          "oklch(85% .07 15)",
+          "oklch(95% .02 15)"
+        ]
+      },
+      "danger-surface": {
+        "role": "secondary",
+        "displayName": "危险浅底",
+        "tonalRamp": [
+          "oklch(15% .025 15)",
+          "oklch(26% .065 15)",
+          "oklch(38% .12 15)",
+          "oklch(50% .17 15)",
+          "oklch(62% .18 15)",
+          "oklch(74% .13 15)",
+          "oklch(85% .07 15)",
+          "oklch(95% .02 15)"
+        ]
+      },
+      "danger-hover": {
+        "role": "secondary",
+        "displayName": "危险悬停底",
+        "tonalRamp": [
+          "oklch(15% .025 10)",
+          "oklch(26% .065 10)",
+          "oklch(38% .12 10)",
+          "oklch(50% .17 10)",
+          "oklch(62% .18 10)",
+          "oklch(74% .13 10)",
+          "oklch(85% .07 10)",
+          "oklch(95% .02 10)"
+        ]
+      },
+      "secondary-hover": {
+        "role": "neutral",
+        "displayName": "次操作悬停浅底",
+        "tonalRamp": [
+          "oklch(15% .015 300)",
+          "oklch(26% .03 300)",
+          "oklch(38% .045 300)",
+          "oklch(50% .05 300)",
+          "oklch(62% .045 300)",
+          "oklch(74% .035 300)",
+          "oklch(85% .025 300)",
+          "oklch(95% .01 300)"
+        ]
+      },
+      "secondary-hover-line": {
+        "role": "neutral",
+        "displayName": "次操作悬停边线",
+        "tonalRamp": [
+          "oklch(15% .02 300)",
+          "oklch(26% .04 300)",
+          "oklch(38% .06 300)",
+          "oklch(50% .07 300)",
+          "oklch(62% .065 300)",
+          "oklch(74% .055 300)",
+          "oklch(85% .035 300)",
+          "oklch(95% .012 300)"
+        ]
+      },
+      "ghost-hover": {
+        "role": "neutral",
+        "displayName": "幽灵操作悬停底",
+        "tonalRamp": [
+          "oklch(15% .01 300)",
+          "oklch(26% .02 300)",
+          "oklch(38% .03 300)",
+          "oklch(50% .035 300)",
+          "oklch(62% .03 300)",
+          "oklch(74% .025 300)",
+          "oklch(85% .015 300)",
+          "oklch(95% .006 300)"
+        ]
+      },
+      "field-line": {
+        "role": "neutral",
+        "displayName": "字段边线",
+        "tonalRamp": [
+          "oklch(15% .01 300)",
+          "oklch(26% .02 300)",
+          "oklch(38% .03 300)",
+          "oklch(50% .035 300)",
+          "oklch(62% .03 300)",
+          "oklch(74% .025 300)",
+          "oklch(85% .015 300)",
+          "oklch(95% .006 300)"
+        ]
+      },
+      "field-placeholder": {
+        "role": "neutral",
+        "displayName": "字段占位紫灰",
+        "tonalRamp": [
+          "oklch(15% .01 300)",
+          "oklch(26% .02 300)",
+          "oklch(38% .03 300)",
+          "oklch(50% .035 300)",
+          "oklch(62% .03 300)",
+          "oklch(74% .025 300)",
+          "oklch(85% .015 300)",
+          "oklch(95% .006 300)"
+        ]
+      },
+      "field-focus": {
+        "role": "primary",
+        "displayName": "字段焦点浅紫",
+        "tonalRamp": [
+          "oklch(15% .025 290)",
+          "oklch(26% .055 290)",
+          "oklch(38% .09 290)",
+          "oklch(50% .12 290)",
+          "oklch(62% .11 290)",
+          "oklch(74% .09 290)",
+          "oklch(85% .055 290)",
+          "oklch(95% .018 290)"
+        ]
+      },
+      "field-disabled": {
+        "role": "neutral",
+        "displayName": "字段禁用浅底",
+        "tonalRamp": [
+          "oklch(15% .01 300)",
+          "oklch(26% .02 300)",
+          "oklch(38% .03 300)",
+          "oklch(50% .035 300)",
+          "oklch(62% .03 300)",
+          "oklch(74% .025 300)",
+          "oklch(85% .015 300)",
+          "oklch(95% .006 300)"
+        ]
+      },
+      "tab-track": {
+        "role": "neutral",
+        "displayName": "分类轨道",
+        "tonalRamp": [
+          "oklch(15% .01 300)",
+          "oklch(26% .02 300)",
+          "oklch(38% .03 300)",
+          "oklch(50% .035 300)",
+          "oklch(62% .03 300)",
+          "oklch(74% .025 300)",
+          "oklch(85% .015 300)",
+          "oklch(95% .006 300)"
+        ]
+      },
+      "pet-surface": {
+        "role": "neutral",
+        "displayName": "宠物浅底",
+        "tonalRamp": [
+          "oklch(15% .015 300)",
+          "oklch(26% .03 300)",
+          "oklch(38% .045 300)",
+          "oklch(50% .05 300)",
+          "oklch(62% .045 300)",
+          "oklch(74% .035 300)",
+          "oklch(85% .025 300)",
+          "oklch(95% .01 300)"
+        ]
+      },
+      "growth-track": {
+        "role": "primary",
+        "displayName": "成长轨道",
+        "tonalRamp": [
+          "oklch(15% .025 295)",
+          "oklch(26% .055 295)",
+          "oklch(38% .09 295)",
+          "oklch(50% .12 295)",
+          "oklch(62% .11 295)",
+          "oklch(74% .09 295)",
+          "oklch(85% .055 295)",
+          "oklch(95% .018 295)"
+        ]
+      },
+      "level-ink": {
+        "role": "neutral",
+        "displayName": "等级深紫",
+        "tonalRamp": [
+          "oklch(15% .02 310)",
+          "oklch(26% .045 310)",
+          "oklch(38% .065 310)",
+          "oklch(50% .08 310)",
+          "oklch(62% .075 310)",
+          "oklch(74% .06 310)",
+          "oklch(85% .04 310)",
+          "oklch(95% .012 310)"
+        ]
+      },
+      "level-line": {
+        "role": "neutral",
+        "displayName": "等级浅紫线",
+        "tonalRamp": [
+          "oklch(15% .015 305)",
+          "oklch(26% .03 305)",
+          "oklch(38% .045 305)",
+          "oklch(50% .05 305)",
+          "oklch(62% .045 305)",
+          "oklch(74% .035 305)",
+          "oklch(85% .025 305)",
+          "oklch(95% .01 305)"
+        ]
+      },
+      "badge-surface": {
+        "role": "secondary",
+        "displayName": "徽章琥珀底",
+        "tonalRamp": [
+          "oklch(15% .015 90)",
+          "oklch(26% .035 90)",
+          "oklch(38% .065 90)",
+          "oklch(50% .09 90)",
+          "oklch(62% .11 90)",
+          "oklch(74% .10 90)",
+          "oklch(85% .07 90)",
+          "oklch(95% .025 90)"
+        ]
+      },
+      "badge-ink": {
+        "role": "secondary",
+        "displayName": "徽章深琥珀",
+        "tonalRamp": [
+          "oklch(15% .015 85)",
+          "oklch(26% .035 85)",
+          "oklch(38% .065 85)",
+          "oklch(50% .09 85)",
+          "oklch(62% .11 85)",
+          "oklch(74% .10 85)",
+          "oklch(85% .07 85)",
+          "oklch(95% .025 85)"
+        ]
+      },
+      "select-highlight": {
+        "role": "primary",
+        "displayName": "select-highlight",
+        "tonalRamp": [
+          "oklch(15% 0.015 295)",
+          "oklch(26% 0.035 295)",
+          "oklch(38% 0.065 295)",
+          "oklch(50% 0.09 295)",
+          "oklch(62% 0.11 295)",
+          "oklch(74% 0.09 295)",
+          "oklch(85% 0.05 295)",
+          "oklch(95% 0.015 295)"
+        ]
+      },
+      "select-focus": {
+        "role": "primary",
+        "displayName": "select-focus",
+        "tonalRamp": [
+          "oklch(15% 0.015 295)",
+          "oklch(26% 0.035 295)",
+          "oklch(38% 0.065 295)",
+          "oklch(50% 0.09 295)",
+          "oklch(62% 0.11 295)",
+          "oklch(74% 0.09 295)",
+          "oklch(85% 0.05 295)",
+          "oklch(95% 0.015 295)"
+        ]
+      },
+      "score-positive": {
+        "role": "primary",
+        "displayName": "score-positive",
+        "tonalRamp": [
+          "oklch(15% 0.015 295)",
+          "oklch(26% 0.035 295)",
+          "oklch(38% 0.065 295)",
+          "oklch(50% 0.09 295)",
+          "oklch(62% 0.11 295)",
+          "oklch(74% 0.09 295)",
+          "oklch(85% 0.05 295)",
+          "oklch(95% 0.015 295)"
+        ]
+      },
+      "score-negative": {
+        "role": "secondary",
+        "displayName": "score-negative",
+        "tonalRamp": [
+          "oklch(15% 0.015 15)",
+          "oklch(26% 0.035 15)",
+          "oklch(38% 0.065 15)",
+          "oklch(50% 0.09 15)",
+          "oklch(62% 0.11 15)",
+          "oklch(74% 0.09 15)",
+          "oklch(85% 0.05 15)",
+          "oklch(95% 0.015 15)"
+        ]
+      },
+      "celebration-title": {
+        "role": "secondary",
+        "displayName": "celebration-title",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      },
+      "celebration-emphasis": {
+        "role": "secondary",
+        "displayName": "celebration-emphasis",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      },
+      "celebration-frame": {
+        "role": "secondary",
+        "displayName": "celebration-frame",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      },
+      "celebration-action": {
+        "role": "secondary",
+        "displayName": "celebration-action",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      },
+      "celebration-action-ink": {
+        "role": "secondary",
+        "displayName": "celebration-action-ink",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      },
+      "celebration-foreground": {
+        "role": "secondary",
+        "displayName": "celebration-foreground",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      },
+      "celebration-ray": {
+        "role": "secondary",
+        "displayName": "celebration-ray",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      },
+      "celebration-level": {
+        "role": "secondary",
+        "displayName": "celebration-level",
+        "tonalRamp": [
+          "oklch(15% 0.015 85)",
+          "oklch(26% 0.035 85)",
+          "oklch(38% 0.065 85)",
+          "oklch(50% 0.09 85)",
+          "oklch(62% 0.11 85)",
+          "oklch(74% 0.09 85)",
+          "oklch(85% 0.05 85)",
+          "oklch(95% 0.015 85)"
+        ]
+      }
+    },
+    "tonalRampPolicy": "仅用于面板预览的合成 OKLCH 暗到亮八阶，不是已实现令牌，不替换 DESIGN.md 的规范色值。",
+    "typographyMeta": {
+      "display-en": {
+        "displayName": "英文登录展示标题",
+        "purpose": "仅 auth 插画区；本地 Nunito 800。 全屏庆祝另按 celebration-headline 字号，沿用语言权重。"
+      },
+      "display-zh": {
+        "displayName": "中文登录展示标题",
+        "purpose": "仅 auth 插画区；中文回退到本地 ZCOOL KuaiLe 400。 全屏庆祝另按 celebration-headline 字号，沿用语言权重。"
+      },
+      "headline-auth": {
+        "displayName": "登录表单标题",
+        "purpose": "系统功能字体，不使用展示字体。"
+      },
+      "headline": {
+        "displayName": "工作台标题",
+        "purpose": "默认工作台标题。"
+      },
+      "headline-desktop": {
+        "displayName": "桌面工作台标题",
+        "purpose": "lg 起覆盖字号；保留 32px 行高。"
+      },
+      "title": {
+        "displayName": "弹窗与次级标题",
+        "purpose": "Dialog 标题另用紧字距。"
+      },
+      "body": {
+        "displayName": "正文",
+        "purpose": "基础正文；姓名和积分同字号、700 字重。"
+      },
+      "body-small": {
+        "displayName": "功能小正文",
+        "purpose": "字段和辅助段落；说明可用 1.625 行高。"
+      },
+      "label": {
+        "displayName": "操作标签",
+        "purpose": "按钮 600；字段标签局部 500。"
+      },
+      "caption": {
+        "displayName": "辅助说明",
+        "purpose": "宠物名、成长说明和辅助信息。"
+      },
+      "celebration-headline": {
+        "displayName": "升级/毕业展示标题",
+        "purpose": "全屏事件层；英文 800、中文 400，不推广到功能界面。"
+      }
+    },
+    "fontEvidence": {
+      "actualBody": "app/globals.css body；Tailwind 的 Noto Sans SC 配置不代表功能界面实际加载该字体。",
+      "localFaces": [
+        {
+          "family": "Garden Nunito",
+          "weight": 800,
+          "url": "/fonts/nunito/nunito-800.ttf",
+          "display": "swap",
+          "scope": "auth 插画区 h1；全屏升级/毕业 h2"
+        },
+        {
+          "family": "Garden KuaiLe",
+          "weight": 400,
+          "url": "/fonts/zcool-kuaile/zcool-kuaile.ttf",
+          "display": "swap",
+          "scope": "auth 插画区 h1 中文回退；全屏升级/毕业 h2"
+        }
+      ]
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 3px 12px -5px rgb(44 29 83 / .13)",
+        "purpose": "静态学生卡片；tailwind.config.ts。"
+      },
+      {
+        "name": "card-hover",
+        "value": "0 8px 20px -10px rgb(67 41 122 / .2)",
+        "purpose": "卡片悬停，同时边框变为 #c9baff；app/globals.css。"
+      },
+      {
+        "name": "tab-active",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Tailwind shadow-sm，分类选中标签。"
+      },
+      {
+        "name": "floating",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Tailwind shadow-lg：通知、菜单、批量栏和 auth 插画卡。"
+      },
+      {
+        "name": "dialog",
+        "value": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+        "purpose": "Tailwind shadow-2xl，Radix 弹窗。"
+      },
+      {
+        "name": "score-delta",
+        "value": "0 6px 16px rgb(52 26 89 / .12)",
+        "purpose": "飘分胶囊。"
+      },
+      {
+        "name": "celebration-frame",
+        "value": "0 18px 56px rgb(0 0 0 / .25)",
+        "purpose": "宠物相框。"
+      },
+      {
+        "name": "celebration-title-text",
+        "value": "0 3px 0 #8f5c23, 0 10px 25px rgb(0 0 0 / .22)",
+        "purpose": "仅庆祝标题 text-shadow，不是工作台 offset box-shadow。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "color-transition",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Tailwind transition-colors 默认颜色过渡。"
+      },
+      {
+        "name": "card-transition",
+        "value": "box-shadow 180ms, border-color 180ms",
+        "purpose": "卡片边框与阴影过渡，默认 ease。"
+      },
+      {
+        "name": "growth-transition",
+        "value": "width 600ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "成长填充宽度更新。"
+      },
+      {
+        "name": "dialog-appear",
+        "value": "opacity 0 to 1; 120ms ease-out",
+        "purpose": "遮罩和弹窗淡入。"
+      },
+      {
+        "name": "score-positive-pet",
+        "value": "720ms cubic-bezier(.16,1,.3,1); peak translateY(-12px) scale(1.06)",
+        "purpose": "本次加分学生；reduced-motion 不运行 Web Animations。"
+      },
+      {
+        "name": "score-negative-pet",
+        "value": "460ms cubic-bezier(.16,1,.3,1); peak translateX ±5px rotate ±2deg",
+        "purpose": "仅本次减分学生；批量同时触发。"
+      },
+      {
+        "name": "score-rise",
+        "value": "1600ms cubic-bezier(.16,1,.3,1) both",
+        "purpose": "白底胶囊分值：18px 起、-12px 保持、-38px 淡出。"
+      },
+      {
+        "name": "score-particles",
+        "value": "1300ms ease-out both; 45ms stagger",
+        "purpose": "正向九个 Heart/Star/Sparkles，负向四个 Cloud。"
+      },
+      {
+        "name": "celebration-reveal",
+        "value": "420ms delay; opacity 650ms ease-out; transform 800ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "新图加载后旧新形态交接。"
+      },
+      {
+        "name": "celebration-rays",
+        "value": "50s linear infinite; rotate(360deg)",
+        "purpose": "全屏庆祝放射光。"
+      },
+      {
+        "name": "celebration-particles",
+        "value": "70 particles; requestAnimationFrame stops after 10s",
+        "purpose": "Canvas 星形/纸屑；reduced-motion 不绘制。"
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition .01ms; animation-iteration-count 1; scroll-behavior auto; rays none; score particles hidden; static score delta; skip pet Web Animations and Canvas; reveal new form directly",
+        "purpose": "保留分值、等级、毕业信息与操作。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "pet-grid-mobile-max",
+        "value": "480px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ],
+    "focus": {
+      "default": "outline: 2px solid var(--focus); outline-offset: 3px; --focus is defined in app/globals.css",
+      "input": "border-color: #6d4aff; outline: 2px solid #e1dbff; outline-offset: 1px",
+      "checkbox": "Radix Checkbox: 20px、6px 圆角；checked 紫底白色 Check；focus-visible 2px #b9a5ff，offset 2px。",
+      "select": "Radix Select: focus-visible border #6d4aff; outline 2px #dcd3fa offset 2px；菜单项 data-highlighted 代替 outline。"
+    },
+    "layers": {
+      "header": 30,
+      "mobileTools": 40,
+      "dialog": 50,
+      "notice": 100,
+      "batchBar": 20,
+      "selectContent": 80,
+      "celebrationOverlay": 110,
+      "celebrationContent": 111,
+      "scoreWithinCard": 4
+    },
+    "assetProvenance": [
+      {
+        "kind": "third-party-pet-raster",
+        "format": "WebP",
+        "count": 376,
+        "pets": 47,
+        "stagesPerPet": 8,
+        "treatment": "原始下载素材，未生成或重绘；object-contain 展示。",
+        "sourceRecord": "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/SOURCES.md",
+        "perImageSha256": "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/image-manifest.csv",
+        "decodeVerification": "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/verification-report.json",
+        "authorization": "下载不代表获得再分发或商用授权；公开部署前由部署者确认。"
+      }
+    ],
+    "catalog": {
+      "reference": "lib/data/pets.json",
+      "originalCollections": {
+        "fairy": 2,
+        "shanhai": 6,
+        "anime": 1,
+        "cute": 38
+      },
+      "zodiac": {
+        "availableSigns": 9,
+        "relationship": "已有 47 种的专题，不增加资产总数",
+        "blockedSigns": [
+          "Rat / 鼠",
+          "Ox / 牛",
+          "Snake / 蛇"
+        ],
+        "missingIndependentStageImages": 24,
+        "status": "blocked; no generation tool or key in current session; not completed",
+        "placeholderPolicy": "不接受单图复用或异风格占位",
+        "removedTemporarySingleImageSpecies": 14
+      },
+      "layout": "3 columns; sm 5; lg 6; max-height 48dvh; overflow-y auto",
+      "evidenceScope": "协调方最终确认、PRODUCT 和已读图鉴截图；不宣称检查未读取的数据文件。"
+    },
+    "celebration": {
+      "overlay": "rgb(27 31 49 / .91)",
+      "rays": "repeating-conic-gradient(from 0deg, transparent 0deg 21deg, #f1ca67 21deg 30deg); opacity .29; radial mask",
+      "frame": "clamp(220px,28vw,330px) circle; 5px #ffda76 border; dashed #edcf82 inner outline; background #fffefa",
+      "progression": "批量逐位；点击屏幕/继续按钮或容器 Enter/Space 前进；Esc/关闭结束全部。",
+      "graduation": "level === 8: 独立毕业标题与 Award/Trophy 徽章说明。",
+      "scope": "用户确认的事件型金色例外，不替换紫色工作台。"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主要操作；最小高 40px，禁用或 busy 时不可点击。",
+      "html": "<button class=\"ds-primary\" type=\"button\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg>添加学生 · Add student</button>",
+      "css": ".ds-primary{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;border:1px solid #6d4aff;border-radius:12px;padding:8px 16px;background:#6d4aff;color:#fff;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;font-weight:600;line-height:20px;cursor:pointer;transition:background-color 150ms cubic-bezier(.4,0,.2,1)}.ds-primary:hover{background:#5937dd}.ds-primary:focus-visible{outline:2px solid var(--focus,#6d4aff);outline-offset:3px}.ds-primary:disabled{pointer-events:none;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-primary{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "默认按钮，用于次级工具。",
+      "html": "<button class=\"ds-secondary\" type=\"button\">评价记录 · History</button>",
+      "css": ".ds-secondary{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;border:1px solid #e9e6f1;border-radius:12px;padding:8px 16px;background:#fff;color:#26233b;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;font-weight:600;line-height:20px;cursor:pointer;transition:background-color 150ms cubic-bezier(.4,0,.2,1),border-color 150ms cubic-bezier(.4,0,.2,1)}.ds-secondary:hover{background:#f9f7ff;border-color:#cfc5ec}.ds-secondary:focus-visible{outline:2px solid var(--focus,#6d4aff);outline-offset:3px}.ds-secondary:disabled{pointer-events:none;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-secondary{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "轻量辅助操作，悬停才出现浅底。",
+      "html": "<button class=\"ds-ghost\" type=\"button\">导入名单 · Import</button>",
+      "css": ".ds-ghost{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:8px 16px;background:transparent;color:#6e6a80;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;font-weight:600;line-height:20px;cursor:pointer;transition:background-color 150ms cubic-bezier(.4,0,.2,1),color 150ms cubic-bezier(.4,0,.2,1)}.ds-ghost:hover{background:#eeebf5;color:#26233b}.ds-ghost:focus-visible{outline:2px solid var(--focus,#6d4aff);outline-offset:3px}.ds-ghost:disabled{pointer-events:none;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-ghost{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "危险操作保留浅红底与红字。",
+      "html": "<button class=\"ds-danger\" type=\"button\">删除 · Delete</button>",
+      "css": ".ds-danger{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:8px 16px;background:#fff0f2;color:#c53c51;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;font-weight:600;line-height:20px;cursor:pointer;transition:background-color 150ms cubic-bezier(.4,0,.2,1)}.ds-danger:hover{background:#ffe0e6}.ds-danger:focus-visible{outline:2px solid var(--focus,#6d4aff);outline-offset:3px}.ds-danger:disabled{pointer-events:none;opacity:.5}@media(prefers-reduced-motion:reduce){.ds-danger{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "标签关联、白底细线、浅紫聚焦轮廓。",
+      "html": "<label class=\"ds-field-label\" for=\"ds-teacher\">用户名 · Username</label><input class=\"ds-field\" id=\"ds-teacher\" autocomplete=\"username\" placeholder=\"输入教师用户名\" />",
+      "css": ".ds-field-label{display:block;margin-bottom:8px;color:#26233b;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;font-weight:500;line-height:20px}.ds-field{width:100%;border:1px solid #dcd8e6;border-radius:12px;padding:10px 12px;background:#fff;color:#26233b;caret-color:#6d4aff;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;line-height:20px}.ds-field::placeholder{color:#797487}.ds-field:focus{border-color:#6d4aff;outline:2px solid #e1dbff;outline-offset:1px}.ds-field:disabled{background:#f1eff5;color:#6e6a80}"
+    },
+    {
+      "name": "Category Navigation",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "带图标与计数的主题分类；静态选中样式预览。",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"宠物主题分类\"><button class=\"ds-tab ds-tab-selected\" aria-pressed=\"true\" type=\"button\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 7v14m0-14C9 4 4 4 2 4v15c4 0 7 0 10 2m0-14c3-3 8-3 10-3v15c-4 0-7 0-10 2\"/></svg>山海系 6</button><button class=\"ds-tab\" aria-pressed=\"false\" type=\"button\">全部伙伴 47</button></nav>",
+      "css": ".ds-tabs{display:flex;gap:4px;overflow-x:auto;border-radius:12px;background:#f0edf7;padding:4px}.ds-tab{flex-shrink:0;border:0;border-radius:8px;padding:8px 16px;background:transparent;color:#6e6a80;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;font-weight:500;line-height:20px;cursor:pointer;transition:color 150ms cubic-bezier(.4,0,.2,1),background-color 150ms cubic-bezier(.4,0,.2,1)}.ds-tab:hover{color:#26233b}.ds-tab-selected{background:#fff;color:#6d4aff;box-shadow:0 1px 2px 0 rgb(0 0 0 / .05)}.ds-tab:focus-visible{outline:2px solid var(--focus,#6d4aff);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-tab{transition-duration:.01ms}}.ds-tab{display:inline-flex;align-items:center;gap:8px}"
+    },
+    {
+      "name": "Level Chip",
+      "kind": "chip",
+      "refersTo": "level-chip",
+      "description": "卡片等级标记，非交互元素，不添加虚构 hover 或 focus 状态。",
+      "html": "<span class=\"ds-level\">Lv.3</span>",
+      "css": ".ds-level{box-sizing:border-box;display:inline-flex;align-items:center;height:28px;border:1px solid #e5ddf5;border-radius:9999px;background:#fff;padding:0 10px;color:#655183;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:11px;font-weight:700;line-height:1}"
+    },
+    {
+      "name": "Student Pet Card — Awaiting Adoption",
+      "kind": "card",
+      "refersTo": "pet-card",
+      "description": "提取真实无宠物状态，SVG 为 Lucide PawPrint；不虚构宠物图片或素材授权。预览只展示卡片外观。",
+      "html": "<article class=\"ds-pet-card\"><button class=\"ds-pet-action\" type=\"button\" aria-label=\"示例学生 · 领养宠物\"><div class=\"ds-pet-image\"><span class=\"ds-pet-empty\"><span class=\"ds-pet-paw\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"4\" r=\"2\"/><circle cx=\"18\" cy=\"8\" r=\"2\"/><circle cx=\"20\" cy=\"16\" r=\"2\"/><path d=\"M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.455 15.84A3.5 3.5 0 0 1 6.5 9Z\"/></svg></span><span>选择一位成长伙伴</span></span><span class=\"ds-pet-level\">Lv.1</span></div><div class=\"ds-pet-info\"><div class=\"ds-pet-heading\"><strong>示例学生</strong><strong class=\"ds-pet-score\">0 <small>分</small></strong></div><p class=\"ds-pet-name\">等待领养 · 01</p><div class=\"ds-pet-growth-label\"><span>成长值</span><span>0 / 40</span></div><div class=\"ds-pet-track\" role=\"progressbar\" aria-label=\"宠物成长进度\" aria-valuenow=\"0\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div></div></button></article>",
+      "css": ".ds-pet-card{width:210px;overflow:hidden;border:1px solid #e9e6f1;border-radius:16px;background:#fff;box-shadow:0 3px 12px -5px rgb(44 29 83 / .13);transition:box-shadow 180ms,border-color 180ms}.ds-pet-card:hover{border-color:#c9baff;box-shadow:0 8px 20px -10px rgb(67 41 122 / .2)}.ds-pet-action{display:block;width:100%;border:0;padding:0;background:transparent;text-align:left;color:#26233b;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;cursor:pointer}.ds-pet-action:focus-visible{outline:2px solid var(--focus,#6d4aff);outline-offset:-3px}.ds-pet-image{position:relative;display:flex;aspect-ratio:1.12;align-items:center;justify-content:center;background:#fbfaff;padding:16px}.ds-pet-empty{display:flex;flex-direction:column;align-items:center;gap:12px;color:#6e6a80;font-size:12px;line-height:16px}.ds-pet-paw{display:flex;width:64px;height:64px;align-items:center;justify-content:center;border:2px dashed #d0c4e7;border-radius:9999px;color:#9f8abb}.ds-pet-level{box-sizing:border-box;position:absolute;bottom:12px;right:12px;display:inline-flex;align-items:center;height:28px;border:1px solid #e5ddf5;border-radius:9999px;background:#fff;padding:0 10px;color:#655183;font-size:11px;font-weight:700;line-height:1}.ds-pet-info{padding:16px}.ds-pet-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;font-size:16px;line-height:24px}.ds-pet-score{color:#6d4aff;font-variant-numeric:tabular-nums;white-space:nowrap}.ds-pet-score small{margin-left:4px;font-size:10px;font-weight:500;color:#6e6a80}.ds-pet-name{margin:0 0 16px;color:#6e6a80;font-size:12px;line-height:16px}.ds-pet-growth-label{display:flex;justify-content:space-between;margin-bottom:8px;color:#6e6a80;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums}.ds-pet-track{height:6px;overflow:hidden;border-radius:9999px;background:#ece7fa}@media(prefers-reduced-motion:reduce){.ds-pet-card{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Pet Growth Bar",
+      "kind": "custom",
+      "refersTo": "growth-bar",
+      "description": "两端数值及 6px 胶囊轨道；真实组件通过数据更新宽度，预览使用固定示例值。",
+      "html": "<div class=\"ds-growth\"><div class=\"ds-growth-label\"><span>成长值 · Growth</span><span>22 / 40</span></div><div class=\"ds-growth-track\" role=\"progressbar\" aria-label=\"宠物成长进度\" aria-valuenow=\"55\" aria-valuemin=\"0\" aria-valuemax=\"100\"><div class=\"ds-growth-fill\" style=\"width:55%\"></div></div></div>",
+      "css": ".ds-growth{font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif}.ds-growth-label{display:flex;justify-content:space-between;margin-bottom:8px;color:#6e6a80;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums}.ds-growth-track{height:6px;overflow:hidden;border-radius:9999px;background:#ece7fa}.ds-growth-fill{height:100%;border-radius:9999px;background:#6d4aff;transition:width 600ms cubic-bezier(.16,1,.3,1)}@media(prefers-reduced-motion:reduce){.ds-growth-fill{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Radix Select — Open State",
+      "kind": "custom",
+      "refersTo": "select-trigger",
+      "description": "展开样式静态预览；产品行为由 Radix Portal、键盘导航和选择实现，本预览不伪装交互。",
+      "html": "<div class=\"ds-select-preview\"><button class=\"ds-select-trigger\" type=\"button\" aria-label=\"班级选择样式预览\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 7v14m0-14C9 4 4 4 2 4v15c4 0 7 0 10 2m0-14c3-3 8-3 10-3v15c-4 0-7 0-10 2\"/></svg><span>演示 · 三年级一班</span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button><div class=\"ds-select-menu\"><div class=\"ds-select-option ds-select-selected\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 7v14m0-14C9 4 4 4 2 4v15c4 0 7 0 10 2m0-14c3-3 8-3 10-3v15c-4 0-7 0-10 2\"/></svg><span>演示 · 三年级一班</span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 12 2 2 4-4\"/></svg></div><div class=\"ds-select-option\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 7v14m0-14C9 4 4 4 2 4v15c4 0 7 0 10 2m0-14c3-3 8-3 10-3v15c-4 0-7 0-10 2\"/></svg><span>401</span></div></div></div>",
+      "css": ".ds-select-preview{max-width:280px;color:#26233b;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;line-height:20px}.ds-select-trigger{display:inline-flex;align-items:center;gap:8px;min-height:40px;width:100%;padding:10px 12px;border:1px solid #6d4aff;border-radius:12px;background:#fff;color:#26233b;font:inherit;cursor:pointer}.ds-select-trigger span{flex:1;text-align:left}.ds-select-trigger:hover{border-color:#b8a6e3}.ds-select-trigger:focus-visible{outline:2px solid #dcd3fa;outline-offset:2px}.ds-select-menu{margin-top:6px;padding:6px;border:1px solid #e9e6f1;border-radius:12px;background:#fff;box-shadow:0 10px 15px -3px rgb(0 0 0 / .1),0 4px 6px -4px rgb(0 0 0 / .1)}.ds-select-option{display:flex;align-items:center;gap:10px;min-height:40px;padding:10px 12px;border-radius:8px}.ds-select-option:hover,.ds-select-selected{background:#f0ebff;color:#6d4aff}.ds-select-selected{font-weight:600}.ds-select-option span{flex:1}"
+    },
+    {
+      "name": "Celebration Continue Button",
+      "kind": "button",
+      "refersTo": "celebration-continue",
+      "description": "全屏庆祝限定金色操作；完整结构与动效见 extensions.celebration/motion，不伪造宠物图片。",
+      "html": "<button class=\"ds-celebration-continue\" type=\"button\">继续一起成长 <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></button>",
+      "css": ".ds-celebration-continue{display:inline-flex;min-height:46px;align-items:center;justify-content:center;gap:8px;border:1px solid #ffe097;border-radius:12px;background:#ffe3a0;color:#503715;padding:11px 24px;font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;font-size:14px;font-weight:600;line-height:20px;cursor:pointer;transition:background-color 150ms cubic-bezier(.4,0,.2,1)}.ds-celebration-continue:hover{background:#fff0c4;border-color:#fff0c4}.ds-celebration-continue:focus-visible{outline:2px solid #ffe097;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-celebration-continue{transition-duration:.01ms}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "班级宠物工作台",
+    "overview": "明亮、温和而以操作为先。用户已经选择班级宠物工作台方向：学生与真实宠物图片是内容，紫色把评价、添加和选中状态连起来。白色表面置于浅紫灰底上，以细边框、柔和圆角和低阴影维持教室工作台的清晰度；不将本次界面改造成另一种视觉世界。\n\n中文与英文共用组件、布局和语义色。功能界面使用系统无衬线字体；登录插画区及全屏升级/毕业标题使用本地展示字体，让宠物的亲和力留在内容与入口，而不影响教师持续操作的可读性。此记录依据当前代码及提供的新旧截图增量更新，不是新一轮完成度审查。此前 ship 仅覆盖上一轮五项修复，不代表本轮新增需求已复审。",
+    "keyCharacteristics": [
+      "浅紫灰画布、白色容器、紫色操作与成长反馈。",
+      "紧凑的功能排版、细描边和柔和低阴影。",
+      "真实 WebP 宠物素材、统一 Lucide 线性图标。",
+      "中英文共用布局，手机保留两列学生卡片。",
+      "Radix Select / Checkbox / Dialog 统一交互；金色全屏庆祝与局部飘分尊重 reduced-motion。"
+    ],
+    "rules": [
+      {
+        "name": "The Semantic Accent Rule",
+        "body": "紫色连接操作和成长；绿、红、琥珀保留成功、负向与徽章含义。局部加分用紫色飘分，全屏升级/毕业允许金色庆祝层；状态同时用文字、数值或图标表达。",
+        "section": "colors"
+      },
+      {
+        "name": "The Functional Voice Rule",
+        "body": "展示字体只服务登录插画大标题与全屏升级/毕业标题；常规工作台、表单、导航、数值与普通弹窗继续使用功能字体。",
+        "section": "typography"
+      },
+      {
+        "name": "The Soft Layer Rule",
+        "body": "表面用细线和柔影分层；悬停不位移内容，弹窗依靠遮罩与高影明确前后关系。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** 复用紫色操作、白色表面与语义状态色，按 Semantic Accent Rule 保留含义。",
+      "**Do** 为中英文共用可换行布局、关联字段标签、键盘焦点与可访问名称。",
+      "**Do** 使用 Lucide SVG、完整展示宠物图片，并保留第三方素材来源与授权提示。",
+      "**Do** 复用 Radix Select / Checkbox / Dialog、Lucide 与功能字体，保留静态可读的 reduced-motion 反馈。",
+      "**Do** 区分批量同时飘分与升级逐位庆祝，保留继续、Esc 和关闭全部操作。"
+    ],
+    "donts": [
+      "**Don't** 将登录/庆祝展示字体和插画构图推广到工作台表单或导航。",
+      "**Don't** 将绿、红或徽章琥珀替换为无语义的装饰性操作主色。",
+      "**Don't** 把截图中的六列、局部 11px 标签或局部圆角提升为所有页面的通用规则。",
+      "**Don't** 用字符图标、裁切宠物或移除焦点轮廓来替换现有组件。",
+      "**Don't** 将缺少八张独立阶段图的宠物以单图或异风格占位开放领养，也不要把缺少的 24 张记为完成。"
+    ]
+  }
+}

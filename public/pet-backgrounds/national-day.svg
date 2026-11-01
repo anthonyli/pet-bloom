@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" fill="#CF1D2B"/>
+  <path d="M0 210h46v-54h50v82h25v-64h47v81h30v-47h51v65h24v-96h51v96h25v-67h49v67h28v-97h47v88h26v-51h55v67h25v-92h49v92h22v-61h44v125H0V210Z" fill="#AC1426"/>
+  <path d="M0 286c98-22 168-15 252-4s152-11 224-5 117-5 164-14v217H0V286Z" fill="#BB172A"/>
+  <path d="M0 352c120-37 205-22 320-14s217-17 320 1v141H0V352Z" fill="#D93636"/>
+  <path d="M211 326h218l90 154H119l92-154Z" fill="#E55745"/>
+  <path d="M202 357h237M179 396h283M153 443h337" stroke="#EC7854" stroke-width="3"/>
+  <path d="M0 28c90 50 158 63 249 38l8 17C150 115 70 96 0 56V28Z" fill="#F6BA58"/>
+  <path d="M0 33c88 38 156 53 242 36C145 77 88 62 0 33Z" fill="#FFE1A0"/>
+  <path d="M55 88v-22m0 67v-20m-43-12h22m43 0h22M24 70l15 15m33 32 15 15m-63 0 15-15m33-32 15-15" stroke="#F9C15F" stroke-width="3" stroke-linecap="round"/>
+  <g fill="#FFE7A9"><circle cx="55" cy="101" r="5"/><circle cx="122" cy="145" r="3"/><circle cx="185" cy="42" r="3"/><circle cx="341" cy="70" r="3"/><circle cx="372" cy="130" r="2.5"/></g>
+  <path d="M410 14v336" stroke="#FFDB8A" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="410" cy="12" r="5" fill="#FFE9B5"/>
+  <g id="national-flag" transform="translate(414 20) scale(5.6)">
+    <rect width="30" height="20" fill="#EE1C25"/>
+    <g fill="#FFFF00">
+      <polygon points="5,2 5.6735,4.0729 7.8532,4.0729 6.0898,5.3541 6.7634,7.4271 5,6.1459 3.2366,7.4271 3.9102,5.3541 2.1468,4.0729 4.3265,4.0729"/>
+      <polygon transform="translate(10 2) rotate(239.0362)" points="0,-1 .2245,-.309 .9511,-.309 .3633,.118 .5878,.809 0,.382 -.5878,.809 -.3633,.118 -.9511,-.309 -.2245,-.309"/>
+      <polygon transform="translate(12 4) rotate(261.8699)" points="0,-1 .2245,-.309 .9511,-.309 .3633,.118 .5878,.809 0,.382 -.5878,.809 -.3633,.118 -.9511,-.309 -.2245,-.309"/>
+      <polygon transform="translate(12 7) rotate(-74.0546)" points="0,-1 .2245,-.309 .9511,-.309 .3633,.118 .5878,.809 0,.382 -.5878,.809 -.3633,.118 -.9511,-.309 -.2245,-.309"/>
+      <polygon transform="translate(10 9) rotate(-51.3402)" points="0,-1 .2245,-.309 .9511,-.309 .3633,.118 .5878,.809 0,.382 -.5878,.809 -.3633,.118 -.9511,-.309 -.2245,-.309"/>
+    </g>
+  </g>
+  <path d="M0 364c49-14 94-12 151 7l-26 64H0v-71Zm640-8c-57-6-101 2-145 27l35 54h110v-81Z" fill="#9E1728"/>
+  <path d="M0 432c46-10 89-6 127 8l-9 24H0v-32Zm640-1c-42-5-78-1-115 15l11 19h104v-34Z" fill="#F3AD4B"/>
+  <path d="M0 447c45-7 82-2 121 10m411 1c34-12 67-17 108-13" stroke="#FFD878" stroke-width="5" stroke-linecap="round"/>
+  <g fill="#FFDA6A"><path d="M30 365c-13-15-33 0-22 12-10 17 13 27 23 13 14 11 29-10 15-20-1-12-11-15-16-5Z"/><path d="M101 386c-13-15-33 0-22 12-10 17 13 27 23 13 14 11 29-10 15-20-1-12-11-15-16-5Z"/><path d="M560 368c-13-15-33 0-22 12-10 17 13 27 23 13 14 11 29-10 15-20-1-12-11-15-16-5Z"/><path d="M616 395c-13-15-33 0-22 12-10 17 13 27 23 13 14 11 29-10 15-20-1-12-11-15-16-5Z"/></g>
+  <g fill="#FFF1BB"><circle cx="30" cy="379" r="6"/><circle cx="101" cy="400" r="6"/><circle cx="560" cy="382" r="6"/><circle cx="616" cy="409" r="6"/><circle cx="77" cy="358" r="10"/><circle cx="519" cy="416" r="9"/></g>
+  <path d="M28 414c12-11 28-15 43-10m38 23c12-9 25-12 38-8m398-10c11-8 24-9 35-5" stroke="#E98948" stroke-width="4" stroke-linecap="round"/>
+  <path d="M242 454h156" stroke="#F5A968" stroke-width="4" stroke-linecap="round"/>
+</svg>

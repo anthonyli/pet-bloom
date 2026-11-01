@@ -1,0 +1,3395 @@
+{
+  "verifiedAt": "2026-10-30T16:24:40.959Z",
+  "petCount": 47,
+  "ruleCount": 83,
+  "imageCount": 376,
+  "decodedImageCount": 376,
+  "bytes": 7824860,
+  "complete": true,
+  "images": [
+    {
+      "petId": "llama",
+      "level": 1,
+      "path": "pets/llama/lv1.webp",
+      "bytes": 29360,
+      "sha256": "53299a0be7ea3e733261e2d90d199adea983bfcbc5d77f3936a2ceaa07560a61",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "llama",
+      "level": 2,
+      "path": "pets/llama/lv2.webp",
+      "bytes": 39282,
+      "sha256": "c3493ad3b3cfd56ef1f55ed979c9d7bd41c343ed1322ee9a93f67df526bb6a75",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "llama",
+      "level": 3,
+      "path": "pets/llama/lv3.webp",
+      "bytes": 36508,
+      "sha256": "66ad9897b4fa99adf30b842df0f2c7b6dc5a2b7402a6c77652df02ecf49845a5",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "llama",
+      "level": 4,
+      "path": "pets/llama/lv4.webp",
+      "bytes": 33684,
+      "sha256": "8a8a706f9ec8e4956aec65ffeebb351ab43a28ed2ed3605fa9d18cdceaf3a64f",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "llama",
+      "level": 5,
+      "path": "pets/llama/lv5.webp",
+      "bytes": 33308,
+      "sha256": "1cfaa4ecf8c04e9f26b77ae20dab92eb56e3ac655c8fbd3a24bc52cf0f365317",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "llama",
+      "level": 6,
+      "path": "pets/llama/lv6.webp",
+      "bytes": 32466,
+      "sha256": "38c12277a437955bd4d003a5e89ef18973f702233e6f58998f4a749a9a629e7e",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "llama",
+      "level": 7,
+      "path": "pets/llama/lv7.webp",
+      "bytes": 27680,
+      "sha256": "82e106920800610f8ae8e5604e0f33706c6e594de85a1a694516b7375f4ab577",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "llama",
+      "level": 8,
+      "path": "pets/llama/lv8.webp",
+      "bytes": 35230,
+      "sha256": "4bf2892cbeed560f1d7c50ac78feb5198cdad0cac62f800a79e5f8d862a0916c",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 1,
+      "path": "pets/koel-duck/lv1.webp",
+      "bytes": 66420,
+      "sha256": "4ccb83049dcec48f57a81cd0ebb1ce7867b0f6bf7f1183455e7f2ddb8844cebe",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 2,
+      "path": "pets/koel-duck/lv2.webp",
+      "bytes": 75376,
+      "sha256": "9f423e3b74789cd8ed070eb419ff808c2c2eed620acac8e4954172f2cc68a1a7",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 3,
+      "path": "pets/koel-duck/lv3.webp",
+      "bytes": 71792,
+      "sha256": "15e8740bcefdecfcefb74d9ff3d03d7d631226278b690b5bd1a471a44890f6a6",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 4,
+      "path": "pets/koel-duck/lv4.webp",
+      "bytes": 74784,
+      "sha256": "a037c1117d1add22ae4ae7c7ede3e10fc4d67147b14dfcedd555dd37a46e6a56",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 5,
+      "path": "pets/koel-duck/lv5.webp",
+      "bytes": 66674,
+      "sha256": "b9717d128e10340f1bb3b22adbb411a1b0b87069b7324190874f430ecb1d1c66",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 6,
+      "path": "pets/koel-duck/lv6.webp",
+      "bytes": 76876,
+      "sha256": "14e9bcd59e9314081ced2f41721a767e8de0e552141ec4b585c75be414863cf1",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 7,
+      "path": "pets/koel-duck/lv7.webp",
+      "bytes": 73176,
+      "sha256": "afbc13951211e5bfff441e87a9e7b85ebfe748b3d8d5347ca8decedfaffa841e",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "koel-duck",
+      "level": 8,
+      "path": "pets/koel-duck/lv8.webp",
+      "bytes": 66284,
+      "sha256": "3d4a10f26d87477716ff7dbb072ba3700ad1bf6d9284a8b3302a3b09571ef175",
+      "width": 375,
+      "height": 500
+    },
+    {
+      "petId": "border-collie",
+      "level": 1,
+      "path": "pets/border-collie/lv1.webp",
+      "bytes": 21790,
+      "sha256": "3aeb76a33f69228d5c1d1966ae95a2f9a0d3ac802fd238afb02cfc459108747c",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "border-collie",
+      "level": 2,
+      "path": "pets/border-collie/lv2.webp",
+      "bytes": 15052,
+      "sha256": "601ccdb73a474b5ce5775679078721add10111db1c4772a3b0d574838f35e059",
+      "width": 300,
+      "height": 264
+    },
+    {
+      "petId": "border-collie",
+      "level": 3,
+      "path": "pets/border-collie/lv3.webp",
+      "bytes": 18786,
+      "sha256": "8c5d93fe45e2fb69d4a9fd2c042f323ee6e738c552115e6349262153c8f1c506",
+      "width": 300,
+      "height": 310
+    },
+    {
+      "petId": "border-collie",
+      "level": 4,
+      "path": "pets/border-collie/lv4.webp",
+      "bytes": 27230,
+      "sha256": "12c04a2e815a137bab35b4e2bb0427eda7594c24cce781b6ec182d3509d57313",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "border-collie",
+      "level": 5,
+      "path": "pets/border-collie/lv5.webp",
+      "bytes": 25390,
+      "sha256": "3fa295fd3ba1288c2a7f3797fd76372517bc9314c7f7ece6a3b37a2874d20bfc",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "border-collie",
+      "level": 6,
+      "path": "pets/border-collie/lv6.webp",
+      "bytes": 31594,
+      "sha256": "7bbae0c7fa8b6076de9c37677778ddeeb6c2924ac2c0cb7424c1dc6ec46e8d3c",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "border-collie",
+      "level": 7,
+      "path": "pets/border-collie/lv7.webp",
+      "bytes": 37170,
+      "sha256": "60274c9bf492d35ffb26a164c74f01c39553494e5595c878126665eda11a5629",
+      "width": 428,
+      "height": 500
+    },
+    {
+      "petId": "border-collie",
+      "level": 8,
+      "path": "pets/border-collie/lv8.webp",
+      "bytes": 40746,
+      "sha256": "b6c4ed7f6fdd2f6c757f5daac4ec8c4bbb788be9f6e0ebb5066a3fcf76c43add",
+      "width": 500,
+      "height": 455
+    },
+    {
+      "petId": "westie",
+      "level": 1,
+      "path": "pets/westie/lv1.webp",
+      "bytes": 23704,
+      "sha256": "1ef18f82ab7424b950c4811f4ca2d52e82a1dcbb698d471a5818bfe0277c7a15",
+      "width": 500,
+      "height": 304
+    },
+    {
+      "petId": "westie",
+      "level": 2,
+      "path": "pets/westie/lv2.webp",
+      "bytes": 32948,
+      "sha256": "4816833b5de2e6a2487c1cc8043cc451e5ff4787739c61de72b9dfc344114912",
+      "width": 500,
+      "height": 631
+    },
+    {
+      "petId": "westie",
+      "level": 3,
+      "path": "pets/westie/lv3.webp",
+      "bytes": 37262,
+      "sha256": "c09cd404de77ca65e2baf0f761d69fbcbb3aab2c7a1cd25e2d99a5bf234aedd3",
+      "width": 481,
+      "height": 768
+    },
+    {
+      "petId": "westie",
+      "level": 4,
+      "path": "pets/westie/lv4.webp",
+      "bytes": 34256,
+      "sha256": "ebb8f4748ee90b2f166c4e8b7b93d8d3186b26de2a0308b8a27d4553598fbf6e",
+      "width": 500,
+      "height": 584
+    },
+    {
+      "petId": "westie",
+      "level": 5,
+      "path": "pets/westie/lv5.webp",
+      "bytes": 41426,
+      "sha256": "c271f1913c9ae3472f0b969b1f5f5aaee708b6e02f393aba3e89e988e93623b3",
+      "width": 500,
+      "height": 730
+    },
+    {
+      "petId": "westie",
+      "level": 6,
+      "path": "pets/westie/lv6.webp",
+      "bytes": 37360,
+      "sha256": "48a73708930edcea0b20696a625c9ff1227dead68abe216bd90cce97550429d1",
+      "width": 500,
+      "height": 436
+    },
+    {
+      "petId": "westie",
+      "level": 7,
+      "path": "pets/westie/lv7.webp",
+      "bytes": 28288,
+      "sha256": "7be3637bdf5a9b69941cda292855196a2771105e44cc84147a939b4de5d2f6d2",
+      "width": 500,
+      "height": 576
+    },
+    {
+      "petId": "westie",
+      "level": 8,
+      "path": "pets/westie/lv8.webp",
+      "bytes": 28862,
+      "sha256": "2eae9f1a28419dbb62cbb4782e11d16c7aa99dcd4a06d737629d70c79e97508b",
+      "width": 500,
+      "height": 332
+    },
+    {
+      "petId": "parrot",
+      "level": 1,
+      "path": "pets/parrot/lv1.webp",
+      "bytes": 15226,
+      "sha256": "4ac88723ff2d83f799c2b2fe71fdc029a2866e456652b9edee83805a5e8c3e56",
+      "width": 300,
+      "height": 352
+    },
+    {
+      "petId": "parrot",
+      "level": 2,
+      "path": "pets/parrot/lv2.webp",
+      "bytes": 17816,
+      "sha256": "90f7a164c71536a95cf807366ee2e34b032d57bd543fd5a097420a8acf622e5d",
+      "width": 300,
+      "height": 289
+    },
+    {
+      "petId": "parrot",
+      "level": 3,
+      "path": "pets/parrot/lv3.webp",
+      "bytes": 18016,
+      "sha256": "663baa5f321c50e0bf119f2ba64aa11d1ae275b982c346aca4e2c2247f509dcc",
+      "width": 300,
+      "height": 285
+    },
+    {
+      "petId": "parrot",
+      "level": 4,
+      "path": "pets/parrot/lv4.webp",
+      "bytes": 19008,
+      "sha256": "f7796d55765b7db727a7af558bf692c8cdf67d4e9bc20b98996cd7363ddd0a53",
+      "width": 300,
+      "height": 292
+    },
+    {
+      "petId": "parrot",
+      "level": 5,
+      "path": "pets/parrot/lv5.webp",
+      "bytes": 22650,
+      "sha256": "0c4356a60f35ec4440b035d98678dd604431b0a32dc1ec7fd4cf1e53cf4fbefe",
+      "width": 300,
+      "height": 303
+    },
+    {
+      "petId": "parrot",
+      "level": 6,
+      "path": "pets/parrot/lv6.webp",
+      "bytes": 24704,
+      "sha256": "c3a8661fac01cc272b71b2ab217d2c10e8f8ba5be5f06921d349dd7589a36b01",
+      "width": 300,
+      "height": 315
+    },
+    {
+      "petId": "parrot",
+      "level": 7,
+      "path": "pets/parrot/lv7.webp",
+      "bytes": 18344,
+      "sha256": "16cf8c713b7d2f1ea8615a95188b83c972e60cacb7025476e7eda1894d926afb",
+      "width": 300,
+      "height": 308
+    },
+    {
+      "petId": "parrot",
+      "level": 8,
+      "path": "pets/parrot/lv8.webp",
+      "bytes": 21528,
+      "sha256": "1b9fbcf99b459b3b55286a526a4acdbfe53ad4aabd382c9223cc3b90244d9a05",
+      "width": 300,
+      "height": 307
+    },
+    {
+      "petId": "silver-cat",
+      "level": 1,
+      "path": "pets/silver-cat/lv1.webp",
+      "bytes": 14444,
+      "sha256": "71f1c50f3d92444e4a16744dfce2f21c9b7c1a19e2a8000b2b1e2639a5f2c5fd",
+      "width": 300,
+      "height": 279
+    },
+    {
+      "petId": "silver-cat",
+      "level": 2,
+      "path": "pets/silver-cat/lv2.webp",
+      "bytes": 23004,
+      "sha256": "5ef6f27574f7f5ed23a36e19c95db7efc24efc9c74f03d4c04a1fd9ba9adeda8",
+      "width": 300,
+      "height": 328
+    },
+    {
+      "petId": "silver-cat",
+      "level": 3,
+      "path": "pets/silver-cat/lv3.webp",
+      "bytes": 20484,
+      "sha256": "4b08691b46869bea60dff0309fba5485608d45872a63836467abd70dfbc85a8b",
+      "width": 300,
+      "height": 302
+    },
+    {
+      "petId": "silver-cat",
+      "level": 4,
+      "path": "pets/silver-cat/lv4.webp",
+      "bytes": 23884,
+      "sha256": "ec7d427698f0590a59f829fb2c6a6aed2e7d8e440cfdc0778d64ca4505f8b510",
+      "width": 300,
+      "height": 424
+    },
+    {
+      "petId": "silver-cat",
+      "level": 5,
+      "path": "pets/silver-cat/lv5.webp",
+      "bytes": 13400,
+      "sha256": "115d6253ff07ba136e3da496380724e1d830c6752a10b26d0f753df1f3355a72",
+      "width": 300,
+      "height": 247
+    },
+    {
+      "petId": "silver-cat",
+      "level": 6,
+      "path": "pets/silver-cat/lv6.webp",
+      "bytes": 23036,
+      "sha256": "61d411a8e5f3cd0afb9b21519c908328bf4b4fd93972ec563e7c94e910a6d77f",
+      "width": 300,
+      "height": 407
+    },
+    {
+      "petId": "silver-cat",
+      "level": 7,
+      "path": "pets/silver-cat/lv7.webp",
+      "bytes": 16520,
+      "sha256": "e68ec8842baceffa0f1db828dadba570e0b21aebf899fe55ba420f1f54ea93f2",
+      "width": 300,
+      "height": 272
+    },
+    {
+      "petId": "silver-cat",
+      "level": 8,
+      "path": "pets/silver-cat/lv8.webp",
+      "bytes": 21090,
+      "sha256": "d1d4c6ca969d90aaee0f9f4712daf8ebf0e8defd719bbd27d78b845fb2e5815d",
+      "width": 300,
+      "height": 414
+    },
+    {
+      "petId": "schnauzer",
+      "level": 1,
+      "path": "pets/schnauzer/lv1.webp",
+      "bytes": 11556,
+      "sha256": "e494d4c0cfabe74d8fa664d96b58c7afe4370bcc6866179979c394b904900a7b",
+      "width": 300,
+      "height": 240
+    },
+    {
+      "petId": "schnauzer",
+      "level": 2,
+      "path": "pets/schnauzer/lv2.webp",
+      "bytes": 12236,
+      "sha256": "084537785d7e0990a5e626856a45ebaf05ed3b540c70c8977595065704d3aa33",
+      "width": 300,
+      "height": 201
+    },
+    {
+      "petId": "schnauzer",
+      "level": 3,
+      "path": "pets/schnauzer/lv3.webp",
+      "bytes": 20980,
+      "sha256": "615f79599741b613b23efd676a91e7c21200d5d55b2c4a08aad768956e0e400d",
+      "width": 300,
+      "height": 390
+    },
+    {
+      "petId": "schnauzer",
+      "level": 4,
+      "path": "pets/schnauzer/lv4.webp",
+      "bytes": 23874,
+      "sha256": "5199c1d42533defb3488c063b42c1eb275ec5ada55ed788470ed0860d9e0107d",
+      "width": 300,
+      "height": 376
+    },
+    {
+      "petId": "schnauzer",
+      "level": 5,
+      "path": "pets/schnauzer/lv5.webp",
+      "bytes": 18656,
+      "sha256": "99a25108288bc81f238344947c0ee3f8f5d14c92d308b27141df07eb6d5e9d91",
+      "width": 300,
+      "height": 291
+    },
+    {
+      "petId": "schnauzer",
+      "level": 6,
+      "path": "pets/schnauzer/lv6.webp",
+      "bytes": 24462,
+      "sha256": "88dea5ff22f4f38d1d6fcfc8e3fd3232877e7da48592a956a0e81be3b0f522ac",
+      "width": 300,
+      "height": 437
+    },
+    {
+      "petId": "schnauzer",
+      "level": 7,
+      "path": "pets/schnauzer/lv7.webp",
+      "bytes": 18166,
+      "sha256": "02127f4ad8e81c9bc65491d4888b93500e8382ff1f3d2b69882ef3fe2a7256d4",
+      "width": 300,
+      "height": 307
+    },
+    {
+      "petId": "schnauzer",
+      "level": 8,
+      "path": "pets/schnauzer/lv8.webp",
+      "bytes": 15502,
+      "sha256": "eecc20b063161cb8e4d176bffbc47bc12e024b2c31a7873da495f0ac43bb3ee7",
+      "width": 300,
+      "height": 279
+    },
+    {
+      "petId": "panda",
+      "level": 1,
+      "path": "pets/panda/lv1.webp",
+      "bytes": 22554,
+      "sha256": "bfd9e45329581821bbbaf35a76ac9019002693f1c89325245c515b2cbaf19538",
+      "width": 300,
+      "height": 312
+    },
+    {
+      "petId": "panda",
+      "level": 2,
+      "path": "pets/panda/lv2.webp",
+      "bytes": 17124,
+      "sha256": "9e39075cfa0b7bda1af4029b0827c171b5b3e40511a160b6f53a1ef0a3591bc9",
+      "width": 300,
+      "height": 304
+    },
+    {
+      "petId": "panda",
+      "level": 3,
+      "path": "pets/panda/lv3.webp",
+      "bytes": 16392,
+      "sha256": "95b21e30a6546c02502e00b7de2ff73d3df5dd5c7a06c8e73bce5727d822dbf7",
+      "width": 300,
+      "height": 358
+    },
+    {
+      "petId": "panda",
+      "level": 4,
+      "path": "pets/panda/lv4.webp",
+      "bytes": 18808,
+      "sha256": "8f0c23d541a70fe63a417f3e519940c79ef6442c65fe258b06e1be4c06eeb6d6",
+      "width": 300,
+      "height": 298
+    },
+    {
+      "petId": "panda",
+      "level": 5,
+      "path": "pets/panda/lv5.webp",
+      "bytes": 30266,
+      "sha256": "ab4dae403ddaabf0da261d433843fac92ea7e7e47404da3321070c2b974500dd",
+      "width": 300,
+      "height": 293
+    },
+    {
+      "petId": "panda",
+      "level": 6,
+      "path": "pets/panda/lv6.webp",
+      "bytes": 18104,
+      "sha256": "4d00dc62d191dd35d04895f89510244a50ad0b9a166d171bad769d4f8ef54015",
+      "width": 300,
+      "height": 338
+    },
+    {
+      "petId": "panda",
+      "level": 7,
+      "path": "pets/panda/lv7.webp",
+      "bytes": 14504,
+      "sha256": "c5826db1d4cfd6dad0b8e8f7163b6ef6a8ed7e0eb9a4e4958d6a5c3a038f2431",
+      "width": 300,
+      "height": 357
+    },
+    {
+      "petId": "panda",
+      "level": 8,
+      "path": "pets/panda/lv8.webp",
+      "bytes": 18434,
+      "sha256": "330be4f225b21c1a4ff940ceb1a9ef54ee3732a0da3df506454b7752927c0234",
+      "width": 300,
+      "height": 421
+    },
+    {
+      "petId": "pig",
+      "level": 1,
+      "path": "pets/pig/lv1.webp",
+      "bytes": 11984,
+      "sha256": "dc772b510742cad58366aa0e2ae032f876755c1fc27aa4ea630e2165aca460e9",
+      "width": 300,
+      "height": 228
+    },
+    {
+      "petId": "pig",
+      "level": 2,
+      "path": "pets/pig/lv2.webp",
+      "bytes": 14548,
+      "sha256": "99d2e52cec78888f09ad7dbed1031e8634e0deb413c47c901c5e08b6b9142214",
+      "width": 300,
+      "height": 348
+    },
+    {
+      "petId": "pig",
+      "level": 3,
+      "path": "pets/pig/lv3.webp",
+      "bytes": 16452,
+      "sha256": "0072dba12db4b370be1e00a9784ab772c2b9d1638917d8f82cf6700687108130",
+      "width": 300,
+      "height": 328
+    },
+    {
+      "petId": "pig",
+      "level": 4,
+      "path": "pets/pig/lv4.webp",
+      "bytes": 22084,
+      "sha256": "f3c6459f3ccf014453f8317d8531cf9afd96b1a352b454af3d3f1085826af81d",
+      "width": 300,
+      "height": 247
+    },
+    {
+      "petId": "pig",
+      "level": 5,
+      "path": "pets/pig/lv5.webp",
+      "bytes": 18148,
+      "sha256": "5eb65d56d08261f35642f5bd3107383eb4bdd373d120c12400a3d2c6f534014f",
+      "width": 300,
+      "height": 199
+    },
+    {
+      "petId": "pig",
+      "level": 6,
+      "path": "pets/pig/lv6.webp",
+      "bytes": 18760,
+      "sha256": "0299fb8a6a080a0183b747e642b9144aa205456afd51ba6ed927b2ab86c5bc68",
+      "width": 300,
+      "height": 394
+    },
+    {
+      "petId": "pig",
+      "level": 7,
+      "path": "pets/pig/lv7.webp",
+      "bytes": 15258,
+      "sha256": "15d6ee260644883d73877e17c0b5b49a9c3772aada0e617d93a5cee57e87a74a",
+      "width": 300,
+      "height": 392
+    },
+    {
+      "petId": "pig",
+      "level": 8,
+      "path": "pets/pig/lv8.webp",
+      "bytes": 17278,
+      "sha256": "04a8d5cf4af3bd2bf7a2ce8c10a607a4b706307f72647c9575a658a75232a417",
+      "width": 300,
+      "height": 332
+    },
+    {
+      "petId": "lamb",
+      "level": 1,
+      "path": "pets/lamb/lv1.webp",
+      "bytes": 7824,
+      "sha256": "8c5f2c3479556e943faeed8fc51f5f8e2b9841ff09eee6c1d72fdfc42193c881",
+      "width": 300,
+      "height": 172
+    },
+    {
+      "petId": "lamb",
+      "level": 2,
+      "path": "pets/lamb/lv2.webp",
+      "bytes": 12612,
+      "sha256": "59ca856c7aae033b791b30b6f28ed3084f4b23bf7d71d3b3a0407ce8e7d50d45",
+      "width": 300,
+      "height": 318
+    },
+    {
+      "petId": "lamb",
+      "level": 3,
+      "path": "pets/lamb/lv3.webp",
+      "bytes": 21346,
+      "sha256": "9a879cd9b94f61d5416ac8e76bbcde2461a78027ac09be08b70efdd2ed06345c",
+      "width": 300,
+      "height": 299
+    },
+    {
+      "petId": "lamb",
+      "level": 4,
+      "path": "pets/lamb/lv4.webp",
+      "bytes": 14760,
+      "sha256": "c3250e863c0acd906ed6bb00e4ad52d4a32f89b395d1c12ce98c552bcc6f3c08",
+      "width": 300,
+      "height": 269
+    },
+    {
+      "petId": "lamb",
+      "level": 5,
+      "path": "pets/lamb/lv5.webp",
+      "bytes": 14682,
+      "sha256": "1460fa76033060d6a4686cfb66cd1b525927e243d2378f04a5a8ca9cf3b6304c",
+      "width": 300,
+      "height": 263
+    },
+    {
+      "petId": "lamb",
+      "level": 6,
+      "path": "pets/lamb/lv6.webp",
+      "bytes": 14776,
+      "sha256": "9fc50f034f17c0158f60f1695aa75912bdba06b2fd8952ab3e0af04f76bd4aa6",
+      "width": 300,
+      "height": 294
+    },
+    {
+      "petId": "lamb",
+      "level": 7,
+      "path": "pets/lamb/lv7.webp",
+      "bytes": 17832,
+      "sha256": "88ea89a9c803964fc4bbd5f0638ff3c5a3e756299f1e28ee0232ea9ada89c078",
+      "width": 300,
+      "height": 389
+    },
+    {
+      "petId": "lamb",
+      "level": 8,
+      "path": "pets/lamb/lv8.webp",
+      "bytes": 19964,
+      "sha256": "405a2a73a02139eefc571323f21ee1dce358ad095a6a469aa86b7373eac1a462",
+      "width": 300,
+      "height": 287
+    },
+    {
+      "petId": "rabbit",
+      "level": 1,
+      "path": "pets/rabbit/lv1.webp",
+      "bytes": 17598,
+      "sha256": "58681f745b3dac5f4a66dbdc014daf10e3db88c644f15d06bc91298ee9096a15",
+      "width": 300,
+      "height": 588
+    },
+    {
+      "petId": "rabbit",
+      "level": 2,
+      "path": "pets/rabbit/lv2.webp",
+      "bytes": 14378,
+      "sha256": "6ceedff01cba1539f5e92d8ff8404d571fa28144959e640ddb1cde8b23564035",
+      "width": 300,
+      "height": 381
+    },
+    {
+      "petId": "rabbit",
+      "level": 3,
+      "path": "pets/rabbit/lv3.webp",
+      "bytes": 16448,
+      "sha256": "82a4a59c997e9810fa8fc2727c8387326a95346d0c551f36ee2bf11379c97e3d",
+      "width": 300,
+      "height": 407
+    },
+    {
+      "petId": "rabbit",
+      "level": 4,
+      "path": "pets/rabbit/lv4.webp",
+      "bytes": 17498,
+      "sha256": "6acc67b7e6cd701981d5bcae1b4515053b3e52fe12a4b3788cf1bfdc725dc533",
+      "width": 300,
+      "height": 289
+    },
+    {
+      "petId": "rabbit",
+      "level": 5,
+      "path": "pets/rabbit/lv5.webp",
+      "bytes": 14806,
+      "sha256": "468ca23a69188099ee4c896555491e82cff43644f9ab8c4db3dbc56fd5e11fc3",
+      "width": 300,
+      "height": 305
+    },
+    {
+      "petId": "rabbit",
+      "level": 6,
+      "path": "pets/rabbit/lv6.webp",
+      "bytes": 12540,
+      "sha256": "998c44bc58eb8d9e7c8a9bcb715a947d919dc92a6fb6b29aa7595e65d571b49e",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "rabbit",
+      "level": 7,
+      "path": "pets/rabbit/lv7.webp",
+      "bytes": 18714,
+      "sha256": "449708c9b0eb4719402b52cf96a09612b6e570efc335f0f1a0e527db11792bbc",
+      "width": 300,
+      "height": 453
+    },
+    {
+      "petId": "rabbit",
+      "level": 8,
+      "path": "pets/rabbit/lv8.webp",
+      "bytes": 18188,
+      "sha256": "310177b07a57c374e9ff15a658dee2f069436c428c8bebae6996c819da722b7c",
+      "width": 300,
+      "height": 447
+    },
+    {
+      "petId": "chick",
+      "level": 1,
+      "path": "pets/chick/lv1.webp",
+      "bytes": 15902,
+      "sha256": "04975daba73f528f2ba9220d80677089749d677da6fef15dd8faad44eea461ea",
+      "width": 300,
+      "height": 296
+    },
+    {
+      "petId": "chick",
+      "level": 2,
+      "path": "pets/chick/lv2.webp",
+      "bytes": 18358,
+      "sha256": "54abece5dcd0371931a923e0380c81f7f6ddbb54a83ef022e6f25432dd549e4e",
+      "width": 300,
+      "height": 392
+    },
+    {
+      "petId": "chick",
+      "level": 3,
+      "path": "pets/chick/lv3.webp",
+      "bytes": 16110,
+      "sha256": "a5079d3bed874ad5641c4325bd2eb213b2a3ef341c3d3a832647436b22ee9d59",
+      "width": 300,
+      "height": 316
+    },
+    {
+      "petId": "chick",
+      "level": 4,
+      "path": "pets/chick/lv4.webp",
+      "bytes": 19494,
+      "sha256": "aaf9f3e2f3495aef9de45df3c374d49603a151271c9abf0185fbc441a31a82b6",
+      "width": 300,
+      "height": 401
+    },
+    {
+      "petId": "chick",
+      "level": 5,
+      "path": "pets/chick/lv5.webp",
+      "bytes": 13132,
+      "sha256": "dd8d1976733fd58579c0d0a620b8ba4e705f313b6ba010fb4c9293e0b5420195",
+      "width": 300,
+      "height": 370
+    },
+    {
+      "petId": "chick",
+      "level": 6,
+      "path": "pets/chick/lv6.webp",
+      "bytes": 11388,
+      "sha256": "44a3e2624a0588008d9586db95cbb32d1ee5b681e0aacf76f93f3f4e26d45d2b",
+      "width": 300,
+      "height": 200
+    },
+    {
+      "petId": "chick",
+      "level": 7,
+      "path": "pets/chick/lv7.webp",
+      "bytes": 16758,
+      "sha256": "c3af7b52ca8b0d26b3c86cfd61c386dad31f0bfe1af77647b3b209b5a32dc5d6",
+      "width": 300,
+      "height": 293
+    },
+    {
+      "petId": "chick",
+      "level": 8,
+      "path": "pets/chick/lv8.webp",
+      "bytes": 16890,
+      "sha256": "498a07cfb238b1a8a5d5396cf6aec29ecd85a0ec6cc6f9dcf2afd26784de8852",
+      "width": 300,
+      "height": 336
+    },
+    {
+      "petId": "poodle",
+      "level": 1,
+      "path": "pets/poodle/lv1.webp",
+      "bytes": 12960,
+      "sha256": "d26e80b4bf97c2c0d7c0694062184c3038fdae718818feff28e287e04b1c74cf",
+      "width": 300,
+      "height": 170
+    },
+    {
+      "petId": "poodle",
+      "level": 2,
+      "path": "pets/poodle/lv2.webp",
+      "bytes": 15756,
+      "sha256": "45b6b8e84ae7a122d27969ba84f83c808f47efe4bd05560fe4e576e443edfe09",
+      "width": 300,
+      "height": 269
+    },
+    {
+      "petId": "poodle",
+      "level": 3,
+      "path": "pets/poodle/lv3.webp",
+      "bytes": 24150,
+      "sha256": "d2fd2a7325d9470625dacc202a0b349eb7cb1153973ced600a3cc4ec01cea1b4",
+      "width": 300,
+      "height": 338
+    },
+    {
+      "petId": "poodle",
+      "level": 4,
+      "path": "pets/poodle/lv4.webp",
+      "bytes": 30838,
+      "sha256": "9a3f4e8d5fac5217a88c95a7a414ac45d5274032c1a89ff6ed8c63e520a8d9b2",
+      "width": 300,
+      "height": 359
+    },
+    {
+      "petId": "poodle",
+      "level": 5,
+      "path": "pets/poodle/lv5.webp",
+      "bytes": 17194,
+      "sha256": "eb932c225237609e979bd4128875564f4fd17f69c35c2615ded84bfea5001066",
+      "width": 300,
+      "height": 299
+    },
+    {
+      "petId": "poodle",
+      "level": 6,
+      "path": "pets/poodle/lv6.webp",
+      "bytes": 25702,
+      "sha256": "4ecc8b463db2d6c0f67334c0fdb7a25c63935732007ac73f43d99c9c7ff2ff4f",
+      "width": 300,
+      "height": 448
+    },
+    {
+      "petId": "poodle",
+      "level": 7,
+      "path": "pets/poodle/lv7.webp",
+      "bytes": 29188,
+      "sha256": "64288ebd3264a45c42201122775ad07ad23a3d41df9042dc111ad138d9d3102b",
+      "width": 300,
+      "height": 427
+    },
+    {
+      "petId": "poodle",
+      "level": 8,
+      "path": "pets/poodle/lv8.webp",
+      "bytes": 27366,
+      "sha256": "e3948698404779ec68108ff4cac2d3be7fa416415bd10925b0b7be276e652f88",
+      "width": 300,
+      "height": 485
+    },
+    {
+      "petId": "calico-cat",
+      "level": 1,
+      "path": "pets/calico-cat/lv1.webp",
+      "bytes": 15004,
+      "sha256": "7aeac0980ddc51da48e98f983d3c655f53aaa3cb305a707d4786d41cd3a92e9e",
+      "width": 300,
+      "height": 242
+    },
+    {
+      "petId": "calico-cat",
+      "level": 2,
+      "path": "pets/calico-cat/lv2.webp",
+      "bytes": 18432,
+      "sha256": "e2c494b4f9ae5909b9189c92badb7abe9ccb800b27a27e613933edaf09e2d405",
+      "width": 300,
+      "height": 296
+    },
+    {
+      "petId": "calico-cat",
+      "level": 3,
+      "path": "pets/calico-cat/lv3.webp",
+      "bytes": 17686,
+      "sha256": "3206d1300f9f58e8251a77184443e68d9b87de5e30c48099b2a1bb9c74f5673b",
+      "width": 300,
+      "height": 280
+    },
+    {
+      "petId": "calico-cat",
+      "level": 4,
+      "path": "pets/calico-cat/lv4.webp",
+      "bytes": 20158,
+      "sha256": "2854938113a5014d6e7519fb32936a02b8972cb94cdf1740e6756110c6a3cea4",
+      "width": 300,
+      "height": 301
+    },
+    {
+      "petId": "calico-cat",
+      "level": 5,
+      "path": "pets/calico-cat/lv5.webp",
+      "bytes": 26906,
+      "sha256": "23a3945b5fd4e65854eaf5ff25ec9f948b45f44ef1fea9896bd730e3b56462d1",
+      "width": 300,
+      "height": 375
+    },
+    {
+      "petId": "calico-cat",
+      "level": 6,
+      "path": "pets/calico-cat/lv6.webp",
+      "bytes": 20184,
+      "sha256": "e30cbbe6f064af84485519234252f02d1c91a2171b21dabb1915f1a8db283f25",
+      "width": 300,
+      "height": 360
+    },
+    {
+      "petId": "calico-cat",
+      "level": 7,
+      "path": "pets/calico-cat/lv7.webp",
+      "bytes": 18172,
+      "sha256": "8e1de9b9f65e9f5a208517658d09b3775dc803f322bc3df24e7f37da2b97d25a",
+      "width": 300,
+      "height": 378
+    },
+    {
+      "petId": "calico-cat",
+      "level": 8,
+      "path": "pets/calico-cat/lv8.webp",
+      "bytes": 27554,
+      "sha256": "cf3cc5e4f0ba8c9c1a6a87d1b0df38525f11f275090b4ca9a1417a9ae194a2d3",
+      "width": 300,
+      "height": 368
+    },
+    {
+      "petId": "horse",
+      "level": 1,
+      "path": "pets/horse/lv1.webp",
+      "bytes": 5466,
+      "sha256": "59111609d4d975bae5292fce027da8d8b1593063cf79f0a5ff6c6640d99fc283",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "horse",
+      "level": 2,
+      "path": "pets/horse/lv2.webp",
+      "bytes": 10948,
+      "sha256": "9ff092bfe089ff6801043d9c27b901e6423a4d80e6688c522e093ac195446b13",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "horse",
+      "level": 3,
+      "path": "pets/horse/lv3.webp",
+      "bytes": 17272,
+      "sha256": "91393f06ff54b25fa92f6ad54f43fb8ae96575c6f1ee1cd92f11900743b1e60b",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "horse",
+      "level": 4,
+      "path": "pets/horse/lv4.webp",
+      "bytes": 16396,
+      "sha256": "78a6931f0d2d3cd6e1622763f4262a79634940e4ee6a4b3a3ce7a81fb545cafe",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "horse",
+      "level": 5,
+      "path": "pets/horse/lv5.webp",
+      "bytes": 16584,
+      "sha256": "867c7f6d2f94b8a8986142bbacbfdf1eb7485528f563b26acca3dc28f807661f",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "horse",
+      "level": 6,
+      "path": "pets/horse/lv6.webp",
+      "bytes": 24672,
+      "sha256": "2364ec2c7695bb6fca941c190b3dbab4ef6fec86f50c0125ca24702dcd73d2fe",
+      "width": 300,
+      "height": 351
+    },
+    {
+      "petId": "horse",
+      "level": 7,
+      "path": "pets/horse/lv7.webp",
+      "bytes": 20938,
+      "sha256": "8eec1b1bfff016dc5d727dd1e374101affb6feefde2b012dc4cf66a1a4ba2351",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "horse",
+      "level": 8,
+      "path": "pets/horse/lv8.webp",
+      "bytes": 29368,
+      "sha256": "3b398e4dc15e7e2e62615ce8abe825b68c728d44c0f1672d0ac66b3cdb907402",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "tiger",
+      "level": 1,
+      "path": "pets/tiger/lv1.webp",
+      "bytes": 15814,
+      "sha256": "e711e10f3641cea85863df85dcfe66473263be6f5505c2ee600222bb7bbe5a07",
+      "width": 300,
+      "height": 213
+    },
+    {
+      "petId": "tiger",
+      "level": 2,
+      "path": "pets/tiger/lv2.webp",
+      "bytes": 18866,
+      "sha256": "744bf2050e30efb5088065541299bcf35c3f0e2a79d00fa94a2b8bcf6e90700c",
+      "width": 300,
+      "height": 335
+    },
+    {
+      "petId": "tiger",
+      "level": 3,
+      "path": "pets/tiger/lv3.webp",
+      "bytes": 18946,
+      "sha256": "7665020045c177e36bdb193dd2d858ca1aa83c0db38ce463612a28f935288f3e",
+      "width": 300,
+      "height": 329
+    },
+    {
+      "petId": "tiger",
+      "level": 4,
+      "path": "pets/tiger/lv4.webp",
+      "bytes": 19686,
+      "sha256": "8d1e806c0405709daa50aa93252cd095c99282d02a486168e958997c9da35402",
+      "width": 300,
+      "height": 343
+    },
+    {
+      "petId": "tiger",
+      "level": 5,
+      "path": "pets/tiger/lv5.webp",
+      "bytes": 13248,
+      "sha256": "b16919086c72f29f1a5704c5cf72ad897d8482419739ba05fdd6c7db6579083f",
+      "width": 300,
+      "height": 201
+    },
+    {
+      "petId": "tiger",
+      "level": 6,
+      "path": "pets/tiger/lv6.webp",
+      "bytes": 27168,
+      "sha256": "65276bda0aeae223414dde5542280d8771b3ab71b0371cc897f3b97d50626f12",
+      "width": 300,
+      "height": 287
+    },
+    {
+      "petId": "tiger",
+      "level": 7,
+      "path": "pets/tiger/lv7.webp",
+      "bytes": 18248,
+      "sha256": "740d6061e78986e286ae3ee487e1c07bbf3d8d09331190078fc242f88a2d21e7",
+      "width": 300,
+      "height": 265
+    },
+    {
+      "petId": "tiger",
+      "level": 8,
+      "path": "pets/tiger/lv8.webp",
+      "bytes": 21556,
+      "sha256": "7c35a0e139c150acd84e8a6cba330166dd30cac0361442b251cd4a75bc641b64",
+      "width": 300,
+      "height": 307
+    },
+    {
+      "petId": "blue-cat",
+      "level": 1,
+      "path": "pets/blue-cat/lv1.webp",
+      "bytes": 18914,
+      "sha256": "eb726947a66e8e86b036138b877f6aebd6d43df40c12900d7285850ee61424bc",
+      "width": 300,
+      "height": 354
+    },
+    {
+      "petId": "blue-cat",
+      "level": 2,
+      "path": "pets/blue-cat/lv2.webp",
+      "bytes": 20230,
+      "sha256": "7ebf4031dcd4a90acf89b04cce2d81a939fb55d1e756f205b37b07d1168c328e",
+      "width": 300,
+      "height": 305
+    },
+    {
+      "petId": "blue-cat",
+      "level": 3,
+      "path": "pets/blue-cat/lv3.webp",
+      "bytes": 22344,
+      "sha256": "4370cf89cc5ec7e0b79fde42a7b83d65b4146536edede840cdf91d069ec7e674",
+      "width": 300,
+      "height": 391
+    },
+    {
+      "petId": "blue-cat",
+      "level": 4,
+      "path": "pets/blue-cat/lv4.webp",
+      "bytes": 20504,
+      "sha256": "01ed33f5ea74a9abc53728131377b10c477806db4d341d92de9ded6cfc4289cd",
+      "width": 300,
+      "height": 385
+    },
+    {
+      "petId": "blue-cat",
+      "level": 5,
+      "path": "pets/blue-cat/lv5.webp",
+      "bytes": 20732,
+      "sha256": "523664fed75a6a7c77028eb543604e6e595661b1f42c1dd9b59452d1321905c0",
+      "width": 300,
+      "height": 453
+    },
+    {
+      "petId": "blue-cat",
+      "level": 6,
+      "path": "pets/blue-cat/lv6.webp",
+      "bytes": 24798,
+      "sha256": "c3ac605256c22fe4663e923ebb476bdabff277e51bba9c1d6b79b927a77c1b12",
+      "width": 300,
+      "height": 341
+    },
+    {
+      "petId": "blue-cat",
+      "level": 7,
+      "path": "pets/blue-cat/lv7.webp",
+      "bytes": 20874,
+      "sha256": "972622522c2103c8523af748f16b3d081f62f3e817f3ec5bae43bb19fd03f7b2",
+      "width": 300,
+      "height": 349
+    },
+    {
+      "petId": "blue-cat",
+      "level": 8,
+      "path": "pets/blue-cat/lv8.webp",
+      "bytes": 20730,
+      "sha256": "eada8017b41eca14a4787efa19519f41b280f2d393092112422951ca75bc23f9",
+      "width": 300,
+      "height": 317
+    },
+    {
+      "petId": "labrador",
+      "level": 1,
+      "path": "pets/labrador/lv1.webp",
+      "bytes": 15124,
+      "sha256": "ff647ab67f94244474190bf6eff80dd5dbf46b74db627dd620693ae70100d471",
+      "width": 300,
+      "height": 305
+    },
+    {
+      "petId": "labrador",
+      "level": 2,
+      "path": "pets/labrador/lv2.webp",
+      "bytes": 15792,
+      "sha256": "b5509f489ff6f88d5662f690adc995a0ec8de8d6adc1be7746794e6ed372fe73",
+      "width": 300,
+      "height": 309
+    },
+    {
+      "petId": "labrador",
+      "level": 3,
+      "path": "pets/labrador/lv3.webp",
+      "bytes": 17724,
+      "sha256": "2e0920f762a792ed23db23228f2f64c84fccc6ea5afa2a6c21cc3f1251198f01",
+      "width": 300,
+      "height": 279
+    },
+    {
+      "petId": "labrador",
+      "level": 4,
+      "path": "pets/labrador/lv4.webp",
+      "bytes": 14972,
+      "sha256": "d20112827a488f3f72c1cf7c043708328764a4f6a47a51651633585dbcf3afc8",
+      "width": 300,
+      "height": 260
+    },
+    {
+      "petId": "labrador",
+      "level": 5,
+      "path": "pets/labrador/lv5.webp",
+      "bytes": 16812,
+      "sha256": "516bf082558880da81c33229bea928b3860c9817cea7d999dfbf5cfcbbf7a9bd",
+      "width": 300,
+      "height": 392
+    },
+    {
+      "petId": "labrador",
+      "level": 6,
+      "path": "pets/labrador/lv6.webp",
+      "bytes": 18494,
+      "sha256": "4bc18f1e4b98e0e4de3477da880aed4a299b1f0359b1b689824f643cfbde57a5",
+      "width": 300,
+      "height": 276
+    },
+    {
+      "petId": "labrador",
+      "level": 7,
+      "path": "pets/labrador/lv7.webp",
+      "bytes": 14642,
+      "sha256": "5b612beacbd73bc9318d018028fb3a87e5470b9aacd6c3516ffd485fafdf84a5",
+      "width": 300,
+      "height": 207
+    },
+    {
+      "petId": "labrador",
+      "level": 8,
+      "path": "pets/labrador/lv8.webp",
+      "bytes": 14108,
+      "sha256": "8abd596c4ad37160534ab8439172432f2face4c55fa945ce43018f540736d22b",
+      "width": 300,
+      "height": 282
+    },
+    {
+      "petId": "corgi",
+      "level": 1,
+      "path": "pets/corgi/lv1.webp",
+      "bytes": 14160,
+      "sha256": "48a47ae49319f2f8f25ecf8ce91359cec6786bfcd5b4cd5cd50c06f2b6811116",
+      "width": 300,
+      "height": 295
+    },
+    {
+      "petId": "corgi",
+      "level": 2,
+      "path": "pets/corgi/lv2.webp",
+      "bytes": 14096,
+      "sha256": "aeb4cb4c2e36b41684851218cce98fee86fc95d82b948da5fef55b1d1d9e791f",
+      "width": 300,
+      "height": 295
+    },
+    {
+      "petId": "corgi",
+      "level": 3,
+      "path": "pets/corgi/lv3.webp",
+      "bytes": 14060,
+      "sha256": "19aee9666df173779073c06fde1e43bef91a67ea95dbd0613c8f4f7a73d0243f",
+      "width": 300,
+      "height": 246
+    },
+    {
+      "petId": "corgi",
+      "level": 4,
+      "path": "pets/corgi/lv4.webp",
+      "bytes": 13970,
+      "sha256": "40190ef7e2356999afe1be39365368268f67284a24f6f534c48213ceeba60e0f",
+      "width": 300,
+      "height": 291
+    },
+    {
+      "petId": "corgi",
+      "level": 5,
+      "path": "pets/corgi/lv5.webp",
+      "bytes": 21690,
+      "sha256": "faea60aea7fc0dfe37df6441834fdcd5a8725da7bdfda8f2e6bfe23002564486",
+      "width": 300,
+      "height": 376
+    },
+    {
+      "petId": "corgi",
+      "level": 6,
+      "path": "pets/corgi/lv6.webp",
+      "bytes": 17072,
+      "sha256": "ce8620ff5d84d2afddbff3ad0669284870a885819740b848a13d51d472fcb850",
+      "width": 300,
+      "height": 332
+    },
+    {
+      "petId": "corgi",
+      "level": 7,
+      "path": "pets/corgi/lv7.webp",
+      "bytes": 13614,
+      "sha256": "d145e13effc0037ff06db91854b4453b44f9acf2f922cb37671b7f12a5f33210",
+      "width": 300,
+      "height": 173
+    },
+    {
+      "petId": "corgi",
+      "level": 8,
+      "path": "pets/corgi/lv8.webp",
+      "bytes": 13986,
+      "sha256": "2e2c8fe59610dc140dd7def57fe022b76118cb3e3fb1a5c2d59b7d56a3e597c0",
+      "width": 300,
+      "height": 301
+    },
+    {
+      "petId": "capybara",
+      "level": 1,
+      "path": "pets/capybara/lv1.webp",
+      "bytes": 15520,
+      "sha256": "588c3833e23629f446f535b5689f30887208f227d85c98c737493b20ed552cea",
+      "width": 300,
+      "height": 188
+    },
+    {
+      "petId": "capybara",
+      "level": 2,
+      "path": "pets/capybara/lv2.webp",
+      "bytes": 18140,
+      "sha256": "ff84e5e1d6a1a066995fee3e0bef056532945557ad8f06b41e254bb677d17640",
+      "width": 300,
+      "height": 299
+    },
+    {
+      "petId": "capybara",
+      "level": 3,
+      "path": "pets/capybara/lv3.webp",
+      "bytes": 24532,
+      "sha256": "dcb7cf8c314b3d12c1b7c9143c0ddb01dcb727823455ded42b8186531a135178",
+      "width": 300,
+      "height": 320
+    },
+    {
+      "petId": "capybara",
+      "level": 4,
+      "path": "pets/capybara/lv4.webp",
+      "bytes": 25572,
+      "sha256": "e3d2f08f3c646421bd30851106bb70016b4342fff86ccba9d4e8bb96143a5edb",
+      "width": 300,
+      "height": 466
+    },
+    {
+      "petId": "capybara",
+      "level": 5,
+      "path": "pets/capybara/lv5.webp",
+      "bytes": 16008,
+      "sha256": "0fb27d34774c1b105f731338e4d037768e468ecd69b471552cf99845b2a05dda",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "capybara",
+      "level": 6,
+      "path": "pets/capybara/lv6.webp",
+      "bytes": 32690,
+      "sha256": "0ef187e8070be292c90ca23a32ed4c6225d43c503ce071ae5bb3cff610037c5d",
+      "width": 300,
+      "height": 470
+    },
+    {
+      "petId": "capybara",
+      "level": 7,
+      "path": "pets/capybara/lv7.webp",
+      "bytes": 19494,
+      "sha256": "1ce9fb85b5ab7cd0e9d2acff00550a54a9fa34c8dc9c44c5ce7ecee547266a09",
+      "width": 300,
+      "height": 308
+    },
+    {
+      "petId": "capybara",
+      "level": 8,
+      "path": "pets/capybara/lv8.webp",
+      "bytes": 10886,
+      "sha256": "7929844e0a191c42026aa8023b293f8b4f690b7e67240b1abe772ce77968cc4c",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 1,
+      "path": "pets/nine-tail-fox/lv1.webp",
+      "bytes": 11776,
+      "sha256": "8ad741f3752dfc71b4ac1472672ce239ae98f1a41c7abf9e1103441b68444515",
+      "width": 300,
+      "height": 242
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 2,
+      "path": "pets/nine-tail-fox/lv2.webp",
+      "bytes": 18118,
+      "sha256": "8ebbcf279b303ef655cf720c27ca81118b417694274553a9e2b4ab62bf124456",
+      "width": 300,
+      "height": 310
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 3,
+      "path": "pets/nine-tail-fox/lv3.webp",
+      "bytes": 15836,
+      "sha256": "244184a380c5f1b338c348d7229b90dd6351208e7527f050ec3ffc3ab24e1557",
+      "width": 300,
+      "height": 305
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 4,
+      "path": "pets/nine-tail-fox/lv4.webp",
+      "bytes": 13820,
+      "sha256": "6892c38890e15f01c9f83d9912c7c821b8ad75b541b75fc10a7cd25b6bb8ba58",
+      "width": 300,
+      "height": 303
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 5,
+      "path": "pets/nine-tail-fox/lv5.webp",
+      "bytes": 15868,
+      "sha256": "5d585b4970e5eeca1fa6c9bbffb4a4289478ebe510dd7b55841ba10571a78e88",
+      "width": 300,
+      "height": 298
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 6,
+      "path": "pets/nine-tail-fox/lv6.webp",
+      "bytes": 17322,
+      "sha256": "66ae27b843fa67e7ed2c7faf4f3d6fc1c3037e3d6273198d48dd6081db9025c1",
+      "width": 300,
+      "height": 297
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 7,
+      "path": "pets/nine-tail-fox/lv7.webp",
+      "bytes": 16384,
+      "sha256": "5b9dd739a8b5bed96d3d717eb4c4624be3edc06f6de315a0d7ce4dca2ae69f41",
+      "width": 300,
+      "height": 267
+    },
+    {
+      "petId": "nine-tail-fox",
+      "level": 8,
+      "path": "pets/nine-tail-fox/lv8.webp",
+      "bytes": 27092,
+      "sha256": "bb9ea81a6fcf6ee0f8eef40348bde8249fdf2176cfb0e957e0c00867d55e94be",
+      "width": 300,
+      "height": 276
+    },
+    {
+      "petId": "golden-cat",
+      "level": 1,
+      "path": "pets/golden-cat/lv1.webp",
+      "bytes": 11108,
+      "sha256": "8f62f7ef8512e610c71bc411a9194fa81ce16e69791f5307c35a393f115fc8bc",
+      "width": 300,
+      "height": 180
+    },
+    {
+      "petId": "golden-cat",
+      "level": 2,
+      "path": "pets/golden-cat/lv2.webp",
+      "bytes": 25188,
+      "sha256": "852a353a2f8b3314bf0b96216afc27cd95fd6325045f79c17d6a18e9379804c4",
+      "width": 300,
+      "height": 355
+    },
+    {
+      "petId": "golden-cat",
+      "level": 3,
+      "path": "pets/golden-cat/lv3.webp",
+      "bytes": 20538,
+      "sha256": "49160340ecfcfee3bd17058a38175eb759af16459f3bf43eeb9588e6562f5766",
+      "width": 300,
+      "height": 247
+    },
+    {
+      "petId": "golden-cat",
+      "level": 4,
+      "path": "pets/golden-cat/lv4.webp",
+      "bytes": 16382,
+      "sha256": "f290b0f1a194a06635c39cd024563cab9e65c1f97a3204b4f0c8b384bae10f99",
+      "width": 300,
+      "height": 240
+    },
+    {
+      "petId": "golden-cat",
+      "level": 5,
+      "path": "pets/golden-cat/lv5.webp",
+      "bytes": 19572,
+      "sha256": "eea86fe9ebc8bf61ddcd98b51fd6314d4d88153eed34949ecdc01ab83887976b",
+      "width": 300,
+      "height": 327
+    },
+    {
+      "petId": "golden-cat",
+      "level": 6,
+      "path": "pets/golden-cat/lv6.webp",
+      "bytes": 24868,
+      "sha256": "520f53e2b2a473fa7c000cfe74fc8fb2425611bf7ad040200490dc9f8ac59b6e",
+      "width": 300,
+      "height": 495
+    },
+    {
+      "petId": "golden-cat",
+      "level": 7,
+      "path": "pets/golden-cat/lv7.webp",
+      "bytes": 20082,
+      "sha256": "8da7781c3b666561faf2bb77708d9295d5c53fe52f9f98cac95d9a32bc6f3a97",
+      "width": 300,
+      "height": 397
+    },
+    {
+      "petId": "golden-cat",
+      "level": 8,
+      "path": "pets/golden-cat/lv8.webp",
+      "bytes": 17492,
+      "sha256": "404ed6aab401dd06d9d50728cbd1cb0fc09e7951875c9c0b0376880f8271af7f",
+      "width": 300,
+      "height": 398
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 1,
+      "path": "pets/tabby-cat/lv1.webp",
+      "bytes": 15192,
+      "sha256": "48532955e69fd9be16f5091c7a39e91790edff57ae3ca8f46f6289aaff433733",
+      "width": 300,
+      "height": 167
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 2,
+      "path": "pets/tabby-cat/lv2.webp",
+      "bytes": 18126,
+      "sha256": "2815b992d8cac4683f460fc8cbad91748c7585d2794f6701352d4b34c5c10b50",
+      "width": 300,
+      "height": 267
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 3,
+      "path": "pets/tabby-cat/lv3.webp",
+      "bytes": 17628,
+      "sha256": "693d846fc08ebcf77bc20542560ca7586d6622b446874a2bad234ced18d812a8",
+      "width": 300,
+      "height": 250
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 4,
+      "path": "pets/tabby-cat/lv4.webp",
+      "bytes": 22318,
+      "sha256": "17d5899e8f9f5f8f8f73346ed14cc50bd39ae3187b36bf0dc31f7ec58c8752e2",
+      "width": 300,
+      "height": 425
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 5,
+      "path": "pets/tabby-cat/lv5.webp",
+      "bytes": 22718,
+      "sha256": "b325c4f3de8e74f6b4f46f866a8a4caf05a30c225ac9fe0ffc457edbccdce0ed",
+      "width": 300,
+      "height": 425
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 6,
+      "path": "pets/tabby-cat/lv6.webp",
+      "bytes": 24210,
+      "sha256": "ccbd11f9804de5bf68a8a6dee42e2f967ba8f7c6deec956b9ccf75b9f54efc0f",
+      "width": 300,
+      "height": 466
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 7,
+      "path": "pets/tabby-cat/lv7.webp",
+      "bytes": 25604,
+      "sha256": "188ef05969d65b6dc55ab4c5747b8d7d733b53f2f696b2d3c6e70bf883e12298",
+      "width": 300,
+      "height": 436
+    },
+    {
+      "petId": "tabby-cat",
+      "level": 8,
+      "path": "pets/tabby-cat/lv8.webp",
+      "bytes": 21208,
+      "sha256": "56be627c1715d173aed0d694317e4361e325c4e37017ceb7e34d76542810c5dc",
+      "width": 300,
+      "height": 457
+    },
+    {
+      "petId": "monkey",
+      "level": 1,
+      "path": "pets/monkey/lv1.webp",
+      "bytes": 26152,
+      "sha256": "111c7173e2a28b7d6c69862ba7f82ae434fc56a50e66046170036e23c35639c7",
+      "width": 300,
+      "height": 498
+    },
+    {
+      "petId": "monkey",
+      "level": 2,
+      "path": "pets/monkey/lv2.webp",
+      "bytes": 23714,
+      "sha256": "c49b33433e8dce6b8ae02a936406b0d6d85debef8ed671830d4139e2dc487e8a",
+      "width": 300,
+      "height": 372
+    },
+    {
+      "petId": "monkey",
+      "level": 3,
+      "path": "pets/monkey/lv3.webp",
+      "bytes": 22820,
+      "sha256": "1ebbf265672e25590061f09e5be08ec621bdc4435efa170f938730fbcbe32f8a",
+      "width": 300,
+      "height": 437
+    },
+    {
+      "petId": "monkey",
+      "level": 4,
+      "path": "pets/monkey/lv4.webp",
+      "bytes": 23400,
+      "sha256": "466ffff34c7a1fe36a00acb9096e2fcabc63b1c8fb7baf0e5eae002d54751f2b",
+      "width": 300,
+      "height": 288
+    },
+    {
+      "petId": "monkey",
+      "level": 5,
+      "path": "pets/monkey/lv5.webp",
+      "bytes": 25078,
+      "sha256": "ff24184001e46b21d519e32a88cdb56473f179bd074d3138e28dbb8fa42d9340",
+      "width": 300,
+      "height": 390
+    },
+    {
+      "petId": "monkey",
+      "level": 6,
+      "path": "pets/monkey/lv6.webp",
+      "bytes": 24576,
+      "sha256": "b44f8cc7fb7a0a4c6ae7afceb9ea6d20b2a39615e60bd1bd428f96d749fd6940",
+      "width": 300,
+      "height": 356
+    },
+    {
+      "petId": "monkey",
+      "level": 7,
+      "path": "pets/monkey/lv7.webp",
+      "bytes": 22194,
+      "sha256": "eae57b3a44d97234dac5d0535fd6ad0c4f5417f0bbc504aa1877c4be1674190b",
+      "width": 300,
+      "height": 314
+    },
+    {
+      "petId": "monkey",
+      "level": 8,
+      "path": "pets/monkey/lv8.webp",
+      "bytes": 35340,
+      "sha256": "9b56fc8c9252dfe909b502a1a8e4aede1bb1761d182dd4f62d6e2627d26fc963",
+      "width": 300,
+      "height": 423
+    },
+    {
+      "petId": "black-cat",
+      "level": 1,
+      "path": "pets/black-cat/lv1.webp",
+      "bytes": 18246,
+      "sha256": "db432488fab689b8104c1c3ffa2746422efe5347cb2fbb378d2e12b9c256a886",
+      "width": 300,
+      "height": 352
+    },
+    {
+      "petId": "black-cat",
+      "level": 2,
+      "path": "pets/black-cat/lv2.webp",
+      "bytes": 16480,
+      "sha256": "df5f8cebae7c45b02503f2f0cbf14cde8423bb28658aa3fe3ed4e357227bf44d",
+      "width": 300,
+      "height": 309
+    },
+    {
+      "petId": "black-cat",
+      "level": 3,
+      "path": "pets/black-cat/lv3.webp",
+      "bytes": 19246,
+      "sha256": "fc484b12f3cc58afeaffead090a060d8099f9b462e0bee21ca76a6415229aaed",
+      "width": 300,
+      "height": 339
+    },
+    {
+      "petId": "black-cat",
+      "level": 4,
+      "path": "pets/black-cat/lv4.webp",
+      "bytes": 18964,
+      "sha256": "b79b38cb1249024636988c4a4b63284fcb5708c2350d17b6ef8d2b072824289d",
+      "width": 300,
+      "height": 313
+    },
+    {
+      "petId": "black-cat",
+      "level": 5,
+      "path": "pets/black-cat/lv5.webp",
+      "bytes": 15098,
+      "sha256": "c5615da8146f1ca08106d540fc5f45abe1cae717e3c96aec5f73c49f27feca2e",
+      "width": 300,
+      "height": 303
+    },
+    {
+      "petId": "black-cat",
+      "level": 6,
+      "path": "pets/black-cat/lv6.webp",
+      "bytes": 14680,
+      "sha256": "76bda6b08a94f28b6b3a8580f1b903a7ac857eeaa1a1afb85adb8ce9bde1af24",
+      "width": 300,
+      "height": 338
+    },
+    {
+      "petId": "black-cat",
+      "level": 7,
+      "path": "pets/black-cat/lv7.webp",
+      "bytes": 17210,
+      "sha256": "81f3a43fccb13e460cb5c0af00e26562d19ce65373260635421e5b38fa93c3d4",
+      "width": 300,
+      "height": 322
+    },
+    {
+      "petId": "black-cat",
+      "level": 8,
+      "path": "pets/black-cat/lv8.webp",
+      "bytes": 14502,
+      "sha256": "2ee952349a8c66ca49db1737f4e922408ef5a584b9c999950fbe0126ec9873e3",
+      "width": 300,
+      "height": 321
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 1,
+      "path": "pets/french-bulldog/lv1.webp",
+      "bytes": 11444,
+      "sha256": "a2cf2addbc67f746e39b5b7bd0af8053a46119ed6ba4fb4553cc5fd2b7c53a65",
+      "width": 300,
+      "height": 175
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 2,
+      "path": "pets/french-bulldog/lv2.webp",
+      "bytes": 16296,
+      "sha256": "3404b8969b57baaab319ef6eccdf190c7393e7c3ff309da6fbbd36511e40c099",
+      "width": 300,
+      "height": 318
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 3,
+      "path": "pets/french-bulldog/lv3.webp",
+      "bytes": 17588,
+      "sha256": "6cbc3de1b7ace48398d0989b1ddf5a302c01822d18b6597cabbaa8b36dea6dbe",
+      "width": 300,
+      "height": 368
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 4,
+      "path": "pets/french-bulldog/lv4.webp",
+      "bytes": 20626,
+      "sha256": "20aa30713e3776f0ab68e6c567f3dd588f6757291132a70b6f3ac99647905a8a",
+      "width": 300,
+      "height": 274
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 5,
+      "path": "pets/french-bulldog/lv5.webp",
+      "bytes": 15660,
+      "sha256": "9e399ad351657f705d014b68e9746c55951312fbca3d5d9aa379148e51c20575",
+      "width": 300,
+      "height": 234
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 6,
+      "path": "pets/french-bulldog/lv6.webp",
+      "bytes": 18946,
+      "sha256": "9abd92946e3947e026d02c4394f6190f2e7d7a53f171d4d42ec6aa17f3d4bea3",
+      "width": 300,
+      "height": 391
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 7,
+      "path": "pets/french-bulldog/lv7.webp",
+      "bytes": 20408,
+      "sha256": "af84c45ec27296d5a0059766d617692afc6ecdb474ece8516a731e80808ac06c",
+      "width": 300,
+      "height": 367
+    },
+    {
+      "petId": "french-bulldog",
+      "level": 8,
+      "path": "pets/french-bulldog/lv8.webp",
+      "bytes": 19030,
+      "sha256": "9381e6bdfd087f239bee1535b59be1032fe84e974fd6bbb5f7cac28841300fa0",
+      "width": 300,
+      "height": 365
+    },
+    {
+      "petId": "polar-bear",
+      "level": 1,
+      "path": "pets/polar-bear/lv1.webp",
+      "bytes": 13472,
+      "sha256": "3c048c44a3e970660613db6118c721bd7ce53e6e35e8ab086b3b86cd48957bf2",
+      "width": 300,
+      "height": 358
+    },
+    {
+      "petId": "polar-bear",
+      "level": 2,
+      "path": "pets/polar-bear/lv2.webp",
+      "bytes": 13672,
+      "sha256": "0de75e76c320e0397de60dae603d3ab2240c10a6cb4575d5ccc786d3a6b918f9",
+      "width": 300,
+      "height": 300
+    },
+    {
+      "petId": "polar-bear",
+      "level": 3,
+      "path": "pets/polar-bear/lv3.webp",
+      "bytes": 15260,
+      "sha256": "e13da84602621b5702da336140a66d1471c91da2ebf99e20fceaeb3f82a768b1",
+      "width": 300,
+      "height": 361
+    },
+    {
+      "petId": "polar-bear",
+      "level": 4,
+      "path": "pets/polar-bear/lv4.webp",
+      "bytes": 12988,
+      "sha256": "dc1450ffeed9404774063953a33665a4921bba98193c2d68dd8171737761308e",
+      "width": 300,
+      "height": 258
+    },
+    {
+      "petId": "polar-bear",
+      "level": 5,
+      "path": "pets/polar-bear/lv5.webp",
+      "bytes": 14464,
+      "sha256": "d9043125f97745a43fca4b75f308c769f7d400bcf07fab41637713d3412b6806",
+      "width": 300,
+      "height": 334
+    },
+    {
+      "petId": "polar-bear",
+      "level": 6,
+      "path": "pets/polar-bear/lv6.webp",
+      "bytes": 19906,
+      "sha256": "4fe00c68b962db84f801c5a2797ff905e6b53eb2bd4a80f2642f5828473faa45",
+      "width": 300,
+      "height": 314
+    },
+    {
+      "petId": "polar-bear",
+      "level": 7,
+      "path": "pets/polar-bear/lv7.webp",
+      "bytes": 16612,
+      "sha256": "879ca62b67d09c2f1116e3cd2cde2114585a654bfd4670c6391da92329f59a7e",
+      "width": 300,
+      "height": 368
+    },
+    {
+      "petId": "polar-bear",
+      "level": 8,
+      "path": "pets/polar-bear/lv8.webp",
+      "bytes": 10750,
+      "sha256": "05c36e4ed955e45833f0a3f3f7c969be490402e19e92c45fbc4c21786fdd2783",
+      "width": 300,
+      "height": 283
+    },
+    {
+      "petId": "bichon",
+      "level": 1,
+      "path": "pets/bichon/lv1.webp",
+      "bytes": 13550,
+      "sha256": "4fd5c0425cd8114fbd877f2c44402ef6b58386fafc9d7b4ee409a16f63308238",
+      "width": 300,
+      "height": 287
+    },
+    {
+      "petId": "bichon",
+      "level": 2,
+      "path": "pets/bichon/lv2.webp",
+      "bytes": 13380,
+      "sha256": "a94ad4538a2090e331a4221a8354e11869902ab415f87279b8689ac53901c68c",
+      "width": 300,
+      "height": 302
+    },
+    {
+      "petId": "bichon",
+      "level": 3,
+      "path": "pets/bichon/lv3.webp",
+      "bytes": 14994,
+      "sha256": "5171c8c20f87dfa15d7c1959fee530405d741c2a3db95a2fba7712cc20b5bed2",
+      "width": 300,
+      "height": 288
+    },
+    {
+      "petId": "bichon",
+      "level": 4,
+      "path": "pets/bichon/lv4.webp",
+      "bytes": 16550,
+      "sha256": "4eb71ffd85a7c094d11b835866a7b13667458c1328024b98f8023470dc872de6",
+      "width": 300,
+      "height": 362
+    },
+    {
+      "petId": "bichon",
+      "level": 5,
+      "path": "pets/bichon/lv5.webp",
+      "bytes": 39788,
+      "sha256": "5bf859c55555a88c615bb312c9129210d0931907c2b72c515b2f8df196b47a91",
+      "width": 300,
+      "height": 365
+    },
+    {
+      "petId": "bichon",
+      "level": 6,
+      "path": "pets/bichon/lv6.webp",
+      "bytes": 19294,
+      "sha256": "adfeb8622f03d26b1b8ecdd10ebf3a77a0c618a3c7b2be913454f05e53caf47f",
+      "width": 300,
+      "height": 330
+    },
+    {
+      "petId": "bichon",
+      "level": 7,
+      "path": "pets/bichon/lv7.webp",
+      "bytes": 51584,
+      "sha256": "1fff06c8e3940c95d32c38c8282fbf4585c36247731867a466d3e0323bc15dfc",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "bichon",
+      "level": 8,
+      "path": "pets/bichon/lv8.webp",
+      "bytes": 37944,
+      "sha256": "d4b81f6de43e0dea732b0f91b6f482c0fb43e1dc2d75e9341da6844059cd78a7",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "leopard",
+      "level": 1,
+      "path": "pets/leopard/lv1.webp",
+      "bytes": 26788,
+      "sha256": "1effd301d34454274c7f91b09671b2804c69d11b2a50ed13b7d7190beb001718",
+      "width": 300,
+      "height": 328
+    },
+    {
+      "petId": "leopard",
+      "level": 2,
+      "path": "pets/leopard/lv2.webp",
+      "bytes": 22624,
+      "sha256": "c0f961e5ebfaa83e7bcb5ded88dc75e24eab98a76661066efe164a60d49b5aea",
+      "width": 300,
+      "height": 361
+    },
+    {
+      "petId": "leopard",
+      "level": 3,
+      "path": "pets/leopard/lv3.webp",
+      "bytes": 21228,
+      "sha256": "f7e96a306c8417fa5c30bed021be1f8810545c0b45dbf53aeacfab31568b4ec2",
+      "width": 300,
+      "height": 295
+    },
+    {
+      "petId": "leopard",
+      "level": 4,
+      "path": "pets/leopard/lv4.webp",
+      "bytes": 24644,
+      "sha256": "534f91564ceeae871ba57aabc2ff5ceda56b9ea50cecc0ffaa966032dcb1fa09",
+      "width": 300,
+      "height": 320
+    },
+    {
+      "petId": "leopard",
+      "level": 5,
+      "path": "pets/leopard/lv5.webp",
+      "bytes": 18368,
+      "sha256": "408232b76321ec414b8adc56f086c940178103d7c718c157036510565831d748",
+      "width": 300,
+      "height": 287
+    },
+    {
+      "petId": "leopard",
+      "level": 6,
+      "path": "pets/leopard/lv6.webp",
+      "bytes": 22424,
+      "sha256": "591d05acc3ad295e5f07f167f15ee357d90896ba8c911bb705d4c78ae7f546ef",
+      "width": 300,
+      "height": 285
+    },
+    {
+      "petId": "leopard",
+      "level": 7,
+      "path": "pets/leopard/lv7.webp",
+      "bytes": 16118,
+      "sha256": "73820462e82833901cc270511c62dbcab9e73743ed6c7e1da2edcedcc3628ee2",
+      "width": 300,
+      "height": 183
+    },
+    {
+      "petId": "leopard",
+      "level": 8,
+      "path": "pets/leopard/lv8.webp",
+      "bytes": 14246,
+      "sha256": "4f9d08408305a6568539b96f6b0f0f14ae28eaa57a78152b9d76d287aea3221a",
+      "width": 300,
+      "height": 220
+    },
+    {
+      "petId": "white-tiger",
+      "level": 1,
+      "path": "pets/white-tiger/lv1.webp",
+      "bytes": 7556,
+      "sha256": "f482aaa9d9463793034bdbcdd4490c26f64d047ec7f9ec03c0fd51b7093073be",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "white-tiger",
+      "level": 2,
+      "path": "pets/white-tiger/lv2.webp",
+      "bytes": 8898,
+      "sha256": "56da3232fec47cfa2b413ebbd359fe31b53d598d69f0bf3dfa6115bd928a8be9",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "white-tiger",
+      "level": 3,
+      "path": "pets/white-tiger/lv3.webp",
+      "bytes": 10372,
+      "sha256": "542751be99dd301b923ed0296b0a21a9013dbc8f5582f59c036dcf6b10d31c99",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "white-tiger",
+      "level": 4,
+      "path": "pets/white-tiger/lv4.webp",
+      "bytes": 15196,
+      "sha256": "fa9f43183c5a7835bf5ccdc70cb096cd62a615f154b70f0202192567a7831737",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "white-tiger",
+      "level": 5,
+      "path": "pets/white-tiger/lv5.webp",
+      "bytes": 12230,
+      "sha256": "4d482d285cb8b4fc12daac2751ff76d97f68ef4da0327b3eb5c7ac9d36332c1a",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "white-tiger",
+      "level": 6,
+      "path": "pets/white-tiger/lv6.webp",
+      "bytes": 12514,
+      "sha256": "cb1379138e57635a343b606b2628e0a57c900bb27de0dfdcf55b8d231ca88a91",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "white-tiger",
+      "level": 7,
+      "path": "pets/white-tiger/lv7.webp",
+      "bytes": 12100,
+      "sha256": "e17461a1521bcbde7f35e56ee01231af7c39c90b032263bd34bc5efe92b9e3f6",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "white-tiger",
+      "level": 8,
+      "path": "pets/white-tiger/lv8.webp",
+      "bytes": 13638,
+      "sha256": "98bebfee83762e0844eaaa66d2694ab4f2bb3c3907221b5bffbc45f25c0becbf",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 1,
+      "path": "pets/vermilion-bird/lv1.webp",
+      "bytes": 7630,
+      "sha256": "a901072467a8d60fe55c1e4957b8501c70c3a09a29ab6c5895bc41370e264ce8",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 2,
+      "path": "pets/vermilion-bird/lv2.webp",
+      "bytes": 11148,
+      "sha256": "0c4eba2f86cd3554ad3743966f498a404be7639156dbe67d807e1d5226117c86",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 3,
+      "path": "pets/vermilion-bird/lv3.webp",
+      "bytes": 7688,
+      "sha256": "0833197fad3410d02e3e031284b6d826923d826636e14712ac7403016085eda8",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 4,
+      "path": "pets/vermilion-bird/lv4.webp",
+      "bytes": 14518,
+      "sha256": "ec7c40918aaff94c338558fadff4e177220ffdcce55ce028f6c598cf54190aeb",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 5,
+      "path": "pets/vermilion-bird/lv5.webp",
+      "bytes": 15478,
+      "sha256": "5baaf43c4e853930ff15144fd2051e5fe2446c54074ee1fa8d732523afc76ce7",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 6,
+      "path": "pets/vermilion-bird/lv6.webp",
+      "bytes": 13862,
+      "sha256": "52dd4222c76418a79cfb99181203a29e4257eff9f6716a30338f998e39a9a63d",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 7,
+      "path": "pets/vermilion-bird/lv7.webp",
+      "bytes": 15502,
+      "sha256": "68950a80195296f3a35726ca20ca3ef051162aab6790b56d62fb8cd5540c97dc",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "vermilion-bird",
+      "level": 8,
+      "path": "pets/vermilion-bird/lv8.webp",
+      "bytes": 17208,
+      "sha256": "7583fc92a0f3aaebb22d8ffdcae825228f454469552fad1162511c934b77c607",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 1,
+      "path": "pets/unicorn/lv1.webp",
+      "bytes": 9000,
+      "sha256": "e6dffbfc3e48a8ba1d74d642fff5c0e610142819f901701116f9b54df8e0c82b",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 2,
+      "path": "pets/unicorn/lv2.webp",
+      "bytes": 8710,
+      "sha256": "467d1eef058d6220f68ce1d62cf39b027c43bc3e1d9276ed83e86c92e52b3d04",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 3,
+      "path": "pets/unicorn/lv3.webp",
+      "bytes": 10442,
+      "sha256": "276892829fe2cf6c2710682d2504c4371dc999448c8263234d88ff82bce6393e",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 4,
+      "path": "pets/unicorn/lv4.webp",
+      "bytes": 11858,
+      "sha256": "01b24f0f8d2906f79984ba2916e3230ebe0bac09c994099a06db99b87b20c478",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 5,
+      "path": "pets/unicorn/lv5.webp",
+      "bytes": 12636,
+      "sha256": "3f822e62f44be4d3ea7572ad97ae22153327119013271a9e904514fdd741997e",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 6,
+      "path": "pets/unicorn/lv6.webp",
+      "bytes": 12338,
+      "sha256": "97ac26bd1d28856b0bbfab73066a624a8009f2497778700a550c9d7ade57f4b1",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 7,
+      "path": "pets/unicorn/lv7.webp",
+      "bytes": 16148,
+      "sha256": "53b585e5e7381bafb67e32164ee43dd91bd9a26c63956ce74b9995f596c9bd1c",
+      "width": 240,
+      "height": 320
+    },
+    {
+      "petId": "unicorn",
+      "level": 8,
+      "path": "pets/unicorn/lv8.webp",
+      "bytes": 13100,
+      "sha256": "368bb554f7f3d04bf401936fdce8b03b0dbf47627a3f9b2471e464caf60b1733",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 1,
+      "path": "pets/tiger-striped-cat/lv1.webp",
+      "bytes": 27440,
+      "sha256": "980029462cd14d1be9775598748008abd5895721cd6d071d6af7f385b4112678",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 2,
+      "path": "pets/tiger-striped-cat/lv2.webp",
+      "bytes": 29386,
+      "sha256": "8a92c14d15c7a554e3ef9095feb40111b90772f524e170e61f65d4c03d78f55f",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 3,
+      "path": "pets/tiger-striped-cat/lv3.webp",
+      "bytes": 22702,
+      "sha256": "fcdeb77d8abaafc3d389d818483aa03de1b1e0b8ea88643005953898bf85c5ee",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 4,
+      "path": "pets/tiger-striped-cat/lv4.webp",
+      "bytes": 29316,
+      "sha256": "90d1dc2e92e19110fe2bf9c816d662b9119de09883e2bf031264903c9fa35bcd",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 5,
+      "path": "pets/tiger-striped-cat/lv5.webp",
+      "bytes": 35762,
+      "sha256": "65241a82c6fc1eba779d8ce581967406c7944361984d8345b290f9bf142d1f50",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 6,
+      "path": "pets/tiger-striped-cat/lv6.webp",
+      "bytes": 32444,
+      "sha256": "3fe250768247c15b9c9dd15ccf75dfbe43d4378aaa03ffc5c8f9a28690a54522",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 7,
+      "path": "pets/tiger-striped-cat/lv7.webp",
+      "bytes": 20812,
+      "sha256": "33d6a8e109804119eff6cd48567b19c818bba568a3350a7ee70f59a0fd1361ce",
+      "width": 666,
+      "height": 374
+    },
+    {
+      "petId": "tiger-striped-cat",
+      "level": 8,
+      "path": "pets/tiger-striped-cat/lv8.webp",
+      "bytes": 36036,
+      "sha256": "766857c8297df0992be6c1c4ea30084e5dc971f1003fd8de3f809c7dbb506609",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 1,
+      "path": "pets/succulent-spirit/lv1.webp",
+      "bytes": 8378,
+      "sha256": "14d25506c0994fc8e18f0219eee132a5bbca0b94dd29c509fb70f7fe9c13e243",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 2,
+      "path": "pets/succulent-spirit/lv2.webp",
+      "bytes": 8376,
+      "sha256": "690840b29642225d2fc15dfba2df648b7a6da692f595facec9fb59a4af1adfba",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 3,
+      "path": "pets/succulent-spirit/lv3.webp",
+      "bytes": 8526,
+      "sha256": "9165458520b17bc5fd47903c61e6dacc45ab281b8454730e09f370545398a114",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 4,
+      "path": "pets/succulent-spirit/lv4.webp",
+      "bytes": 10238,
+      "sha256": "f2e3c8dff00d143eb1ce1994f63fad983dc1e0c4437c87527b6297fb702d694c",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 5,
+      "path": "pets/succulent-spirit/lv5.webp",
+      "bytes": 10148,
+      "sha256": "5d853e33b45c056d0fc749f9cd374f51fcacad4f3060280430693cae422ed456",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 6,
+      "path": "pets/succulent-spirit/lv6.webp",
+      "bytes": 13742,
+      "sha256": "29b2f2affaad2968e12846451f18fc2485844ed5d7a502fe73e44b5926b7c8bd",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 7,
+      "path": "pets/succulent-spirit/lv7.webp",
+      "bytes": 12458,
+      "sha256": "5582cee608d89540f371b71dcbab74ad12757de288efb2333830da703b40e750",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "succulent-spirit",
+      "level": 8,
+      "path": "pets/succulent-spirit/lv8.webp",
+      "bytes": 16948,
+      "sha256": "369823c0fe7175b5edcfa4c5a72143900383b0a887feba0475b29b9860f662e1",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 1,
+      "path": "pets/suanni/lv1.webp",
+      "bytes": 12970,
+      "sha256": "23fb4189b01e9185410830360bcca35d4853ae3312436212797abed453664f0c",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 2,
+      "path": "pets/suanni/lv2.webp",
+      "bytes": 12202,
+      "sha256": "ea39b72a245769a9949f14ec2d6a28f4735affeee96ce069ba667d81aa8bf988",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 3,
+      "path": "pets/suanni/lv3.webp",
+      "bytes": 13800,
+      "sha256": "7b8564e395b2329e6682ad6526e4b4c6f26a903a9161dfb8fa4faa12d1dfd335",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 4,
+      "path": "pets/suanni/lv4.webp",
+      "bytes": 11576,
+      "sha256": "aa4725cd529e93174c2dc8543235de64f6c32bab3541392cb3651792df677715",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 5,
+      "path": "pets/suanni/lv5.webp",
+      "bytes": 15806,
+      "sha256": "e2dd7b641a9ecb876d78f2b253eb34b33df1ac95a7e801598532c906c361937b",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 6,
+      "path": "pets/suanni/lv6.webp",
+      "bytes": 12486,
+      "sha256": "98a7b0a615522a2b3aa1b3d95342366a679b878b2aa36e73882532946239a813",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 7,
+      "path": "pets/suanni/lv7.webp",
+      "bytes": 15048,
+      "sha256": "253d3a5746be7dfa39904c3476279eb1d5ee942f7871cec18f612e076898d935",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "suanni",
+      "level": 8,
+      "path": "pets/suanni/lv8.webp",
+      "bytes": 16918,
+      "sha256": "920bb4dc0ff89a5ceb4fe469564d2ceafd685e8ef66f6cbd9288b40f7311cdbd",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "shiba",
+      "level": 1,
+      "path": "pets/shiba/lv1.webp",
+      "bytes": 14798,
+      "sha256": "b1855e9636a8f43d6d57df0a84d22c7121fb7d9f4f644d23a50fa1c8f6791d68",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "shiba",
+      "level": 2,
+      "path": "pets/shiba/lv2.webp",
+      "bytes": 21602,
+      "sha256": "ae4d43a993244b6c51c43abc89085ced1faca15e04328f30318ae8918e517943",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "shiba",
+      "level": 3,
+      "path": "pets/shiba/lv3.webp",
+      "bytes": 23410,
+      "sha256": "f36078bab3cff3448a745027c085bb7d65c773b4df36429614582e3988db1e72",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "shiba",
+      "level": 4,
+      "path": "pets/shiba/lv4.webp",
+      "bytes": 26366,
+      "sha256": "3efbd19dc7dc34837397139dc8bc70e8403648a826f944f800bdcdf73f7de905",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "shiba",
+      "level": 5,
+      "path": "pets/shiba/lv5.webp",
+      "bytes": 23454,
+      "sha256": "f41dd46a8d45dfa7d710e41edfe339cb3b71a3a8d91167543de11351c050887f",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "shiba",
+      "level": 6,
+      "path": "pets/shiba/lv6.webp",
+      "bytes": 18872,
+      "sha256": "c200a1a44d742ca5b782c9b2fb39d3c2ac07aaeb98e3c91d30028053da517724",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "shiba",
+      "level": 7,
+      "path": "pets/shiba/lv7.webp",
+      "bytes": 20334,
+      "sha256": "61dce803cfa6e8a4a23e917eef3b9631c3eb2d4cf5d93093900152e31f78700a",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "shiba",
+      "level": 8,
+      "path": "pets/shiba/lv8.webp",
+      "bytes": 25114,
+      "sha256": "4c7d4e8ec0981536fe826969874d1b4e6bfb74bf29dfedebce99f6040cd41721",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 1,
+      "path": "pets/samoyed/lv1.webp",
+      "bytes": 22554,
+      "sha256": "78f641c49b8a6fcabda248ed1fb7ae7a99db27b2876e71f9d0b3e860527485b5",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 2,
+      "path": "pets/samoyed/lv2.webp",
+      "bytes": 19670,
+      "sha256": "327524a58a5d9910f3f131b2cd98c911ace813432f57293629c4239b96834ec9",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 3,
+      "path": "pets/samoyed/lv3.webp",
+      "bytes": 23564,
+      "sha256": "8dc1935f12cb972ba025c6d223119ab6056401f5d45ed5905532b091ee18a342",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 4,
+      "path": "pets/samoyed/lv4.webp",
+      "bytes": 21682,
+      "sha256": "6f0dd5f2751aa3ac6480fda7a8b9214f205d74915480289b617b1cac5cfc29ed",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 5,
+      "path": "pets/samoyed/lv5.webp",
+      "bytes": 26218,
+      "sha256": "b44e43dd08d42fc3b9297f676925b58acfa71a167b0d46b4f88dde355c2b8bbd",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 6,
+      "path": "pets/samoyed/lv6.webp",
+      "bytes": 33046,
+      "sha256": "62e51df9ff2456420d93a355a244bf6549640e6ae91a2e7ce61d2903b46826c4",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 7,
+      "path": "pets/samoyed/lv7.webp",
+      "bytes": 34804,
+      "sha256": "204d947413c92e4093fcd946209a32dd536654b54c3228cb77b4c4bc9556d8a9",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "samoyed",
+      "level": 8,
+      "path": "pets/samoyed/lv8.webp",
+      "bytes": 17972,
+      "sha256": "ab781d0ed90e2f574e0761998337cd50003bbfed7bea06ddd3892831c472115d",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "red-panda",
+      "level": 1,
+      "path": "pets/red-panda/lv1.webp",
+      "bytes": 9524,
+      "sha256": "d3cb17b505c5f7bb88a1b350a1f9b67e8df0f786412396f9d5409024f61f4c1f",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "red-panda",
+      "level": 2,
+      "path": "pets/red-panda/lv2.webp",
+      "bytes": 10646,
+      "sha256": "c79a27e0702c78d6a0e158d1ee005a8ff8113dfd361e7cc881655c121c7f2bc3",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "red-panda",
+      "level": 3,
+      "path": "pets/red-panda/lv3.webp",
+      "bytes": 11032,
+      "sha256": "16b89b98ef35134688d7ae12de7f795a5183426166bc4ef1d9ccaa4d01865553",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "red-panda",
+      "level": 4,
+      "path": "pets/red-panda/lv4.webp",
+      "bytes": 10010,
+      "sha256": "3b46428084b16344b1c831e4fbcbc7b451801cfd7b1ecc234c3f292607adba9e",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "red-panda",
+      "level": 5,
+      "path": "pets/red-panda/lv5.webp",
+      "bytes": 12234,
+      "sha256": "5e13fb88d168b4bfaa2b36750f85a1d745e321539c6ec74d2b9f7ae69dd85966",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "red-panda",
+      "level": 6,
+      "path": "pets/red-panda/lv6.webp",
+      "bytes": 9192,
+      "sha256": "8d0c0a480ac29ecc6ec57d0212fb067b60b4189fc14af5ba200cd6d4ac5bb0e6",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "red-panda",
+      "level": 7,
+      "path": "pets/red-panda/lv7.webp",
+      "bytes": 11776,
+      "sha256": "6dad2ef01f5fd8a888286bd833fee4c08f9628a97ef35c1814a721dbd92f0bd6",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "red-panda",
+      "level": 8,
+      "path": "pets/red-panda/lv8.webp",
+      "bytes": 11032,
+      "sha256": "ac08d7f2a804994bb0926b1d80b3223551789a5f6ebce682f61102d6a9d06b7d",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 1,
+      "path": "pets/ragdoll-cat/lv1.webp",
+      "bytes": 9180,
+      "sha256": "fb82e2626dd4065dcfdd6400330c4e27f8cdbd0a52fbb53f2c2b35d41e365d91",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 2,
+      "path": "pets/ragdoll-cat/lv2.webp",
+      "bytes": 9334,
+      "sha256": "c939770a98a15f16d454a76e4587f7e73bba3d53266526001899ffe38a988656",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 3,
+      "path": "pets/ragdoll-cat/lv3.webp",
+      "bytes": 10032,
+      "sha256": "c26385d5d25d6de2fe36298b2c6394d45fad3d494aff7d397696b583dfb078ef",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 4,
+      "path": "pets/ragdoll-cat/lv4.webp",
+      "bytes": 8734,
+      "sha256": "bccccd56210b77b8f42c519e3825aaca17e0496d0fc521106efeefdf30adf54d",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 5,
+      "path": "pets/ragdoll-cat/lv5.webp",
+      "bytes": 8988,
+      "sha256": "d0f1a2be9060c0f751a9de3f8ee542467a5f1e14386c45b3603d67208c54f92c",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 6,
+      "path": "pets/ragdoll-cat/lv6.webp",
+      "bytes": 8106,
+      "sha256": "3feee89f5278e1aae12de29cc8d4e516af729b0b3bd312e2bf59e19dc6231f56",
+      "width": 240,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 7,
+      "path": "pets/ragdoll-cat/lv7.webp",
+      "bytes": 10456,
+      "sha256": "cf2744a55d0c9fd09e8538c58c88ed95b7349183570ee214b88912ec4cae7a3c",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "ragdoll-cat",
+      "level": 8,
+      "path": "pets/ragdoll-cat/lv8.webp",
+      "bytes": 10708,
+      "sha256": "c9c76ad13bb8ad1f06603d33da99826b1e224a56527326ff66b9bc44d3ab6e47",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 1,
+      "path": "pets/pixiu/lv1.webp",
+      "bytes": 6768,
+      "sha256": "db00d5f6a374cc3e5999c6c29043806256e055f4e30338985b562e248debde31",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 2,
+      "path": "pets/pixiu/lv2.webp",
+      "bytes": 11242,
+      "sha256": "b8ebdeb4c56fbb948ae6581ea2ebc94bdf0b50c5948d5e3ded38932ce67fd20e",
+      "width": 240,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 3,
+      "path": "pets/pixiu/lv3.webp",
+      "bytes": 11480,
+      "sha256": "7dae4d5a0fb820e27f322e4d62c99228b6d382f2c2f13a41468c685806e97a6b",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 4,
+      "path": "pets/pixiu/lv4.webp",
+      "bytes": 10488,
+      "sha256": "e2366e7fff7b3397a5c7def6e8e4eaeaa6e1b5b456ab024a759ec34c12379f98",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 5,
+      "path": "pets/pixiu/lv5.webp",
+      "bytes": 12524,
+      "sha256": "3a84aeb7faac31dfdc3a6cd674543d60abc5c77681478162da7e73124c422206",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 6,
+      "path": "pets/pixiu/lv6.webp",
+      "bytes": 13646,
+      "sha256": "961766f98bc7b395904dad26ff693d0750164e8a9d951bf55b2137644266a1e6",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 7,
+      "path": "pets/pixiu/lv7.webp",
+      "bytes": 18178,
+      "sha256": "ea9050ea6f4fc37f5a05310a98b448b27177ff2cd4f8323ecff950f85a6410b8",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "pixiu",
+      "level": 8,
+      "path": "pets/pixiu/lv8.webp",
+      "bytes": 13810,
+      "sha256": "31ad54251efa1dad4abe578468a01c8aa25fa2ad487a260c6927a0b334a6b699",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 1,
+      "path": "pets/orange-cat/lv1.webp",
+      "bytes": 9174,
+      "sha256": "395899a737fc5964224348e588ed189a59a3af962cb202e7162bfe7886d56fce",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 2,
+      "path": "pets/orange-cat/lv2.webp",
+      "bytes": 11128,
+      "sha256": "78c9ade20b7050893c333072c0ad73a8e364a83b062bbbe1db5598d904607e21",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 3,
+      "path": "pets/orange-cat/lv3.webp",
+      "bytes": 10588,
+      "sha256": "7c49068429afd336d31ee096a70d4b100df419fcde5b8f33d61087ec8af6ba22",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 4,
+      "path": "pets/orange-cat/lv4.webp",
+      "bytes": 10896,
+      "sha256": "f8a9e2eedf79a2ea5c986367d0cd7d928358ca3f406df1b31f4523a7cf06c993",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 5,
+      "path": "pets/orange-cat/lv5.webp",
+      "bytes": 10588,
+      "sha256": "24e3e8620253139d8d4d4bd7935c3afc2ab4adc2a36d55f6b9808f96da01860d",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 6,
+      "path": "pets/orange-cat/lv6.webp",
+      "bytes": 7654,
+      "sha256": "adb16551f739f71cc8e29be46d7dc3a4c7376d8b52332256ab9dafbb199f7080",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 7,
+      "path": "pets/orange-cat/lv7.webp",
+      "bytes": 11716,
+      "sha256": "ec45ab20197b152733011d1a7e439882b4f698ec3c76c6517cde9f102b93a90b",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "orange-cat",
+      "level": 8,
+      "path": "pets/orange-cat/lv8.webp",
+      "bytes": 8732,
+      "sha256": "a9374ad12066780da0de1047ddaa40ecca3fd30eccda09be839458fceae4f58b",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 1,
+      "path": "pets/husky/lv1.webp",
+      "bytes": 9328,
+      "sha256": "147217030deccbc3e1bc198fe527b3da405049a871eae15a9b2c49c8f0598401",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 2,
+      "path": "pets/husky/lv2.webp",
+      "bytes": 9016,
+      "sha256": "68578f38527a6e3204e110d231b1448dee5627e4ab12468d735f67fb1e385755",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 3,
+      "path": "pets/husky/lv3.webp",
+      "bytes": 9190,
+      "sha256": "6715dbb6652e31311773cee493d40dc94c6e3c31cf84ec2864b042b939a19af9",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 4,
+      "path": "pets/husky/lv4.webp",
+      "bytes": 10778,
+      "sha256": "642b8cd9782a378dfa7f9ed9f98fd2ddaae6ea0f47ff24180b4a930022f98d28",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 5,
+      "path": "pets/husky/lv5.webp",
+      "bytes": 9942,
+      "sha256": "1b718b748050d14e3bd6e9e197c690da1bd36ab06f16e712ee82a7aa63b924fb",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 6,
+      "path": "pets/husky/lv6.webp",
+      "bytes": 12494,
+      "sha256": "3fa40c7d51a93a41810ee10ea4b610af5554dcbf9be005b419f83542f9a727e8",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 7,
+      "path": "pets/husky/lv7.webp",
+      "bytes": 10142,
+      "sha256": "1abf7a0869403154669e54d8e87e95b3978bff50462d8b4eff80ffcdfac4c4b2",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "husky",
+      "level": 8,
+      "path": "pets/husky/lv8.webp",
+      "bytes": 13056,
+      "sha256": "55a6f3e2051225a2de2f8fa2d3f192e1e656ef52bfb4c9c985241fc2ab5631c2",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 1,
+      "path": "pets/golden-retriever/lv1.webp",
+      "bytes": 19028,
+      "sha256": "ab4fc9d5bd37b8e932b4f31449f6504eca3513f4cd023de242483a0b272f7037",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 2,
+      "path": "pets/golden-retriever/lv2.webp",
+      "bytes": 32288,
+      "sha256": "9227b096efbfa9936f27c947731d6830e70163ee83a2c6891d22172bf1a0c8df",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 3,
+      "path": "pets/golden-retriever/lv3.webp",
+      "bytes": 25312,
+      "sha256": "210b767b08af55a6dff67a1279122e43055cef023ceada5bb9c0c974d29bd17b",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 4,
+      "path": "pets/golden-retriever/lv4.webp",
+      "bytes": 29650,
+      "sha256": "c746244f9dc17fea392358becc1506192d7b54a7a4a35cacb9b5d27b6f010c00",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 5,
+      "path": "pets/golden-retriever/lv5.webp",
+      "bytes": 26966,
+      "sha256": "a2f37e5cdbb63d179a079429c53134fb7e43cf04dec012b896f32e9c1279bbdc",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 6,
+      "path": "pets/golden-retriever/lv6.webp",
+      "bytes": 28434,
+      "sha256": "ed6ae2b29b574a0cf57513f91b35fbef8f4a352c180407ba163fd2fe9d20aceb",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 7,
+      "path": "pets/golden-retriever/lv7.webp",
+      "bytes": 26998,
+      "sha256": "116d6d5f734c991cde1051a73a5fd5da2f29c00e83688ba58b084644cb3cc5ba",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "golden-retriever",
+      "level": 8,
+      "path": "pets/golden-retriever/lv8.webp",
+      "bytes": 18662,
+      "sha256": "ddf54dd4bea7cb0f4eca8a2ca0182d42c25a15d4816d2701d16bb7bad8932414",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "garfield",
+      "level": 1,
+      "path": "pets/garfield/lv1.webp",
+      "bytes": 18104,
+      "sha256": "33fb3b77dd7103648b3b60759b08fb5a3a6bfe433cf55ce7096fdd9a4cc56dd2",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "garfield",
+      "level": 2,
+      "path": "pets/garfield/lv2.webp",
+      "bytes": 17316,
+      "sha256": "41b90efbaa260d3122db9cb2e70ed54a72a50c3e6875b024b99040d3018405e4",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "garfield",
+      "level": 3,
+      "path": "pets/garfield/lv3.webp",
+      "bytes": 39864,
+      "sha256": "cd6ddd1e9767c6372f79ea8f3a7a0f4a942bd5da7fc9b0f913378bbb0805e35e",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "garfield",
+      "level": 4,
+      "path": "pets/garfield/lv4.webp",
+      "bytes": 27284,
+      "sha256": "d39f5bc00e72f6165195edd2594a74d30950b1fc569c2d24e3b0852357ff2d63",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "garfield",
+      "level": 5,
+      "path": "pets/garfield/lv5.webp",
+      "bytes": 29596,
+      "sha256": "099b6c3a1f6f6ec30f6dd49e30cbd71f1b8653e848564b12a9be65b2661a9ba4",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "garfield",
+      "level": 6,
+      "path": "pets/garfield/lv6.webp",
+      "bytes": 31518,
+      "sha256": "73dd37a0dc18fdb78903edc6d3c436cfe62dcabc8ba10aae96219e228be0d135",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "garfield",
+      "level": 7,
+      "path": "pets/garfield/lv7.webp",
+      "bytes": 25706,
+      "sha256": "7041966c4beb88be77bf6e77bfb0af3203d51bc15bc855c7a2de5643b42e56de",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "garfield",
+      "level": 8,
+      "path": "pets/garfield/lv8.webp",
+      "bytes": 26342,
+      "sha256": "216ca2887d6d5e7fc0a5a4ee2001b46d80f4ab1d187709fc36741db1d2382e3d",
+      "width": 500,
+      "height": 500
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 1,
+      "path": "pets/curl-ear-rabbit/lv1.webp",
+      "bytes": 33006,
+      "sha256": "efe78edaafd3d6b24044b3bf2845b957a64ccf67a39c61dc61f42e09f84df83e",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 2,
+      "path": "pets/curl-ear-rabbit/lv2.webp",
+      "bytes": 49474,
+      "sha256": "7ec079098815c3ee8936b1b0ab71d918835b2cf276072adce53a8d2a562be76f",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 3,
+      "path": "pets/curl-ear-rabbit/lv3.webp",
+      "bytes": 35126,
+      "sha256": "8886aacc3f819b717abf2a2f967ff23af83ad66b566cecaf882d67fa5328761e",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 4,
+      "path": "pets/curl-ear-rabbit/lv4.webp",
+      "bytes": 50500,
+      "sha256": "8b84bf972cf3d4778be5182e46fb2d6ee6e04114da69ce3f019b2dc837d30129",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 5,
+      "path": "pets/curl-ear-rabbit/lv5.webp",
+      "bytes": 42594,
+      "sha256": "53948fdaf2ce209eea0bd4c883fe0f9500ffa0886f9f2d82d4fbbf5108be7641",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 6,
+      "path": "pets/curl-ear-rabbit/lv6.webp",
+      "bytes": 28132,
+      "sha256": "06080935a05baaafb593f8f6ea80b4045fa99e196c8d973afca17ff431a1fabe",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 7,
+      "path": "pets/curl-ear-rabbit/lv7.webp",
+      "bytes": 39920,
+      "sha256": "18826f2c0886d712e71e807754622d1a9ff51649421888a12ed9ac91f70d15b9",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "curl-ear-rabbit",
+      "level": 8,
+      "path": "pets/curl-ear-rabbit/lv8.webp",
+      "bytes": 61840,
+      "sha256": "d0e89c956cd5ec85077bab8c89682be41f81b38f32d528f7f7d3a5e93594c9dc",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 1,
+      "path": "pets/azure-dragon/lv1.webp",
+      "bytes": 10554,
+      "sha256": "23a612f7bad74ef94380d7815839553642a2877fbb958955ee0360bfe33503dc",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 2,
+      "path": "pets/azure-dragon/lv2.webp",
+      "bytes": 12682,
+      "sha256": "df249b9a55d2265a967d29f9b626b3672c7a344a6d953c22e4f07130b5b1e523",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 3,
+      "path": "pets/azure-dragon/lv3.webp",
+      "bytes": 13946,
+      "sha256": "40f7e75d5c44bf9d0f921b5c6b81815bcb56801ec3df752fe93f874f396d4c92",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 4,
+      "path": "pets/azure-dragon/lv4.webp",
+      "bytes": 13046,
+      "sha256": "51e117935c53900fa0a380cb54ae54a763968f8a6e474fff466992cd2c57442b",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 5,
+      "path": "pets/azure-dragon/lv5.webp",
+      "bytes": 12976,
+      "sha256": "0ccad6c9c67eeab0edb40673d398ba4a9b55bdc54fe0ad1f0ea9580491547629",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 6,
+      "path": "pets/azure-dragon/lv6.webp",
+      "bytes": 16032,
+      "sha256": "3e7f94f65cc6026717945c2c1fd848c36349899aaae1c64ec894a715b2c33c90",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 7,
+      "path": "pets/azure-dragon/lv7.webp",
+      "bytes": 15420,
+      "sha256": "c30abd25335a869b5d875259ce4d371c18b9866f94f17ab3b182361666b25470",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "azure-dragon",
+      "level": 8,
+      "path": "pets/azure-dragon/lv8.webp",
+      "bytes": 18370,
+      "sha256": "0c214fd49a9dd3a7bb3c851eba3568a41dfd8645504485cedcf51bd4e405d13f",
+      "width": 320,
+      "height": 320
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 1,
+      "path": "pets/angora-rabbit/lv1.webp",
+      "bytes": 37166,
+      "sha256": "8b23451143239bacdfa45317671b89deb2654b51fe00c154fea355be8199ac5e",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 2,
+      "path": "pets/angora-rabbit/lv2.webp",
+      "bytes": 44546,
+      "sha256": "ca12f3a872ba10a20aeccbdbe45d11330df482177514f25eb327ea740c69141c",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 3,
+      "path": "pets/angora-rabbit/lv3.webp",
+      "bytes": 37116,
+      "sha256": "5fddd66f8157dc036c5ac9115f91af1f6c1480ee6ed9e8b7e71613bb9cb9d3a6",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 4,
+      "path": "pets/angora-rabbit/lv4.webp",
+      "bytes": 51862,
+      "sha256": "1590578ff5ef00344ca9577aaf1667e52e79706008bb16208cd30b3f6cee8c86",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 5,
+      "path": "pets/angora-rabbit/lv5.webp",
+      "bytes": 33368,
+      "sha256": "891c557f40b45490a61e9b7f3517673236ec0937604ebae8bc2305bb300c1ffc",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 6,
+      "path": "pets/angora-rabbit/lv6.webp",
+      "bytes": 39970,
+      "sha256": "ff31755945140be5a0f304d433ee9550f88c3572c4335cde005e1ecbcc5a7ecd",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 7,
+      "path": "pets/angora-rabbit/lv7.webp",
+      "bytes": 42128,
+      "sha256": "18b4cbf6a8b34b0f5242664e3e32386f6d093bc25a5ee3eadf389e2c15d8f967",
+      "width": 433,
+      "height": 577
+    },
+    {
+      "petId": "angora-rabbit",
+      "level": 8,
+      "path": "pets/angora-rabbit/lv8.webp",
+      "bytes": 38176,
+      "sha256": "b5b43af7f1ffbe226e3ffa2b1ce5697c9d9ee90f9143a9ccd5c09a72b055cb67",
+      "width": 433,
+      "height": 577
+    }
+  ]
+}

@@ -1,0 +1,852 @@
+[
+  {
+    "id": "llama",
+    "name": {
+      "zh": "羊驼",
+      "en": "Alpaca"
+    },
+    "description": {
+      "zh": "羊驼",
+      "en": "Alpaca"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "farm"
+  },
+  {
+    "id": "koel-duck",
+    "name": {
+      "zh": "柯尔鸭",
+      "en": "Call duck"
+    },
+    "description": {
+      "zh": "柯尔鸭",
+      "en": "Call duck"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "bird"
+  },
+  {
+    "id": "border-collie",
+    "name": {
+      "zh": "边牧",
+      "en": "Border collie"
+    },
+    "description": {
+      "zh": "边牧",
+      "en": "Border collie"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "westie",
+    "name": {
+      "zh": "西高地犬",
+      "en": "West Highland terrier"
+    },
+    "description": {
+      "zh": "西高地白梗犬",
+      "en": "West Highland terrier"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 11,
+      "name": {
+        "zh": "戌狗",
+        "en": "Dog"
+      }
+    },
+    "kind": "dog"
+  },
+  {
+    "id": "parrot",
+    "name": {
+      "zh": "虎皮鹦鹉",
+      "en": "Budgerigar"
+    },
+    "description": {
+      "zh": "虎皮鹦鹉",
+      "en": "Budgerigar"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "bird"
+  },
+  {
+    "id": "silver-cat",
+    "name": {
+      "zh": "银渐层",
+      "en": "Silver shaded cat"
+    },
+    "description": {
+      "zh": "银渐层",
+      "en": "Silver shaded cat"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "schnauzer",
+    "name": {
+      "zh": "雪纳瑞",
+      "en": "Schnauzer"
+    },
+    "description": {
+      "zh": "雪纳瑞",
+      "en": "Schnauzer"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "panda",
+    "name": {
+      "zh": "熊猫",
+      "en": "Panda"
+    },
+    "description": {
+      "zh": "熊猫",
+      "en": "Panda"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "wild"
+  },
+  {
+    "id": "pig",
+    "name": {
+      "zh": "小猪猪",
+      "en": "Piglet"
+    },
+    "description": {
+      "zh": "小猪猪",
+      "en": "Piglet"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 12,
+      "name": {
+        "zh": "亥猪",
+        "en": "Pig"
+      }
+    },
+    "kind": "farm"
+  },
+  {
+    "id": "lamb",
+    "name": {
+      "zh": "小羊仔",
+      "en": "Lamb"
+    },
+    "description": {
+      "zh": "小羊仔",
+      "en": "Lamb"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 8,
+      "name": {
+        "zh": "未羊",
+        "en": "Goat"
+      }
+    },
+    "kind": "farm"
+  },
+  {
+    "id": "rabbit",
+    "name": {
+      "zh": "小白兔",
+      "en": "White rabbit"
+    },
+    "description": {
+      "zh": "小白兔",
+      "en": "White rabbit"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 4,
+      "name": {
+        "zh": "卯兔",
+        "en": "Rabbit"
+      }
+    },
+    "kind": "small"
+  },
+  {
+    "id": "chick",
+    "name": {
+      "zh": "小鸡仔",
+      "en": "Chick"
+    },
+    "description": {
+      "zh": "小鸡仔",
+      "en": "Chick"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 10,
+      "name": {
+        "zh": "酉鸡",
+        "en": "Rooster"
+      }
+    },
+    "kind": "bird"
+  },
+  {
+    "id": "poodle",
+    "name": {
+      "zh": "泰迪",
+      "en": "Poodle"
+    },
+    "description": {
+      "zh": "泰迪",
+      "en": "Poodle"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "calico-cat",
+    "name": {
+      "zh": "三花猫",
+      "en": "Calico cat"
+    },
+    "description": {
+      "zh": "三花猫",
+      "en": "Calico cat"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "horse",
+    "name": {
+      "zh": "小马驹",
+      "en": "Foal"
+    },
+    "description": {
+      "zh": "小马驹",
+      "en": "Foal"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 7,
+      "name": {
+        "zh": "午马",
+        "en": "Horse"
+      }
+    },
+    "kind": "farm"
+  },
+  {
+    "id": "tiger",
+    "name": {
+      "zh": "老虎",
+      "en": "Tiger"
+    },
+    "description": {
+      "zh": "老虎",
+      "en": "Tiger"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 3,
+      "name": {
+        "zh": "寅虎",
+        "en": "Tiger"
+      }
+    },
+    "kind": "wild"
+  },
+  {
+    "id": "blue-cat",
+    "name": {
+      "zh": "蓝猫",
+      "en": "British shorthair"
+    },
+    "description": {
+      "zh": "蓝猫",
+      "en": "British shorthair"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "labrador",
+    "name": {
+      "zh": "拉布拉多",
+      "en": "Labrador"
+    },
+    "description": {
+      "zh": "拉布拉多",
+      "en": "Labrador"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "corgi",
+    "name": {
+      "zh": "柯基",
+      "en": "Corgi"
+    },
+    "description": {
+      "zh": "柯基",
+      "en": "Corgi"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "capybara",
+    "name": {
+      "zh": "卡皮巴拉",
+      "en": "Capybara"
+    },
+    "description": {
+      "zh": "卡皮巴拉",
+      "en": "Capybara"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "wild"
+  },
+  {
+    "id": "nine-tail-fox",
+    "name": {
+      "zh": "九尾狐",
+      "en": "Nine-tailed fox"
+    },
+    "description": {
+      "zh": "九尾狐",
+      "en": "Nine-tailed fox"
+    },
+    "collections": [
+      "shanhai"
+    ],
+    "chapter": {
+      "zh": "南山经",
+      "en": "Southern Mountains"
+    },
+    "kind": "mythical"
+  },
+  {
+    "id": "golden-cat",
+    "name": {
+      "zh": "金渐层",
+      "en": "Golden shaded cat"
+    },
+    "description": {
+      "zh": "金渐层",
+      "en": "Golden shaded cat"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "tabby-cat",
+    "name": {
+      "zh": "虎斑猫",
+      "en": "Tabby cat"
+    },
+    "description": {
+      "zh": "虎斑猫",
+      "en": "Tabby cat"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "monkey",
+    "name": {
+      "zh": "猴子",
+      "en": "Monkey"
+    },
+    "description": {
+      "zh": "猴子",
+      "en": "Monkey"
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 9,
+      "name": {
+        "zh": "申猴",
+        "en": "Monkey"
+      }
+    },
+    "kind": "wild"
+  },
+  {
+    "id": "black-cat",
+    "name": {
+      "zh": "小黑猫",
+      "en": "Black cat"
+    },
+    "description": {
+      "zh": "小黑猫",
+      "en": "Black cat"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "french-bulldog",
+    "name": {
+      "zh": "法斗",
+      "en": "French bulldog"
+    },
+    "description": {
+      "zh": "法斗",
+      "en": "French bulldog"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "polar-bear",
+    "name": {
+      "zh": "大白熊",
+      "en": "Great Pyrenees"
+    },
+    "description": {
+      "zh": "大白熊",
+      "en": "Great Pyrenees"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "bichon",
+    "name": {
+      "zh": "比熊",
+      "en": "Bichon frise"
+    },
+    "description": {
+      "zh": "比熊犬",
+      "en": "Bichon frise"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "leopard",
+    "name": {
+      "zh": "小花豹",
+      "en": "Leopard cub"
+    },
+    "description": {
+      "zh": "小花豹",
+      "en": "Leopard cub"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "wild"
+  },
+  {
+    "id": "white-tiger",
+    "name": {
+      "zh": "白虎",
+      "en": "White tiger"
+    },
+    "description": {
+      "zh": "白虎",
+      "en": "White tiger"
+    },
+    "collections": [
+      "shanhai"
+    ],
+    "kind": "mythical"
+  },
+  {
+    "id": "vermilion-bird",
+    "name": {
+      "zh": "朱雀",
+      "en": "Vermilion bird"
+    },
+    "description": {
+      "zh": "朱雀",
+      "en": "Vermilion bird"
+    },
+    "collections": [
+      "shanhai"
+    ],
+    "kind": "mythical"
+  },
+  {
+    "id": "unicorn",
+    "name": {
+      "zh": "独角兽",
+      "en": "Unicorn"
+    },
+    "description": {
+      "zh": "独角兽",
+      "en": "Unicorn"
+    },
+    "collections": [
+      "fairy"
+    ],
+    "kind": "mythical"
+  },
+  {
+    "id": "tiger-striped-cat",
+    "name": {
+      "zh": "虎斑猫",
+      "en": "Tiger-striped cat"
+    },
+    "description": {
+      "zh": "虎斑猫",
+      "en": "Tiger-striped cat"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "succulent-spirit",
+    "name": {
+      "zh": "多肉精灵",
+      "en": "Succulent spirit"
+    },
+    "description": {
+      "zh": "多肉精灵",
+      "en": "Succulent spirit"
+    },
+    "collections": [
+      "fairy"
+    ],
+    "kind": "mythical"
+  },
+  {
+    "id": "suanni",
+    "name": {
+      "zh": "狻猊",
+      "en": "Suanni"
+    },
+    "description": {
+      "zh": "狻猊",
+      "en": "Suanni"
+    },
+    "collections": [
+      "shanhai"
+    ],
+    "kind": "mythical"
+  },
+  {
+    "id": "shiba",
+    "name": {
+      "zh": "柴犬",
+      "en": "Shiba inu"
+    },
+    "description": {
+      "zh": "柴犬",
+      "en": "Shiba inu"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "samoyed",
+    "name": {
+      "zh": "萨摩耶",
+      "en": "Samoyed"
+    },
+    "description": {
+      "zh": "萨摩耶",
+      "en": "Samoyed"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "red-panda",
+    "name": {
+      "zh": "小熊猫",
+      "en": "Red panda"
+    },
+    "description": {
+      "zh": "小熊猫",
+      "en": "Red panda"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "wild"
+  },
+  {
+    "id": "ragdoll-cat",
+    "name": {
+      "zh": "布偶猫",
+      "en": "Ragdoll cat"
+    },
+    "description": {
+      "zh": "布偶猫",
+      "en": "Ragdoll cat"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "pixiu",
+    "name": {
+      "zh": "貔貅",
+      "en": "Pixiu"
+    },
+    "description": {
+      "zh": "貔貅",
+      "en": "Pixiu"
+    },
+    "collections": [
+      "shanhai"
+    ],
+    "kind": "mythical"
+  },
+  {
+    "id": "orange-cat",
+    "name": {
+      "zh": "橘猫",
+      "en": "Orange tabby"
+    },
+    "description": {
+      "zh": "橘猫",
+      "en": "Orange tabby"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "husky",
+    "name": {
+      "zh": "哈士奇",
+      "en": "Husky"
+    },
+    "description": {
+      "zh": "哈士奇",
+      "en": "Husky"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "golden-retriever",
+    "name": {
+      "zh": "金毛",
+      "en": "Golden retriever"
+    },
+    "description": {
+      "zh": "金毛",
+      "en": "Golden retriever"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "dog"
+  },
+  {
+    "id": "garfield",
+    "name": {
+      "zh": "加菲猫",
+      "en": "Garfield cat"
+    },
+    "description": {
+      "zh": "加菲猫",
+      "en": "Garfield cat"
+    },
+    "collections": [
+      "anime"
+    ],
+    "kind": "cat"
+  },
+  {
+    "id": "curl-ear-rabbit",
+    "name": {
+      "zh": "垂耳兔",
+      "en": "Lop-eared rabbit"
+    },
+    "description": {
+      "zh": "垂耳兔",
+      "en": "Lop-eared rabbit"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "small"
+  },
+  {
+    "id": "azure-dragon",
+    "name": {
+      "zh": "青龙",
+      "en": "Azure dragon"
+    },
+    "description": {
+      "zh": "青龙",
+      "en": "Azure dragon"
+    },
+    "collections": [
+      "shanhai",
+      "zodiac"
+    ],
+    "zodiac": {
+      "order": 5,
+      "name": {
+        "zh": "辰龙",
+        "en": "Dragon"
+      }
+    },
+    "kind": "mythical"
+  },
+  {
+    "id": "angora-rabbit",
+    "name": {
+      "zh": "安哥拉兔",
+      "en": "Angora rabbit"
+    },
+    "description": {
+      "zh": "安哥拉兔",
+      "en": "Angora rabbit"
+    },
+    "collections": [
+      "cute"
+    ],
+    "kind": "small"
+  },
+  {
+    "id": "zodiac-rat",
+    "name": {
+      "zh": "小老鼠",
+      "en": "Little rat"
+    },
+    "description": {
+      "zh": "圆圆的耳朵、细长的尾巴，从小小幼鼠成长为自信的伙伴。",
+      "en": "A round-eared mouse with a long, slender tail, growing from a tiny baby into a confident companion."
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "kind": "small",
+    "zodiac": {
+      "order": 1,
+      "name": {
+        "zh": "子鼠",
+        "en": "Rat"
+      }
+    }
+  },
+  {
+    "id": "zodiac-ox",
+    "name": {
+      "zh": "小黄牛",
+      "en": "Little ox"
+    },
+    "description": {
+      "zh": "温暖的棕色绒毛、小小牛角，踏实地迈出每一步成长。",
+      "en": "A warm caramel calf with little horns, growing steadily with every step."
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "kind": "farm",
+    "zodiac": {
+      "order": 2,
+      "name": {
+        "zh": "丑牛",
+        "en": "Ox"
+      }
+    }
+  },
+  {
+    "id": "zodiac-snake",
+    "name": {
+      "zh": "灵蛇",
+      "en": "Little snake"
+    },
+    "description": {
+      "zh": "翠绿的身姿、温和的笑脸，从幼蛇成长为灵动的守护伙伴。",
+      "en": "A gentle green snake, growing from a tiny hatchling into a graceful guardian companion."
+    },
+    "collections": [
+      "cute",
+      "zodiac"
+    ],
+    "kind": "wild",
+    "zodiac": {
+      "order": 6,
+      "name": {
+        "zh": "巳蛇",
+        "en": "Snake"
+      }
+    }
+  }
+]

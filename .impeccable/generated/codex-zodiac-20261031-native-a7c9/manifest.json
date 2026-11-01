@@ -1,0 +1,709 @@
+{
+  "tool": "image_gen.imagegen",
+  "actual_model": null,
+  "model_note": "原生工具不接受 model 参数，返回结果只有 image_url 和 output_hint，未披露实际模型；未宣称使用 gpt-image-2。",
+  "reference_images": [
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv4.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv8.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv4.webp"
+  ],
+  "all_inspected_references": [
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv1.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv4.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv8.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv1.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv4.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv8.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv1.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv4.webp",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv8.webp"
+  ],
+  "generation_strategy": "Native AI generated eight independent panels per animal; crop panels into separate files. No duplicated single image, no SVG or drawn substitute.",
+  "generations": [
+    {
+      "animal": "zodiac-rat",
+      "prompt": "Use case: stylized-concept. Create a production character evolution sprite sheet for a classroom pet app, exactly EIGHT DISTINCT fully rendered illustrations of the SAME cute true mouse, arranged in a precise 4-column by 2-row grid on pure white. Prefer 4096x2048 resolution, each cell square, equal sized, with generous white gutters and absolutely no grid lines or text. Read order left to right top row then bottom row = stages 1 to 8. Every cell contains ONE complete centered mouse with ears, all limbs and entire long thin pink tail INSIDE its own cell, at least 10% padding. STYLE REFERENCES: supplied westie, pig and chick images are style references only, not subjects to copy. Match their exquisite soft 3D children's pet render, tactile fine soft fur, warm gentle studio lighting, large glossy expressive eyes, round friendly face, subtle contact shadow. No flat illustration.\nIDENTITY LOCK: a genuine small mouse, warm dove gray fur, ivory belly and muzzle, very large round pink inner ears, small pointed muzzle, pink nose, fine whiskers, long slender hairless pink tail prominently visible, dark brown eyes. NOT a hamster, no short tail, no rodent species swapping.\nEIGHT ACTUALLY DIFFERENT growth illustrations:\n1 newborn curled low on its side, huge head tiny plump body, paws tucked, sleepy half-open eyes, tail curled beside body, no clothes.\n2 baby sitting upright with both tiny paws at chest, curious wide eyes, a tiny sage green neck ribbon.\n3 energetic juvenile bounding in a playful side-three-quarter hop, paws visibly apart, long tail sweeping behind, sage bandana.\n4 growing adolescent standing on hind feet leaning to inspect a small acorn held in forepaws, taller torso and longer limbs, sage explorer neckerchief and tiny satchel.\n5 mature companion comfortably seated, poised upright, one paw welcoming, fuller chest and balanced adult proportions, tailored sage waistcoat.\n6 gentle guardian standing stably on hind feet, one paw on chest, slightly broader adult shoulders, small sage cape with simple gold leaf clasp, no weapons.\n7 elegant advanced adult stepping forward with one forepaw raised, richer layered sage-and-cream cape, gold botanical embroidered trim, small laurel head ornament leaving ears unobstructed.\n8 joyful graduate mature mouse standing proudly with forepaws holding a rolled blank diploma tied with sage ribbon, sage graduation cape, small dark green mortarboard between the ears, golden tassel, tail fully visible. No lettering on diploma.\nGrowth must change anatomy proportions, posture, maturity, expression and decorations, not merely scale or recolor the same pose. Consistent mouse identity and palette across all cells. Keep restrained accessories and animal anatomy readable. White background only, no scenery. No names, numbers, labels, letters, logos, watermarks, borders or panel captions anywhere. Entire bodies unclipped and separated.",
+      "completed_at_utc": "2026-10-30T19:30:10.289Z",
+      "source_file": "/Users/anthonyli/.codex/generated_images/01a18e46-8e6e-7c92-9628-897af0e050ed/exec-223e9056-d9cd-477e-805e-66e63b2bbf71.png",
+      "parameters": {
+        "transparent_background": false,
+        "referenced_image_paths": [
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv4.webp",
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv8.webp",
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv4.webp"
+        ]
+      },
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "source_sha256": "9701a96d0e899b2239e7d7e843f95d78790da736cf90f3aae973b1fb6b213158",
+      "generation_file_time": "2026-10-30T19:29:39.225952+00:00"
+    },
+    {
+      "animal": "zodiac-ox",
+      "prompt": "Use case: stylized-concept. Production character evolution sprite sheet for a classroom pet app: EXACTLY EIGHT DISTINCT full-body illustrations of the SAME adorable warm caramel calf/ox. Precise equal 4 columns x 2 rows, read left-to-right then next row. Pure white background, no borders, no grid lines, no text. Prefer 4096x2048. Each square cell has ONE complete animal, with ears, horns, hooves and entire tufted tail all within its cell, 10% clear white padding. References are STYLE ONLY: match exquisite soft 3D pet rendering, tactile velvety fine fur, large glossy dark brown eyes, rounded gentle expressions, warm soft studio lighting and subtle floor shadows seen in reference pig/chick/westie. Not flat cartoon.\nLOCK IDENTITY in all eight: warm caramel tan bovine, cream muzzle and belly, darker cocoa cloven hooves and tail tuft, broad round moist brown nose with two nostrils, two ears, TWO small ivory horns growing modestly with maturity, single bovine tail ending in brown hair tuft. Four bovine legs, no hands. No other species. Decorations use muted terracotta and cream with small gold details.\nEight genuinely distinct growth states:\n1 newborn calf lying tucked on its belly with tiny legs folded, oversized sleepy head tilted to viewer, tiny visible horn buds, entire tail resting alongside.\n2 baby calf seated awkwardly with front legs straight together and hind legs relaxed, wide curious eyes, a tiny terracotta neck bow.\n3 lively juvenile calf making a playful small running leap, forelegs and hind legs in distinct galloping positions, cheerful open smile, terracotta bandana, visible tail raised.\n4 adolescent calf standing in side three-quarter view, leaning its nose to a small daisy sprig on the ground, longer legs and slimmer torso, soft terracotta neckerchief and small saddle satchel.\n5 mature friendly young ox with broad chest and more balanced adult proportions, standing front three-quarter with one forehoof lifted in greeting, short rounded ivory horns, terracotta fabric collar with plain gold medallion.\n6 gentle guardian ox planted on all four hooves with steady confident pose, fuller shoulders, small terracotta shoulder cape with gold leaf clasp, short ivory horns, no weapon.\n7 elegant advanced ox in an intentional forward walking pose, head turned warmly to viewer, terracotta and cream short ceremonial cape with fine gold botanical trim, delicate small laurel ornament between horns, full body visible.\n8 proud graduate ox seated upright with both forehooves planted, broad mature body and happy expression, small terracotta graduation cape, dark reddish brown mortarboard neatly between two visible ivory horns, golden tassel; a blank rolled diploma tied with terracotta ribbon rests against one forehoof, entire tufted tail curves outward.\nChange actual poses, anatomy proportions, maturity and growth ornaments; never repeat the same image with altered color or size. Animal remains cute, round and clearly a calf/ox throughout. Restrained props, no scenery. No wings, no human hands, no lettering, no numbers, no names, no watermarks, no logos. No clipped anatomy or overlapping cells.",
+      "completed_at_utc": "2026-10-30T19:31:10.583Z",
+      "source_file": "/Users/anthonyli/.codex/generated_images/01a18e46-8e6e-7c92-9628-897af0e050ed/exec-9785eeaa-5dda-4841-8b21-03ae883ef10e.png",
+      "parameters": {
+        "transparent_background": false,
+        "referenced_image_paths": [
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv4.webp",
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv8.webp",
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv4.webp"
+        ]
+      },
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "source_sha256": "81ac8a103fcc1740c2d463b2bc55b98b0a5132572501d15135291f5ec9cb53c9",
+      "generation_file_time": "2026-10-30T19:31:10.518143+00:00"
+    },
+    {
+      "animal": "zodiac-snake",
+      "prompt": "Use case: stylized-concept. Create a polished production character evolution sheet containing EXACTLY EIGHT DISTINCT illustrations of the SAME cute GREEN SNAKE for a classroom pet application. Layout precisely 4 equal columns by 2 equal rows, white backdrop with generous empty gutters, no visible borders. Prefer 4096x2048, each cell square. Read order left to right top then bottom. ONE whole snake centered in every cell with 12% empty margin all around. All coils, head and tail wholly visible within cell.\nSTYLE references attached are only style and rendering references: soft exquisite 3D pet with rounded proportions, big glossy brown eyes, friendly gentle smile, soft warm studio lighting, fine material detail and subtle contact shadow. Snake skin is softly satin with very fine subtle scale texture, NOT furry. IDENTITY LOCK: fresh leaf green back, pale buttery cream segmented belly, small rounded snout, big friendly dark brown eyes, no ears, no horns, no legs, no arms, no wings, no fins, no hair, no dragon anatomy. One continuous tubular serpentine body tapering to ONE slender tail. Coils must be anatomically coherent and clearly visible. Richer emerald with cream and restrained gold accents for accessories.\nEight independent growth stages with clearly differing body proportions, coil configuration, pose and expression:\n1 newborn tiny snake curled in one low loose circular coil, oversized round head resting gently atop body, sleepy half-open eyes, small slender tail tip visible, no accessories.\n2 baby snake in a small two-loop compact coil, lifting short neck upright and tilting head curiously, tiny emerald neck ribbon, wide eyes.\n3 lively juvenile stretching out in a loose horizontal S-shaped serpentine wave with head lifted playfully and tail curling upward, emerald small bandana, cheerful expression.\n4 growing adolescent in an asymmetrical figure-eight coil, longer neck and slimmer head-to-body proportion, head leaning inquisitively toward a small daisy sprig, soft emerald neckerchief.\n5 mature companion in a broad relaxed double coil, longer thicker body and balanced smaller head proportion, tall gently curved neck, head turned toward viewer, simple emerald collar with plain golden leaf clasp.\n6 gentle guardian in a stable three-tier circular coil, thicker mature body, neck rising confidently with slight S bend, small emerald cape hanging behind neck WITHOUT obscuring coils, calm reassuring expression.\n7 elegant advanced snake with mature body in a sweeping wide spiral, neck making a graceful pronounced S curve, head turned three-quarter to viewer, short emerald-and-cream mantle with delicate golden leaf trim, small laurel circlet on head; coils readable and no limbs.\n8 joyful graduate snake in a distinct open oval coil with slender tail curling to the front, mature long upright neck and proud smiling head tilted to opposite side, small dark emerald mortarboard with gold tassel and short graduation neck cape. A blank rolled diploma tied with emerald ribbon lies nestled in the front loop, NOT held with hands; no hands exist.\nEvery cell must have genuinely different independent image content, not a repeated pose with accessories. Keep clear snake identity all stages. Do not turn into dragon or dinosaur. Restrained accessories, visible continuous snake anatomy. Pure white background, no scenes, no text, names, letters, labels, numbers, logos, watermark or borders. No cross-cell overlaps, no clipped body parts.",
+      "completed_at_utc": "2026-10-30T19:32:46.421Z",
+      "source_file": "/Users/anthonyli/.codex/generated_images/01a18e46-8e6e-7c92-9628-897af0e050ed/exec-eb07892e-805f-4a7c-8d5e-b8bba0fb0625.png",
+      "parameters": {
+        "transparent_background": false,
+        "referenced_image_paths": [
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv4.webp",
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv8.webp",
+          "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv4.webp"
+        ]
+      },
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "source_sha256": "83e93226748e84e6162043a8b180670a501516865a0073887af47f07075fda02",
+      "generation_file_time": "2026-10-30T19:32:46.376535+00:00"
+    }
+  ],
+  "files": [
+    {
+      "animal": "zodiac-rat",
+      "level": 1,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv1.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "898f85205c7e1ac0b006c3454121e4410fd5777d8d43642b605c9a4d4e9d3e2e",
+      "pixel_sha256": "1a2c07a023e2d8c9379efb6847e5883d6e71b2e441a1b6df65446b115692576c",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        0,
+        0,
+        443,
+        414
+      ],
+      "content_crop_within_cell": [
+        17,
+        119,
+        414,
+        395
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-rat",
+      "level": 2,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv2.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "54449d5335f52cb8f91e17281b06b61250b5d2b58f3a4a91e8c048b8b8de5c0f",
+      "pixel_sha256": "3c90265568ae81594a4c11635d51c979735ce04bb35b894ad9cc4a01c83abb4e",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        443,
+        0,
+        887,
+        414
+      ],
+      "content_crop_within_cell": [
+        46,
+        14,
+        419,
+        406
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-rat",
+      "level": 3,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv3.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "87cbc3f024918cd8066e15ef9ee3ff1b16952882fc64886aab7c5d87d98746ff",
+      "pixel_sha256": "322ad7780f38b93f4373d9d97ed04296d68660089982e525fb9ec0060af74081",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        887,
+        0,
+        1380,
+        414
+      ],
+      "content_crop_within_cell": [
+        17,
+        7,
+        466,
+        408
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-rat",
+      "level": 4,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv4.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "58022df1f1b2d94c988ab2aabf859086c13dfd9decf5d788f069ab210783d52c",
+      "pixel_sha256": "79783b8ef73e119f034ace2fa0ad4fc686ac84691829d18b1fd959d503f3aa73",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        1380,
+        0,
+        1774,
+        414
+      ],
+      "content_crop_within_cell": [
+        10,
+        0,
+        331,
+        414
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-rat",
+      "level": 5,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv5.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "47a899dc4fe5d3746a4e8bdcc6b1fc9ebea82d2923b77985b2a053caa725cd92",
+      "pixel_sha256": "1cb24ff41e3d64c17671a4c30ec6ad014e8b38d59e097b0cc6a803bd16b380cf",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        0,
+        414,
+        444,
+        887
+      ],
+      "content_crop_within_cell": [
+        11,
+        2,
+        407,
+        430
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-rat",
+      "level": 6,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv6.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "5dccfe87f572029aaf4f359333bdf573e620c4398692bccc9e2e0353b6880388",
+      "pixel_sha256": "1b8cb2bf082749a6123fc5dce9ca4a99c9999afe10c0154a1c29b68888cd288b",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        444,
+        414,
+        887,
+        887
+      ],
+      "content_crop_within_cell": [
+        1,
+        0,
+        348,
+        441
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-rat",
+      "level": 7,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv7.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "35e596f1825011b490be962ab6e39de030410ea9f8f4d1562703878fd5e957d3",
+      "pixel_sha256": "d0c2063961d0e9f1b881d65c0e662563fa4c420adba15c1fb14e8f5605410024",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        887,
+        414,
+        1330,
+        887
+      ],
+      "content_crop_within_cell": [
+        0,
+        4,
+        400,
+        455
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-rat",
+      "level": 8,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv8.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "1ebc43831d017770014bf6870353c743e6085a17a1eb7ca8ca38c180af43303c",
+      "pixel_sha256": "17005dabc44296b5800936bf7839dd38ee61693aa53ed2687e591483177b0cc6",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat-source.png",
+      "source_cell_box": [
+        1330,
+        414,
+        1774,
+        887
+      ],
+      "content_crop_within_cell": [
+        14,
+        6,
+        399,
+        449
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 1,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv1.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "4e7399e832d350dc021c87a52d44350a592f6f130f25eb2d45f46b5b7f3b4960",
+      "pixel_sha256": "ac2bf3e2610015b6f354a7697a15a1b963eec52ee918a974d54230fb3f9f2299",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        0,
+        0,
+        444,
+        390
+      ],
+      "content_crop_within_cell": [
+        36,
+        146,
+        444,
+        386
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 2,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv2.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "80030d9ecebe18d5bf7e41d3a130279a4472aeaeb215424b4eef29815e2e5ea1",
+      "pixel_sha256": "0e73adb07fd18e8677451fd549f4d61f38a925fd51741b08249ef7ed32212869",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        444,
+        0,
+        887,
+        390
+      ],
+      "content_crop_within_cell": [
+        51,
+        14,
+        405,
+        384
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 3,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv3.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "a73145fbc2a2aaea1d274149e668c2bbcc901bc53c40bddc1f2b2a2f47e89149",
+      "pixel_sha256": "915df4861c11c309b9200c915ba66a39bed49741be15416409f6224cc93df8d2",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        887,
+        0,
+        1330,
+        390
+      ],
+      "content_crop_within_cell": [
+        2,
+        2,
+        416,
+        390
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 4,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv4.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "d223a84714b926e8fa1da13fc12c5031db0a9d852751895be4afbb2f0935a291",
+      "pixel_sha256": "f458f926b1e3a38fa3ac25bcc36960c4b33a0e326fab8cb160c13f9f4f61be59",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        1330,
+        0,
+        1774,
+        390
+      ],
+      "content_crop_within_cell": [
+        0,
+        47,
+        444,
+        384
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 5,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv5.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "edc13ec46af25a192b404a256c0e2c5e58b9e8fa0549fee0fabb5b312d01b605",
+      "pixel_sha256": "dde0352526f1d457178ce8ccf2f04e517070ab778fac0a7492eecd70a765e4d8",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        0,
+        390,
+        444,
+        887
+      ],
+      "content_crop_within_cell": [
+        11,
+        0,
+        415,
+        456
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 6,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv6.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "31dfc99e5cab7c7107441424700fdeff7db1d9cf8982d16acd637b74ad0a30e2",
+      "pixel_sha256": "00381872f0a81bdeb07df7ee64f36e9cafc550f0499f9887a9b7643f69c47237",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        444,
+        390,
+        887,
+        887
+      ],
+      "content_crop_within_cell": [
+        22,
+        0,
+        443,
+        464
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 7,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv7.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "54c69899e450c964168b4558812b791f3dc28ea017636b44a6a849681b7021e4",
+      "pixel_sha256": "a15e07246197a322488b2df94c60ed4eae6b1b96b1dc2575bd55adf38be5e490",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        887,
+        390,
+        1330,
+        887
+      ],
+      "content_crop_within_cell": [
+        11,
+        2,
+        411,
+        466
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-ox",
+      "level": 8,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv8.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "65918d8338d083679847987b9819c14c9c9c8e5b154318322c9bf4714b843f9c",
+      "pixel_sha256": "373c776a4f5b89d051b108c1b19326566b9bee269530bc70b75ec231e0f4474a",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox-source.png",
+      "source_cell_box": [
+        1330,
+        390,
+        1774,
+        887
+      ],
+      "content_crop_within_cell": [
+        18,
+        5,
+        437,
+        460
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 1,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv1.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "37ba97305f5ddca71574212776229fd3eca255b43c2c7506f8996a09a1fd51bb",
+      "pixel_sha256": "b0e1bf874528d00dde1db5ee0c543daf7bceffe4fa39ba5dbc6fd03e5f4a6786",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        0,
+        0,
+        444,
+        414
+      ],
+      "content_crop_within_cell": [
+        60,
+        164,
+        377,
+        402
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 2,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv2.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "d31b88529b06ae319505b063771c6fb0163822f620f1a694d0ba3da225def5cd",
+      "pixel_sha256": "e32c37ef4e4a5d663d26a139b07108f0b2f4ee51d9ed9f3c67bf9db1807e6f7d",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        444,
+        0,
+        887,
+        414
+      ],
+      "content_crop_within_cell": [
+        79,
+        61,
+        359,
+        407
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 3,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv3.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "cf8b342ba37bf9f09a4d6d8c3d324af9c79fcb4772bda50994ef5df725a82f53",
+      "pixel_sha256": "01d7f4601e0727878ea8dfc9f38dad42e359988a7d2b34bc9debdc41d598f371",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        887,
+        0,
+        1330,
+        414
+      ],
+      "content_crop_within_cell": [
+        17,
+        83,
+        443,
+        396
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 4,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv4.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "aa779e2f456802580fb428dae9d4704579d465b839d935efdc0248a1e68ed755",
+      "pixel_sha256": "3a0ecdec1006b27ceb7c8cc35cc4e389a32abfdd7da0b562e5859bf54613476d",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        1330,
+        0,
+        1774,
+        414
+      ],
+      "content_crop_within_cell": [
+        31,
+        36,
+        432,
+        409
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 5,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv5.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "b69c1b4020e867d57e2b84636c1ba2f0c29f774ade611d7cc92a2deddd678ecd",
+      "pixel_sha256": "c9ea91dd227a0d7c838d52df370f74654928907a16a3f3d763bb68bace1195cd",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        0,
+        414,
+        444,
+        887
+      ],
+      "content_crop_within_cell": [
+        24,
+        26,
+        435,
+        442
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 6,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv6.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "2315082c25c28ef5a1745927c2abae5e2c5ad85acbd079a5c27c096f45390935",
+      "pixel_sha256": "e58bcc9fb2debd5802d43bf569b99b7b73dbbf71277eb8cce2e93413069e84cc",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        444,
+        414,
+        887,
+        887
+      ],
+      "content_crop_within_cell": [
+        41,
+        12,
+        428,
+        445
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 7,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv7.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "79039066061ca31dcee72835fa58e018dd7476e048502706c4833c594b79ed04",
+      "pixel_sha256": "54501c04cb4a0a60b1f69ac303641ea3817f0196447bf6dc6a3f1bf6afa0825e",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        887,
+        414,
+        1330,
+        887
+      ],
+      "content_crop_within_cell": [
+        24,
+        12,
+        431,
+        446
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    },
+    {
+      "animal": "zodiac-snake",
+      "level": 8,
+      "file": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv8.png",
+      "dimensions": [
+        560,
+        560
+      ],
+      "sha256": "0a1f6fb3e2ef87ce94755c7c73149f68461391787d11d0c04a9b7bb810885d13",
+      "pixel_sha256": "1c01ff22965917b0aadc01aa5724cf444f9d52b929a7529a5aca0d5b858fc851",
+      "source_sheet": "/Users/anthonyli/code/github/class-pet-garden-next/.impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake-source.png",
+      "source_cell_box": [
+        1330,
+        414,
+        1774,
+        887
+      ],
+      "content_crop_within_cell": [
+        28,
+        29,
+        425,
+        444
+      ],
+      "processing": "Crop independent AI-generated panel; center on white 560x560 canvas without rescaling animal pixels."
+    }
+  ],
+  "verification": {
+    "expected_count": 24,
+    "actual_count": 24,
+    "unique_file_sha256": 24,
+    "unique_pixel_sha256": 24,
+    "all_dimensions": [
+      560,
+      560
+    ],
+    "background": "white",
+    "actual_model": "undisclosed by native tool"
+  },
+  "reference_sha256": {
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv1.webp": "1ef18f82ab7424b950c4811f4ca2d52e82a1dcbb698d471a5818bfe0277c7a15",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv4.webp": "ebb8f4748ee90b2f166c4e8b7b93d8d3186b26de2a0308b8a27d4553598fbf6e",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/westie/lv8.webp": "2eae9f1a28419dbb62cbb4782e11d16c7aa99dcd4a06d737629d70c79e97508b",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv1.webp": "dc772b510742cad58366aa0e2ae032f876755c1fc27aa4ea630e2165aca460e9",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv4.webp": "f3c6459f3ccf014453f8317d8531cf9afd96b1a352b454af3d3f1085826af81d",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/pig/lv8.webp": "04a8d5cf4af3bd2bf7a2ce8c10a607a4b706307f72647c9575a658a75232a417",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv1.webp": "04975daba73f528f2ba9220d80677089749d677da6fef15dd8faad44eea461ea",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv4.webp": "aaf9f3e2f3495aef9de45df3c374d49603a151271c9abf0185fbc441a31a82b6",
+    "/Users/anthonyli/code/github/class-pet-garden-next/public/pets/chick/lv8.webp": "498a07cfb238b1a8a5d5396cf6aec29ecd85a0ec6cc6f9dcf2afd26784de8852"
+  }
+}

@@ -1,0 +1,14 @@
+services:
+  garden:
+    build: .
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    environment:
+      DATABASE_PATH: /app/data/pet-garden.db
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3100}
+    volumes:
+      - garden-data:/app/data
+volumes:
+  garden-data:

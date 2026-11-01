@@ -1,0 +1,78 @@
+{
+  "tool": "image_gen.imagegen",
+  "model": "未暴露",
+  "modelVersion": "未暴露",
+  "processing": "Delivered PNG files preserved byte-for-byte without re-encoding",
+  "assets": [
+    {
+      "level": 2,
+      "file": "lv2.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "bytes": 179355,
+      "sha256": "d4a899e26d0a3819e02db37d2bf90731af60339bbea9e294628b4ce04e1a8a8e",
+      "generatedAt": "2026-10-31T02:35:05.985Z"
+    },
+    {
+      "level": 3,
+      "file": "lv3.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "bytes": 191135,
+      "sha256": "963300fa8e80ad4655554e263a4ec9cea682ab8fe363b4f7702bdbd2b965a744",
+      "generatedAt": "2026-10-31T02:41:38.150Z"
+    },
+    {
+      "level": 4,
+      "file": "lv4.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "bytes": 168203,
+      "sha256": "ed43165066434c725441332a1be205e1bb24e69c3866adc270d8647d8029a554",
+      "generatedAt": "2026-10-31T02:43:01.081Z"
+    },
+    {
+      "level": 5,
+      "file": "lv5.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "bytes": 222815,
+      "sha256": "afddc7b427ca7e10c426aa87876a8492aa5ce4d8c07a3510b0e5a01c75542f08",
+      "generatedAt": "2026-10-31T02:40:29.784Z"
+    },
+    {
+      "level": 6,
+      "file": "lv6.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "bytes": 232983,
+      "sha256": "c39288ef4bcb07867085908b29c2146fb9299497c3d92a3b028a69293a13b99b",
+      "generatedAt": "2026-10-31T02:44:04.238Z"
+    },
+    {
+      "level": 7,
+      "file": "lv7.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "bytes": 225920,
+      "sha256": "10209e24b526e440000365421906eae7b908630d6bc9c65c1ec770ecf518e1c1",
+      "generatedAt": "2026-10-31T02:46:20.456Z"
+    },
+    {
+      "level": 8,
+      "file": "lv8.png",
+      "width": 512,
+      "height": 512,
+      "hasAlpha": true,
+      "bytes": 240136,
+      "sha256": "e7c639d3b51123b601431a6404368f5259cb06051b8c51a4b66ef8649bd52b8a",
+      "generatedAt": "2026-10-31T02:36:35.567Z"
+    }
+  ]
+}

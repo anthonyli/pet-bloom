@@ -1,0 +1,47 @@
+[
+  {
+    "order": 1,
+    "name": {
+      "zh": "子鼠",
+      "en": "Rat"
+    },
+    "id": "zodiac-rat",
+    "requiredStages": 8,
+    "status": "ready",
+    "referencePets": [
+      "westie",
+      "pig",
+      "chick"
+    ]
+  },
+  {
+    "order": 2,
+    "name": {
+      "zh": "丑牛",
+      "en": "Ox"
+    },
+    "id": "zodiac-ox",
+    "requiredStages": 8,
+    "status": "ready",
+    "referencePets": [
+      "westie",
+      "pig",
+      "chick"
+    ]
+  },
+  {
+    "order": 6,
+    "name": {
+      "zh": "巳蛇",
+      "en": "Snake"
+    },
+    "id": "zodiac-snake",
+    "requiredStages": 8,
+    "status": "ready",
+    "referencePets": [
+      "westie",
+      "pig",
+      "chick"
+    ]
+  }
+]

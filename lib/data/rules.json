@@ -1,0 +1,749 @@
+[
+  {
+    "id": "study-1",
+    "name": {
+      "zh": "作业完成优秀",
+      "en": "Excellent homework"
+    },
+    "points": 1,
+    "category": "study"
+  },
+  {
+    "id": "study-2",
+    "name": {
+      "zh": "平时测验满分",
+      "en": "Perfect quiz score"
+    },
+    "points": 3,
+    "category": "study"
+  },
+  {
+    "id": "study-3",
+    "name": {
+      "zh": "平时测验达优秀",
+      "en": "Excellent quiz result"
+    },
+    "points": 2,
+    "category": "study"
+  },
+  {
+    "id": "study-4",
+    "name": {
+      "zh": "默写全对",
+      "en": "Perfect dictation"
+    },
+    "points": 1,
+    "category": "study"
+  },
+  {
+    "id": "study-5",
+    "name": {
+      "zh": "订正态度认真",
+      "en": "Thoughtful corrections"
+    },
+    "points": 1,
+    "category": "study"
+  },
+  {
+    "id": "study-6",
+    "name": {
+      "zh": "优秀作业,值得表扬",
+      "en": "Homework worth celebrating"
+    },
+    "points": 1,
+    "category": "study"
+  },
+  {
+    "id": "study-7",
+    "name": {
+      "zh": "近期学习状态进步",
+      "en": "Improved learning habits"
+    },
+    "points": 1,
+    "category": "study"
+  },
+  {
+    "id": "study-8",
+    "name": {
+      "zh": "被老师点名表扬",
+      "en": "Praised by the teacher"
+    },
+    "points": 1,
+    "category": "study"
+  },
+  {
+    "id": "study-9",
+    "name": {
+      "zh": "单元测验显著进步",
+      "en": "Significant test improvement"
+    },
+    "points": 2,
+    "category": "study"
+  },
+  {
+    "id": "study-10",
+    "name": {
+      "zh": "不交作业",
+      "en": "Missing homework"
+    },
+    "points": -1,
+    "category": "study"
+  },
+  {
+    "id": "study-11",
+    "name": {
+      "zh": "未完成作业",
+      "en": "Incomplete homework"
+    },
+    "points": -2,
+    "category": "study"
+  },
+  {
+    "id": "study-12",
+    "name": {
+      "zh": "作业潦草",
+      "en": "Untidy homework"
+    },
+    "points": -1,
+    "category": "study"
+  },
+  {
+    "id": "study-13",
+    "name": {
+      "zh": "订正不认真",
+      "en": "Careless corrections"
+    },
+    "points": -2,
+    "category": "study"
+  },
+  {
+    "id": "study-14",
+    "name": {
+      "zh": "抄袭作业",
+      "en": "Copying homework"
+    },
+    "points": -5,
+    "category": "study"
+  },
+  {
+    "id": "study-15",
+    "name": {
+      "zh": "考试作弊",
+      "en": "Cheating on a test"
+    },
+    "points": -5,
+    "category": "study"
+  },
+  {
+    "id": "study-16",
+    "name": {
+      "zh": "学习显著退步",
+      "en": "Significant learning setback"
+    },
+    "points": -2,
+    "category": "study"
+  },
+  {
+    "id": "behavior-1",
+    "name": {
+      "zh": "早读认真专注",
+      "en": "Focused morning reading"
+    },
+    "points": 1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-2",
+    "name": {
+      "zh": "课前准备充分",
+      "en": "Well prepared for class"
+    },
+    "points": 1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-3",
+    "name": {
+      "zh": "眼保健操全程认真",
+      "en": "Careful eye exercises"
+    },
+    "points": 1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-4",
+    "name": {
+      "zh": "升旗仪式安静整齐",
+      "en": "Respectful at the flag ceremony"
+    },
+    "points": 1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-5",
+    "name": {
+      "zh": "守纪表现优秀(被表扬)",
+      "en": "Excellent classroom conduct"
+    },
+    "points": 2,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-6",
+    "name": {
+      "zh": "无故迟到或早退",
+      "en": "Late or leaving early without reason"
+    },
+    "points": -1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-7",
+    "name": {
+      "zh": "未佩戴红领巾,不穿校服",
+      "en": "Missing uniform or required scarf"
+    },
+    "points": -1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-8",
+    "name": {
+      "zh": "私自旷课或课间操",
+      "en": "Skipping class or exercises"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-9",
+    "name": {
+      "zh": "上课讲话、开小差",
+      "en": "Talking or distracted in class"
+    },
+    "points": -1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-10",
+    "name": {
+      "zh": "扰乱课堂",
+      "en": "Disrupting the lesson"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-11",
+    "name": {
+      "zh": "课间追逐打闹",
+      "en": "Unsafe play during breaks"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-12",
+    "name": {
+      "zh": "追逐打闹(酿成事故)",
+      "en": "Unsafe play causing an accident"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-13",
+    "name": {
+      "zh": "中午自习说话、随意走动",
+      "en": "Disrupting quiet study"
+    },
+    "points": -1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-14",
+    "name": {
+      "zh": "私自带玩具或零食或危险物品",
+      "en": "Bringing prohibited items"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-15",
+    "name": {
+      "zh": "排队时说话或小动作不停,被点名",
+      "en": "Disrupting the line after a reminder"
+    },
+    "points": -1,
+    "category": "behavior"
+  },
+  {
+    "id": "behavior-16",
+    "name": {
+      "zh": "传播脏话或不良歌谣",
+      "en": "Sharing offensive language or songs"
+    },
+    "points": -5,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-1",
+    "name": {
+      "zh": "主动帮助同学",
+      "en": "Helping a classmate"
+    },
+    "points": 2,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-2",
+    "name": {
+      "zh": "拾金不昧(一般物品)",
+      "en": "Returning a lost item"
+    },
+    "points": 2,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-3",
+    "name": {
+      "zh": "拾金不昧(贵重物品)",
+      "en": "Returning a valuable item"
+    },
+    "points": 5,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-4",
+    "name": {
+      "zh": "主动帮助生病同学",
+      "en": "Supporting an unwell classmate"
+    },
+    "points": 3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-5",
+    "name": {
+      "zh": "主动调解同学矛盾、化解冲突",
+      "en": "Helping resolve a disagreement"
+    },
+    "points": 3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-6",
+    "name": {
+      "zh": "做好人好事被学校提出表扬",
+      "en": "Recognized by the school for kindness"
+    },
+    "points": 3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-7",
+    "name": {
+      "zh": "积极参与校内外志愿服务",
+      "en": "Volunteering in the community"
+    },
+    "points": 3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-8",
+    "name": {
+      "zh": "犯错主动认错,积极协商",
+      "en": "Owning a mistake and making amends"
+    },
+    "points": 1,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-9",
+    "name": {
+      "zh": "撒谎、隐瞒真实情况",
+      "en": "Lying or concealing the truth"
+    },
+    "points": -2,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-10",
+    "name": {
+      "zh": "说脏话,骂人,起绰号",
+      "en": "Offensive language or name-calling"
+    },
+    "points": -2,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-11",
+    "name": {
+      "zh": "欺负、推搡、伤害同学",
+      "en": "Bullying or hurting a classmate"
+    },
+    "points": -10,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-12",
+    "name": {
+      "zh": "挑拨离间、拉帮结派",
+      "en": "Creating conflict or exclusion"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-13",
+    "name": {
+      "zh": "不尊重同学、孤立他人",
+      "en": "Disrespecting or isolating a classmate"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-14",
+    "name": {
+      "zh": "为私欲包庇犯错者",
+      "en": "Covering up misconduct"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-15",
+    "name": {
+      "zh": "恶意举报、诬陷他人",
+      "en": "Making a malicious accusation"
+    },
+    "points": -3,
+    "category": "behavior"
+  },
+  {
+    "id": "moral-16",
+    "name": {
+      "zh": "破坏校园设施",
+      "en": "Damaging school facilities"
+    },
+    "points": -5,
+    "category": "behavior"
+  },
+  {
+    "id": "health-1",
+    "name": {
+      "zh": "认真完成包干区值日",
+      "en": "Completing classroom cleaning"
+    },
+    "points": 1,
+    "category": "health"
+  },
+  {
+    "id": "health-2",
+    "name": {
+      "zh": "主动为班级擦黑板",
+      "en": "Volunteering to clean the board"
+    },
+    "points": 1,
+    "category": "health"
+  },
+  {
+    "id": "health-3",
+    "name": {
+      "zh": "主动整理讲台",
+      "en": "Tidying the teacher's desk"
+    },
+    "points": 1,
+    "category": "health"
+  },
+  {
+    "id": "health-4",
+    "name": {
+      "zh": "主动整理黑板粉笔槽",
+      "en": "Cleaning the chalk tray"
+    },
+    "points": 1,
+    "category": "health"
+  },
+  {
+    "id": "health-5",
+    "name": {
+      "zh": "主动倒垃圾并套垃圾袋",
+      "en": "Taking out the rubbish"
+    },
+    "points": 2,
+    "category": "health"
+  },
+  {
+    "id": "health-6",
+    "name": {
+      "zh": "座位整洁无涂画,桌椅干净",
+      "en": "Keeping desk and chair clean"
+    },
+    "points": 1,
+    "category": "health"
+  },
+  {
+    "id": "health-7",
+    "name": {
+      "zh": "座位周围无垃圾",
+      "en": "Keeping the floor around the desk clean"
+    },
+    "points": 1,
+    "category": "health"
+  },
+  {
+    "id": "health-8",
+    "name": {
+      "zh": "打扫包干区时间玩耍,不认真",
+      "en": "Neglecting cleaning duties"
+    },
+    "points": -2,
+    "category": "health"
+  },
+  {
+    "id": "health-9",
+    "name": {
+      "zh": "个人座位卫生不合格",
+      "en": "Untidy personal space"
+    },
+    "points": -1,
+    "category": "health"
+  },
+  {
+    "id": "health-10",
+    "name": {
+      "zh": "校园内乱扔垃圾",
+      "en": "Littering"
+    },
+    "points": -1,
+    "category": "health"
+  },
+  {
+    "id": "health-11",
+    "name": {
+      "zh": "桌洞脏乱、物品杂乱",
+      "en": "Disorganized desk storage"
+    },
+    "points": -1,
+    "category": "health"
+  },
+  {
+    "id": "health-12",
+    "name": {
+      "zh": "破坏卫生、乱涂乱画",
+      "en": "Graffiti or deliberate mess"
+    },
+    "points": -2,
+    "category": "health"
+  },
+  {
+    "id": "health-13",
+    "name": {
+      "zh": "浪费粮食",
+      "en": "Wasting food"
+    },
+    "points": -2,
+    "category": "health"
+  },
+  {
+    "id": "health-14",
+    "name": {
+      "zh": "破坏班级绿植、把玩绿植",
+      "en": "Damaging classroom plants"
+    },
+    "points": -3,
+    "category": "health"
+  },
+  {
+    "id": "other-1",
+    "name": {
+      "zh": "主动整理图书、摆放整齐",
+      "en": "Organizing classroom books"
+    },
+    "points": 2,
+    "category": "other"
+  },
+  {
+    "id": "other-2",
+    "name": {
+      "zh": "主动帮同学更换桌椅",
+      "en": "Helping move desks and chairs"
+    },
+    "points": 2,
+    "category": "other"
+  },
+  {
+    "id": "other-3",
+    "name": {
+      "zh": "主动承担班级任务",
+      "en": "Taking responsibility for a class task"
+    },
+    "points": 2,
+    "category": "other"
+  },
+  {
+    "id": "other-4",
+    "name": {
+      "zh": "积极参加班级墙面布置",
+      "en": "Helping decorate the classroom"
+    },
+    "points": 2,
+    "category": "other"
+  },
+  {
+    "id": "other-5",
+    "name": {
+      "zh": "损坏公物、乱刻乱画",
+      "en": "Damaging shared property"
+    },
+    "points": -1,
+    "category": "other"
+  },
+  {
+    "id": "other-6",
+    "name": {
+      "zh": "浪费水电、屡教不改",
+      "en": "Repeatedly wasting water or electricity"
+    },
+    "points": -1,
+    "category": "other"
+  },
+  {
+    "id": "other-7",
+    "name": {
+      "zh": "故意玩弄损坏公共电器",
+      "en": "Tampering with shared equipment"
+    },
+    "points": -3,
+    "category": "other"
+  },
+  {
+    "id": "other-8",
+    "name": {
+      "zh": "故意损坏卫生工具",
+      "en": "Damaging cleaning tools"
+    },
+    "points": -2,
+    "category": "other"
+  },
+  {
+    "id": "award-1",
+    "name": {
+      "zh": "积极参加班级或学校活动",
+      "en": "Joining a class or school activity"
+    },
+    "points": 1,
+    "category": "other"
+  },
+  {
+    "id": "award-2",
+    "name": {
+      "zh": "活动中表现优秀",
+      "en": "Excellent activity participation"
+    },
+    "points": 2,
+    "category": "other"
+  },
+  {
+    "id": "award-3",
+    "name": {
+      "zh": "代表班级参赛",
+      "en": "Representing the class"
+    },
+    "points": 3,
+    "category": "other"
+  },
+  {
+    "id": "award-4",
+    "name": {
+      "zh": "校级比赛:一等奖",
+      "en": "School competition: first prize"
+    },
+    "points": 5,
+    "category": "other"
+  },
+  {
+    "id": "award-5",
+    "name": {
+      "zh": "校级比赛:二等奖",
+      "en": "School competition: second prize"
+    },
+    "points": 4,
+    "category": "other"
+  },
+  {
+    "id": "award-6",
+    "name": {
+      "zh": "校级比赛:三等奖",
+      "en": "School competition: third prize"
+    },
+    "points": 3,
+    "category": "other"
+  },
+  {
+    "id": "award-7",
+    "name": {
+      "zh": "区级及以上:一等奖",
+      "en": "District competition: first prize"
+    },
+    "points": 8,
+    "category": "other"
+  },
+  {
+    "id": "award-8",
+    "name": {
+      "zh": "区级及以上:二等奖",
+      "en": "District competition: second prize"
+    },
+    "points": 6,
+    "category": "other"
+  },
+  {
+    "id": "award-9",
+    "name": {
+      "zh": "区级及以上:三等奖",
+      "en": "District competition: third prize"
+    },
+    "points": 4,
+    "category": "other"
+  },
+  {
+    "id": "award-10",
+    "name": {
+      "zh": "联欢会或文艺汇演积极参与",
+      "en": "Taking part in a performance"
+    },
+    "points": 2,
+    "category": "other"
+  },
+  {
+    "id": "award-11",
+    "name": {
+      "zh": "为班级争得荣誉",
+      "en": "Bringing honor to the class"
+    },
+    "points": 5,
+    "category": "other"
+  },
+  {
+    "id": "group-1",
+    "name": {
+      "zh": "小组全周无违纪、全员交作业",
+      "en": "A full week of teamwork and homework"
+    },
+    "points": 2,
+    "category": "other"
+  },
+  {
+    "id": "note-1",
+    "name": {
+      "zh": "扣分严重/打架/作弊/严重违纪",
+      "en": "Serious misconduct or fighting"
+    },
+    "points": -8,
+    "category": "other"
+  }
+]
