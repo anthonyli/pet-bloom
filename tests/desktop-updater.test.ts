@@ -24,7 +24,8 @@ type UpdaterPort = EventEmitter & {
   logger: { info(message: string): void; warn(message: string): void; error(message: string): void } | null
   checkForUpdates(): Promise<CheckResult | null>
   downloadUpdate(): Promise<string[]>
-  quitAndInstall(isSilent: boolean, isForceRunAfter: boolean): void
+  prepareInstall?(): Promise<void>
+  quitAndInstall(isSilent: boolean, isForceRunAfter: boolean): void | Promise<void>
 }
 type Controller = { check(manual?: boolean): Promise<void> | undefined; start(): void; dispose(): void }
 type UpdaterOptions = {
@@ -67,6 +68,7 @@ function setup(options: { packaged?: boolean; locale?: 'zh' | 'en'; responses?: 
     logger: null as UpdaterPort['logger'],
     checkForUpdates: vi.fn<() => Promise<CheckResult | null>>().mockResolvedValue({ isUpdateAvailable: false, updateInfo: { version: '1.0.0' } }),
     downloadUpdate: vi.fn<() => Promise<string[]>>().mockResolvedValue(['/updates/app.zip']),
+    prepareInstall: undefined as UpdaterPort['prepareInstall'],
     quitAndInstall: vi.fn<(isSilent: boolean, isForceRunAfter: boolean) => void>()
   })
   const window = { isDestroyed: vi.fn(() => false), setProgressBar: vi.fn<(progress: number) => void>() }
@@ -330,6 +332,47 @@ describe('桌面更新控制器', () => {
     await first
   })
 
+  it('安装准备完成前不关闭本地服务', async () => {
+    const context = setup({ responses: [0, 0] })
+    available(context)
+    const prepared = deferred<void>()
+    const prepare = vi.fn(() => prepared.promise)
+    context.autoUpdater.prepareInstall = prepare
+    const checking = context.controller.check()
+    await vi.waitFor(() => expect(prepare).toHaveBeenCalledTimes(1))
+    expect(context.beforeInstall).not.toHaveBeenCalled()
+    prepared.resolve()
+    await checking
+    expect(context.beforeInstall).toHaveBeenCalledTimes(1)
+    expect(context.autoUpdater.quitAndInstall).toHaveBeenCalledTimes(1)
+  })
+
+  it('更新包准备失败保留当前窗口和服务，可再次检查重试', async () => {
+    const context = setup({ responses: [0, 0] })
+    available(context)
+    context.autoUpdater.prepareInstall = vi.fn().mockRejectedValue(new Error('bad zip'))
+    await context.controller.check()
+    expect(context.messages[2].detail).toContain('安装准备失败')
+    expect(context.beforeInstall).not.toHaveBeenCalled()
+    expect(context.app.quit).not.toHaveBeenCalled()
+    expect(context.app.relaunch).not.toHaveBeenCalled()
+    expect(context.onStatus).toHaveBeenLastCalledWith('ready', undefined)
+  })
+
+  it('准备期间退出不会再关闭服务或启动安装辅助程序', async () => {
+    const context = setup({ responses: [0, 0] })
+    available(context)
+    const prepared = deferred<void>()
+    context.autoUpdater.prepareInstall = vi.fn(() => prepared.promise)
+    const checking = context.controller.check()
+    await vi.waitFor(() => expect(context.autoUpdater.prepareInstall).toHaveBeenCalled())
+    context.controller.dispose()
+    prepared.resolve()
+    await checking
+    expect(context.beforeInstall).not.toHaveBeenCalled()
+    expect(context.autoUpdater.quitAndInstall).not.toHaveBeenCalled()
+  })
+
   it('确认安装后等待本地服务完全停止，再调用安装器', async () => {
     const context = setup({ responses: [0, 0] })
     available(context)
@@ -352,7 +395,7 @@ describe('桌面更新控制器', () => {
     else context.autoUpdater.quitAndInstall.mockImplementation(() => { throw error })
     await context.controller.check()
     expect(context.messages[2].detail).toContain('将重新打开现有版本')
-    expect(context.messages[2].detail).toContain('macOS 自动更新需要已签名的正式版本')
+    expect(context.messages[2].detail).toContain('下载最新安装包')
     expect(context.app.relaunch).toHaveBeenCalledTimes(1)
     expect(context.app.quit).toHaveBeenCalledTimes(1)
     if (stage === 'beforeInstall') expect(context.autoUpdater.quitAndInstall).not.toHaveBeenCalled()

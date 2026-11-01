@@ -17,6 +17,7 @@ let origin
 let quitting = false
 let log
 let updates
+let updateReceipt
 const token = randomBytes(32).toString('hex')
 const settingsFile = path.join(dataDirectory, 'desktop.json')
 const t = (zh, en) => app.getPreferredSystemLanguages()[0].startsWith('zh') ? zh : en
@@ -77,9 +78,10 @@ function startServer(port) {
 async function stopServer() {
   const child = server
   if (!child) return
-  await new Promise(resolve => {
-    const timeout = setTimeout(() => { child.kill(); resolve() }, 5000)
-    child.once('exit', () => { clearTimeout(timeout); resolve() })
+  await new Promise((resolve, reject) => {
+    const kill = setTimeout(() => child.kill(), 5000)
+    const timeout = setTimeout(() => reject(new Error(t('本地服务未退出，已取消安装。', 'The local service did not stop; installation cancelled.'))), 60000)
+    child.once('exit', () => { clearTimeout(kill); clearTimeout(timeout); resolve() })
     child.postMessage({ type: 'shutdown' })
   })
 }
@@ -109,7 +111,22 @@ function createWindow() {
     if (new URL(url).origin !== origin) navigation.preventDefault()
   })
   window.webContents.on('will-attach-webview', event => event.preventDefault())
-  window.once('ready-to-show', () => { window?.show(); updates.start() })
+  window.once('ready-to-show', async () => {
+    const receipt = updateReceipt
+    if (receipt) {
+      try { if (!await receipt.ready()) return }
+      catch (error) { showFailure(error); app.quit(); return }
+      updateReceipt = undefined
+    }
+    window?.show()
+    updates.start()
+    if (receipt?.failure) void dialog.showMessageBox(window, {
+      type: 'warning', title: t('萌芽更新未完成', 'PetBloom update did not complete'),
+      message: t('已重新打开原有版本，数据会保留。', 'The previous version has reopened. Your data is preserved.'),
+      detail: `${receipt.failure}\n\n${t('请检查系统安全提示或通过“文件 → 下载最新安装包”手动安装。', 'Check macOS security prompts or use File → Download latest installer to install manually.')}`,
+      buttons: [t('知道了', 'OK')]
+    })
+  })
   window.on('closed', () => { window = undefined })
   window.loadURL(`${origin}/${t('zh', 'en')}`).catch(error => {
     if (!quitting && error.code !== 'ERR_ABORTED') { showFailure(error); app.quit() }
@@ -190,7 +207,7 @@ function updateMenu(phase, percent) {
 if (!app.requestSingleInstanceLock()) app.quit()
 else {
   app.on('second-instance', () => {
-    if (!origin || quitting) return
+    if (!origin || quitting || updateReceipt) return
     if (!window) createWindow()
     if (window.isMinimized()) window.restore()
     window.show()
@@ -208,8 +225,9 @@ else {
   app.whenReady().then(async () => {
     app.setName(t('萌芽', 'PetBloom'))
     log = createWriteStream(path.join(dataDirectory, 'desktop.log'), { flags: 'w' })
+    if (process.platform === 'darwin') updateReceipt = await require('./mac-install.cjs').receipt(app)
     updates = createUpdater({
-      app, autoUpdater: require('electron-updater').autoUpdater, dialog,
+      app, autoUpdater: require('./update-client.cjs').getUpdater(), dialog,
       getWindow: () => window,
       beforeInstall: async () => { quitting = true; await stopServer() },
       writeLog, onStatus: updateMenu, t

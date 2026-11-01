@@ -1,7 +1,7 @@
-import { _electron as electron } from 'playwright-core'
+import { _electron as electron, chromium } from 'playwright-core'
 import { strict as assert } from 'node:assert'
 import { createRequire } from 'node:module'
-import { cp, mkdtemp, readFile, readdir, readlink, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readFile, readdir, readlink, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { createServer } from 'node:net'
 import path from 'node:path'
@@ -17,6 +17,9 @@ const data = path.join(directory, 'profile')
 let executablePath = process.argv[2] ? path.resolve(process.argv[2]) : require('electron')
 const appDirectory = path.join(root, '.desktop', `${process.platform}-${process.arch}`, 'app')
 const packaged = Boolean(process.argv[2])
+const macUpdate = process.argv.includes('--mac-update')
+const quitUpdate = path.join(directory, 'quit-update')
+let updateBrowser
 let portableDirectory
 if (packaged) {
   const bundle = process.platform === 'darwin' ? path.resolve(path.dirname(executablePath), '../..') : path.dirname(executablePath)
@@ -51,7 +54,7 @@ async function launch() {
   app.process().stderr.on('data', chunk => { runtimeOutput = (runtimeOutput + chunk).slice(-32768) })
   await app.evaluate(async ({ app }) => {
     await app.whenReady()
-    const updater = process.mainModule.require('electron-updater').autoUpdater
+    const updater = process.mainModule.require('./update-client.cjs').getUpdater()
     // 回归不依赖公开仓库当前是否已有新版本。
     updater.checkForUpdates = async () => ({ isUpdateAvailable: false, updateInfo: { version: app.getVersion() } })
   })
@@ -74,7 +77,7 @@ async function launch() {
 
 async function checkUpdateMenu(page) {
   const safety = await app.evaluate(({ app, Menu, dialog }) => {
-    const updater = process.mainModule.require('electron-updater').autoUpdater
+    const updater = process.mainModule.require('./update-client.cjs').getUpdater()
     const originalCheck = updater.checkForUpdates
     const originalDownload = updater.downloadUpdate
     const originalDialog = dialog.showMessageBox
@@ -147,6 +150,82 @@ async function download(page, mode) {
   }, { filename, mode })
   await page.getByRole('button', { name: '导出负责班级', exact: true }).click()
   return await app.evaluate(() => globalThis.smokeDownload)
+}
+
+async function checkMacInstall() {
+  assert.ok(packaged && process.platform === 'darwin' && portableDirectory, '--mac-update 仅支持隔离的 Mac 安装包 / --mac-update requires a Mac package')
+  const bundle = path.resolve(path.dirname(executablePath), '../..')
+  const observer = path.join(directory, 'update-process.json')
+  const listener = createServer()
+  await new Promise(resolve => listener.listen(0, '127.0.0.1', resolve))
+  const port = listener.address().port
+  await new Promise(resolve => listener.close(resolve))
+  const main = path.join(bundle, 'Contents/Resources/app/desktop/main.cjs')
+  // 调试入口仅写入隔离副本，发布源码不提供该入口。
+  const instrumentation = `;(() => {
+    const {app} = require('electron'), fs = require('node:fs');
+    app.commandLine.appendSwitch('remote-debugging-port', '${port}');
+    app.commandLine.appendSwitch('remote-debugging-address', '127.0.0.1');
+    app.commandLine.appendSwitch('use-mock-keychain');
+    app.whenReady().then(() => fs.writeFileSync(${JSON.stringify(observer)}, JSON.stringify({pid: process.pid, version: app.getVersion()})));
+    setInterval(() => { if (fs.existsSync(${JSON.stringify(quitUpdate)})) app.quit(); }, 250).unref();
+  })();\n`
+  await writeFile(main, instrumentation + await readFile(main, 'utf8'))
+  const sign = app => {
+    execFileSync('/usr/bin/codesign', ['--force', '--sign', '-', '--preserve-metadata=identifier,entitlements,flags', app])
+    execFileSync('/usr/bin/codesign', ['--verify', '--deep', '--strict', app])
+  }
+  sign(bundle)
+  const fixture = path.join(directory, 'update-fixture/PetBloom.app')
+  await mkdir(path.dirname(fixture))
+  await cp(bundle, fixture, { recursive: true, verbatimSymlinks: true })
+  const metadataFile = path.join(fixture, 'Contents/Resources/app/package.json')
+  const metadata = JSON.parse(await readFile(metadataFile, 'utf8'))
+  const parts = metadata.version.split('.').map(Number)
+  parts[2]++
+  const version = parts.join('.')
+  await writeFile(metadataFile, JSON.stringify({ ...metadata, version }))
+  for (const key of ['CFBundleShortVersionString', 'CFBundleVersion']) execFileSync('/usr/libexec/PlistBuddy', ['-c', `Set :${key} ${version}`, path.join(fixture, 'Contents/Info.plist')])
+  sign(fixture)
+  const archive = path.join(directory, 'update-fixture.zip')
+  execFileSync('/usr/bin/ditto', ['-c', '-k', '--sequesterRsrc', '--keepParent', fixture, archive])
+  const sha512 = await require('../desktop/mac-install.cjs').digest(archive)
+  const closed = app.waitForEvent('close', { timeout: 90000 })
+  await app.evaluate(({ Menu, dialog }, downloaded) => {
+    const updater = process.mainModule.require('./update-client.cjs').getUpdater()
+    updater.checkForUpdates = async () => ({ isUpdateAvailable: true, updateInfo: { version: downloaded.version } })
+    updater.downloadUpdate = async () => { updater.downloaded = downloaded }
+    dialog.showMessageBox = async () => ({ response: 0, checkboxChecked: false })
+    Menu.getApplicationMenu().getMenuItemById('check-for-updates').click()
+  }, { archive, sha512, version })
+  await closed
+  app = undefined
+  const deadline = Date.now() + 240000
+  let lastError
+  while (Date.now() < deadline) {
+    try {
+      const state = JSON.parse(await readFile(observer, 'utf8'))
+      if (!updateBrowser) updateBrowser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { timeout: 2000 })
+      const page = updateBrowser.contexts()[0]?.pages()[0]
+      if (!page) throw new Error('新版窗口尚未创建 / New window is not created yet')
+      await page.locator('.pet-card').first().waitFor({ timeout: 2000 })
+      await page.screenshot({ path: path.join(directory, 'after-update.png'), fullPage: true })
+      const restored = await page.evaluate(async () => (await fetch('/api/state')).json())
+      assert.equal(restored.classes.length, 2)
+      assert.equal(restored.user.display_name, '桌面验证老师')
+      assert.equal(state.version, version, '系统未启动新版，已恢复旧版及班级数据；请检查 macOS 安全确认 / macOS did not start the update; previous version and class data restored. Check macOS security approval')
+      const installing = path.join(data, 'updates/installing.json')
+      if (await readFile(installing).then(() => true, () => false)) throw new Error('安装事务尚未提交 / Installation has not committed yet')
+      console.log(`本地更新副本已通过覆盖安装、重启与数据保留验证：${version}`)
+      return
+    } catch (error) {
+      lastError = error
+      if (error.code === 'ERR_ASSERTION') throw error
+      await new Promise(resolve => setTimeout(resolve, 250))
+    }
+  }
+  console.error(await readFile(path.join(data, 'update.log'), 'utf8').catch(() => '尚无更新日志 / No update log'))
+  throw lastError || new Error('更新窗口启动超时 / Update window timed out')
 }
 
 try {
@@ -248,7 +327,8 @@ try {
   assert.notEqual(new URL(page.url()).origin, firstOrigin)
   assert.equal((await page.evaluate(async () => (await fetch('/api/state')).json())).classes.length, 2)
   assert.deepEqual(errors, [])
-  const result = { status: 'ok', screenshots: directory, checks: ['系统语言应用名称', '原生更新菜单与取消下载', '真实窗口注册', '教师资料', '演示班级', '图片加载及原生转码', '令牌隔离', '渲染沙箱', '备份保存与取消', '错误文件', '副本导入', '中英文', '退出回收', '重启持久化', '端口冲突恢复'] }
+  if (macUpdate) await checkMacInstall()
+  const result = { status: 'ok', screenshots: directory, checks: ['系统语言应用名称', '原生更新菜单与取消下载', '真实窗口注册', '教师资料', '演示班级', '图片加载及原生转码', '令牌隔离', '渲染沙箱', '备份保存与取消', '错误文件', '副本导入', '中英文', '退出回收', '重启持久化', '端口冲突恢复', ...(macUpdate ? ['Mac 本地 ZIP 覆盖更新、重启与数据保留（不含 GitHub 网络下载和管理员授权）'] : [])] }
   await writeFile(path.join(directory, 'result.json'), JSON.stringify(result, null, 2))
   console.log(JSON.stringify(result, null, 2))
 } catch (error) {
@@ -263,9 +343,23 @@ try {
   }
   console.error(directory, { processExit, runtimeOutput })
   console.error(await readFile(path.join(data, 'desktop.log'), 'utf8').catch(() => '尚无启动日志 / No startup log'))
+  if (macUpdate) console.error(await readFile(path.join(data, 'update.log'), 'utf8').catch(() => '尚无更新日志 / No update log'))
   throw error
 } finally {
   if (app) await app.close().catch(() => {})
+  if (macUpdate) {
+    await writeFile(quitUpdate, '')
+    await updateBrowser?.close().catch(() => {})
+    const state = await readFile(path.join(directory, 'update-process.json'), 'utf8').then(JSON.parse, () => null)
+    const alive = pid => { try { process.kill(pid, 0); return true } catch { return false } }
+    const deadline = Date.now() + 15000
+    while (state?.pid && alive(state.pid) && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250))
+    const active = await readFile(path.join(data, 'updates/installing.json'), 'utf8').then(JSON.parse, () => null)
+    if ((state?.pid && alive(state.pid)) || (active?.pid && alive(active.pid))) {
+      console.error(`测试进程仍在退出，保留隔离副本：${portableDirectory}`)
+      portableDirectory = undefined
+    }
+  }
   if (blocker) await new Promise(resolve => blocker.close(resolve))
   if (portableDirectory) await rm(portableDirectory, { recursive: true, force: true })
 }

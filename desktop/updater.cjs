@@ -45,8 +45,8 @@ function createUpdater({ app, autoUpdater, dialog, getWindow, beforeInstall, wri
     // 安装器可能先触发退出，必须在等待提示前登记重启。
     app.relaunch()
     await failure(t(
-      '将重新打开现有版本。请稍后重试，或通过“文件 → 下载最新安装包”手动覆盖安装；macOS 自动更新需要已签名的正式版本。',
-      'The current version will reopen. Retry later or use File → Download latest installer to upgrade manually. macOS automatic updates require a signed release.'
+      '将重新打开现有版本。请稍后重试，或通过“文件 → 下载最新安装包”手动覆盖安装。',
+      'The current version will reopen. Retry later or use File → Download latest installer to upgrade manually.'
     ))
     if (!disposed) app.quit()
   }
@@ -72,18 +72,29 @@ function createUpdater({ app, autoUpdater, dialog, getWindow, beforeInstall, wri
     const result = await message({
       type: 'question', message: t(`版本 ${downloaded.version} 已下载，是否重启安装？`, `Version ${downloaded.version} is downloaded. Restart to install?`),
       detail: t(
-        '安装会关闭并重新打开应用，账号、班级和记录会保留。建议先导出备份。选择稍后时，普通退出不会自动安装，可再次点击“检查更新”继续。',
-        'Installation closes and reopens the app, preserving accounts, classes and records. Export a backup first. Choosing Later also prevents installation on normal quit; use Check for updates to continue.'
+        '安装会关闭并重新打开应用，账号、班级和记录会保留。Mac 可能请求系统授权或安全确认，请按系统提示操作。建议先导出备份；选择稍后时，普通退出不会自动安装。',
+        'Installation closes and reopens the app, preserving accounts, classes and records. macOS may request permission or security approval; follow its prompts. Export a backup first. Choosing Later prevents installation on normal quit.'
       ),
       buttons: [t('重启并安装', 'Restart and install'), t('稍后', 'Later')], defaultId: 1, cancelId: 1
     })
     if (disposed) return
     if (result.response !== 0) { status('ready'); return }
     status('installing')
+    let stopping = false
     try {
+      await autoUpdater.prepareInstall?.()
+      if (disposed) return
+      stopping = true
       await beforeInstall()
-      if (!disposed) autoUpdater.quitAndInstall(false, true)
-    } catch (error) { await recoverInstall(error) }
+      if (!disposed) await autoUpdater.quitAndInstall(false, true)
+    } catch (error) {
+      if (stopping) await recoverInstall(error)
+      else {
+        writeLog(error.stack || String(error))
+        await failure(t('安装准备失败，应用仍可继续使用。请重试或通过“文件 → 下载最新安装包”手动安装。', 'Installation could not be prepared. Keep using the app, retry, or use File → Download latest installer to install manually.'))
+        if (!disposed) status('ready')
+      }
+    }
   }
 
   async function runCheck(manual) {
