@@ -1,5 +1,5 @@
 ---
-name: 班级宠物园 · Class Pet Garden
+name: PetBloom · 萌芽
 description: 以学生宠物成长为内容、以教师评价为操作的中英文班级工作台。
 colors:
   primary: "#6d4aff"
@@ -216,7 +216,7 @@ components:
     height: "6px"
 ---
 
-# Design System: 班级宠物园 · Class Pet Garden
+# Design System: PetBloom · 萌芽
 
 ## Overview
 

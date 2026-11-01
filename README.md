@@ -1,6 +1,10 @@
-# 班级宠物园 · Class Pet Garden
+# PetBloom · 萌芽
 
-独立的 Next.js 全栈班级管理应用。采用宠物卡片工作台，架构参考同级 `pageon`：Next.js App Router + React + Tailwind + 共享 UI；数据库使用 SQLite，不依赖原 Vue 项目或 PageOn 服务。
+> 让每一份成长，都悄悄发芽。
+
+PetBloom（萌芽）是面向学校和班级的游戏化宠物养成与学生成长激励平台。
+
+独立的 Next.js 全栈应用，采用宠物卡片工作台。架构参考同级 `pageon`：Next.js App Router + React + Tailwind + 共享 UI；数据库使用 SQLite，不依赖原 Vue 项目或 PageOn 服务。
 
 ## 启动
 
@@ -139,7 +143,11 @@ Compose 的 `garden-data` 卷保存 SQLite。不要删除该卷；更新代码�
 
 ## English
 
-A standalone bilingual classroom management app using Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, Radix Dialog and SQLite. Pages and API routes run in one Node.js service, following the architecture of the adjacent PageOn project without depending on it.
+**PetBloom · 萌芽** is a gamified pet-raising and student growth motivation platform for schools and classrooms.
+
+> Let every bit of growth quietly bloom.
+
+A standalone bilingual app using Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, Radix Dialog and SQLite. Pages and API routes run in one Node.js service, following the architecture of the adjacent PageOn project without depending on it.
 
 ### Run
 
