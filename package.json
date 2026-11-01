@@ -1,6 +1,6 @@
 {
-  "name": "class-pet-garden-next",
-  "version": "1.0.0",
+  "name": "pet-bloom",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.21.0",
@@ -13,14 +13,21 @@
     "start": "node scripts/start.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "desktop:dev": "node scripts/desktop.mjs --dev",
+    "desktop:test": "node scripts/desktop-smoke.mjs",
+    "desktop:build:mac": "node scripts/desktop.mjs --mac --all-arch",
+    "desktop:build:mac:arm64": "node scripts/desktop.mjs --mac --arm64",
+    "desktop:build:mac:x64": "node scripts/desktop.mjs --mac --x64",
+    "desktop:build:win": "node scripts/desktop.mjs --win --x64",
+    "desktop:release:prepare": "node scripts/desktop-release.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.4.1",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-select": "^2.4.1",
     "@radix-ui/react-tooltip": "^1.4.1",
-    "better-sqlite3": "^12.4.1",
+    "better-sqlite3": "^13.0.3",
     "clsx": "^2.1.1",
     "date-holidays": "^3.38.0",
     "lucide-react": "^0.468.0",
@@ -32,14 +39,20 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@electron/rebuild": "4.2.1",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.15.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.21",
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0",
+    "electron-updater": "6.8.11",
+    "playwright-core": "1.64.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.0",
+    "yaml": "2.9.1"
   }
 }

@@ -12,7 +12,7 @@
 
 ## 原生 AI 生成的生肖素材（2026-10-31）
 
-已新增子鼠（zodiac-rat）、丑牛（zodiac-ox）、巳蛇（zodiac-snake），每种 8 张独立阶段图，共 24 张，文件为各目录下 lv1.webp 至 lv8.webp，560×560 白底无损 WebP。通过 Codex 原生 image_gen 生成八格成长分镜后逐格裁切，未复用单图伪装等级。24 张均可解码、SHA-256 各不相同，且解码像素与 PNG 原图完全一致。素材已注册到 lib/data/pets.json 并开放领养，当前共 50 种宠物、400 张阶段图，十二生肖专题已补齐 12 个属相。
+已新增子鼠（zodiac-rat）、丑牛（zodiac-ox）、巳蛇（zodiac-snake），每种 8 张独立阶段图，共 24 张，文件为各目录下 lv1.webp 至 lv8.webp，均为无损 WebP。通过 Codex 原生 image_gen 生成八格成长分镜后逐格裁切，未复用单图伪装等级；560×560 白底 PNG 生成稿保留，当前发布的 24 张原路径 WebP 已统一处理为透明底，并裁去多余透明外边距，使显示占比与现有宠物一致。所有可见主体像素完整保留，RGB 与 PNG 生成稿保持一致，无缩放或拉伸。24 张均可解码、SHA-256 各不相同。素材已注册到 lib/data/pets.json 并开放领养，当前共 50 种宠物、400 张阶段图，十二生肖专题已补齐 12 个属相。
 
 不同画风的临时单图素材已撤下，不进入发布资源。本批参考本项目 westie、pig、chick 的 Lv.1、Lv.4、Lv.8；实际生成参考输入及完整提示词、生成时间、尺寸、SHA-256 和导出信息见 zodiac-generation-manifest.json。原生工具未提供模型选择参数，也未披露实际模型，故不标称 gpt-image-2。PNG 原稿与分镜保留在 .impeccable/generated/codex-zodiac-20261031-native-a7c9/。
 
@@ -66,10 +66,10 @@
 
 这些背景不来自第三方站点，仅作为宠物卡片的背景场景，不替换、重绘或修改原有宠物图片，也不计入宠物八阶段成长图数量。2026-11-01 按节日代表元素强化既有 28 种节日场景，并新增上述 9 种国内节日；国庆使用大红庆典与按 30×20 网格绘制的五星红旗，建军节采用「八一」矢量笔画、红旗和和平鸽，不包含武器或军徽。新增及修改部分仍为本项目原创本地 SVG，无外部资源或字体依赖。
 
-## 背景叠加用的生肖透明展示副本（2026-11-01）
+## 生肖原图透明底处理（2026-11-01）
 
-为避免生肖鼠、牛、蛇原图的白底遮挡场景背景，新增 24 张透明展示副本：来源为既有 `zodiac-rat`、`zodiac-ox`、`zodiac-snake` 各目录下的 `lv1.webp` 至 `lv8.webp`，副本位于相对本说明的 `../pet-backgrounds/pets/{zodiac-rat,zodiac-ox,zodiac-snake}/lv1.webp` 至 `lv8.webp`，均为 560×560 无损 WebP。这些文件是既有图像的透明底派生素材，不是重新调用模型生成的宠物图；原 24 张宠物图与 `zodiac-generation-manifest.json` 均保持不变。
+鼠、牛、蛇的 24 张 `lv1.webp` 至 `lv8.webp` 统一在原路径使用透明底，供默认卡片、图鉴、领养与背景装扮共用；不再保留 `../pet-backgrounds/pets/` 背景专用副本或其独立派生清单。这些图片复用已核验的透明处理结果，不是重新调用模型生成的宠物图；白底 PNG 生成稿与分镜继续保留在 `.impeccable/generated/codex-zodiac-20261031-native-a7c9/`。
 
-处理方法保留原始 RGB，从图片四边按四邻域连通查找并移除中性近白背景（RGB 最小通道值 ≥225、最大与最小通道差 ≤25）。在本机用 Apple Vision 的 `VNGenerateForegroundInstanceMaskRequest` 计算主体 alpha，仅对主体底部向上 20% 图高的接地区域精修透明度，并将该蒙版中低于 8/255 的 alpha 置零，去除底片和孤立背景残留；牛 Lv.4 的前景花草保留原始轮廓。最后以无损 WebP 编码。未上传任何图像，未重绘主体，也不是将整张图中所有白色像素统一透明化。
+处理方法保留原始 RGB，从图片四边按四邻域连通查找并移除中性近白背景（RGB 最小通道值 ≥225、最大与最小通道差 ≤25）。在本机用 Apple Vision 的 `VNGenerateForegroundInstanceMaskRequest` 计算主体 alpha，仅对主体底部向上 20% 图高的接地区域精修透明度，并将该蒙版中低于 8/255 的 alpha 置零，去除底片和孤立背景残留；牛 Lv.4 的前景花草保留原始轮廓。随后仅裁去完全透明的外边距，四周保留 4px 透明安全边，全部 alpha 大于零的像素及其透明度保持不变；不缩放、不拉伸，不靠 CSS 对个别宠物加倍率。最后以无损 WebP 编码。未上传任何图像，未重绘主体，也不是将整张图中所有白色像素统一透明化。
 
-派生来源清单为 `../pet-backgrounds/derivatives.json`，包含生成日期（`created_at`）、处理方法（`method`），以及逐图原始路径与 SHA-256（`source`、`source_sha256`）、副本路径与 SHA-256（`file`、`sha256`）、尺寸和透明像素数量（`width`、`height`、`transparent_pixels`）。每张副本另在 WebP 原生 XMP 元数据中嵌入原始路径、来源哈希及处理方法，不新增逐图 JSON 旁文件。这些副本不改变原有宠物图的来源记录，也不代表新增外部授权。
+`zodiac-generation-manifest.json` 保留原生生成与白底 PNG 的历史记录；其中 `webp_export` 记录当前发布图的透明处理方法、PNG 来源路径与哈希（`source`、`source_sha256`）、处理前 WebP 哈希（`original_webp_sha256`）、当前文件哈希（`sha256`）、字节数及透明像素数量（`transparent_pixels`）。每图还记录原画布尺寸与透明像素数（`uncropped_dimensions`、`uncropped_transparent_pixels`）、相对于 PNG 原稿的裁切框（`crop`）和发布尺寸（`dimensions`），用于验证没有丢失主体像素。每张发布图的 WebP 原生 XMP 中也嵌入 PNG 来源、处理前哈希、裁切框及处理方法，不新增逐图 JSON 旁文件，也不代表新增外部授权。

@@ -31,13 +31,16 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".next-build/types/**/*.ts",
+    ".next-desktop/types/**/*.ts",
     ".next/types/**/*.ts",
-    "next-env.d.ts",
-    ".next-build/types/**/*.ts"
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules",
     ".impeccable",
-    "data"
+    "data",
+    ".desktop",
+    "dist"
   ]
 }

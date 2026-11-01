@@ -30,7 +30,7 @@ export function AuthScreen({ locale, client }: { locale: Locale; client: GardenC
           <Button type="submit" variant="primary" busy={client.busy} className="w-full py-3">{mode === 'login' ? t('登录萌芽', 'Sign in') : t('创建教师账号', 'Create account')}<ArrowRight size={17} /></Button>
         </form>
         <p className="mt-6 text-center text-sm text-muted">{mode === 'login' ? t('第一次来？', 'New here?') : t('已有账号？', 'Already have an account?')}<Button variant="ghost" className="ml-1 px-1 text-primary" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); client.setNotice(null) }}>{mode === 'login' ? <UserPlus size={16} /> : <LogIn size={16} />}{mode === 'login' ? t('创建账号', 'Create an account') : t('前往登录', 'Sign in')}</Button></p>
-        <p className="mt-8 flex items-start gap-2 border-t border-line pt-5 text-xs leading-relaxed text-muted"><ShieldCheck size={17} className="shrink-0" />{t('仅你和获邀教师可以管理共享班级。班级数据保存在服务器的 SQLite 数据库中。', 'Only you and invited teachers can manage shared classes. Class data is saved in the server’s SQLite database.')}</p>
+        <p className="mt-8 flex items-start gap-2 border-t border-line pt-5 text-xs leading-relaxed text-muted"><ShieldCheck size={17} className="shrink-0" />{process.env.NEXT_PUBLIC_DESKTOP === 'true' ? t('离线桌面版：数据仅保存在这台电脑，不会自动同步。请定期导出备份；不同电脑之间不能通过邀请码共享班级。', 'Offline desktop edition: data stays on this computer and does not sync automatically. Export backups regularly; invitation codes cannot share classes across computers.') : t('仅你和获邀教师可以管理共享班级。班级数据保存在服务器的 SQLite 数据库中。', 'Only you and invited teachers can manage shared classes. Class data is saved in the server’s SQLite database.')}</p>
       </section>
     </main>
   </div>

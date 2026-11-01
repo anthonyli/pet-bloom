@@ -1,4 +1,9 @@
 allowBuilds:
   better-sqlite3: true
+  electron: true
+  electron-winstaller: false
   esbuild: true
   sharp: true
+# 打包器使用的缓存 API 仅由新版下载器提供。
+overrides:
+  'app-builder-lib>@electron/get': 5.1.0

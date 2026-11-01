@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import sharp from 'sharp'
 import { badgeLevels } from '../lib/data/badges'
 import badgeManifest from '../public/badges/manifest.json'
-import backgroundDerivatives from '../public/pet-backgrounds/derivatives.json'
+import zodiacManifest from '../public/pets/zodiac-generation-manifest.json'
 import { petBackgrounds, backgroundCategories, filterPetBackgrounds, versionFiveBackgroundIds, holidayBackgroundIds, versionSevenBackgroundIds } from '../lib/pet-backgrounds'
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
@@ -137,46 +137,67 @@ describe('宠物背景本地素材', () => {
     for (let index = 0; index < data.length; index += info.channels) if (data[index] >= 150 && data[index] > data[index + 1] * 1.6 && data[index] > data[index + 2] * 1.35) red++
     expect(red / (info.width * info.height)).toBeGreaterThan(.6)
   })
-  it('透明展示副本完整覆盖三个白底生肖的八阶段，不替换原图', () => {
-    expect(backgroundDerivatives.assets).toHaveLength(24)
+  it('鼠牛蛇原图统一覆盖24个透明阶段，不再保留背景专用副本', () => {
+    expect(zodiacManifest.webp_export.files).toHaveLength(24)
+    expect(zodiacManifest.webp_export.background).toBe('transparent')
     for (const pet of ['zodiac-rat', 'zodiac-ox', 'zodiac-snake']) {
-      const rows = backgroundDerivatives.assets.filter(row => row.source.startsWith(`public/pets/${pet}/`))
-      expect(rows.map(row => row.source).sort()).toEqual(Array.from({ length: 8 }, (_, index) => `public/pets/${pet}/lv${index + 1}.webp`))
+      const rows = zodiacManifest.webp_export.files.filter(row => row.file.startsWith(`public/pets/${pet}/`))
+      expect(rows.map(row => row.file).sort()).toEqual(Array.from({ length: 8 }, (_, index) => `public/pets/${pet}/lv${index + 1}.webp`))
       expect(new Set(rows.map(row => row.sha256)).size).toBe(8)
+      for (let level = 1; level <= 8; level++) expect(petImage(pet, level)).toBe(`/pets/${pet}/lv${level}.webp`)
     }
+    expect(existsSync(resolve('public/pet-backgrounds/pets'))).toBe(false)
+    expect(existsSync(resolve('public/pet-backgrounds/derivatives.json'))).toBe(false)
   })
   it.each([
     { pet: 'zodiac-rat', level: 3, ground: [250, 459], paw: [257, 430] },
     { pet: 'zodiac-rat', level: 8, ground: [310, 483], paw: [252, 473] },
     { pet: 'zodiac-ox', level: 6, ground: [190, 485], paw: [250, 477] }
   ])('$pet Lv.$level移除接地底片且保留脚掌', async ({ pet, level, ground, paw }) => {
-    const pixels = await sharp(resolve(`public/pet-backgrounds/pets/${pet}/lv${level}.webp`)).ensureAlpha().raw().toBuffer()
+    const file = `public/pets/${pet}/lv${level}.webp`
+    const { crop } = zodiacManifest.webp_export.files.find(asset => asset.file === file)!
+    const pixels = await sharp(resolve(file)).ensureAlpha().extend({ left: crop.left, top: crop.top, right: 560 - crop.left - crop.width, bottom: 560 - crop.top - crop.height, background: { r: 0, g: 0, b: 0, alpha: 0 } }).raw().toBuffer()
     expect(pixels[(ground[1] * 560 + ground[0]) * 4 + 3]).toBe(0)
     expect(pixels[(paw[1] * 560 + paw[0]) * 4 + 3]).toBe(255)
   })
-  it('牛Lv.4透明副本保留原有前景花草', async () => {
-    const pixels = await sharp(resolve('public/pet-backgrounds/pets/zodiac-ox/lv4.webp')).ensureAlpha().raw().toBuffer()
+  it('牛Lv.4透明原图保留原有前景花草', async () => {
+    const file = 'public/pets/zodiac-ox/lv4.webp'
+    const { crop } = zodiacManifest.webp_export.files.find(asset => asset.file === file)!
+    const pixels = await sharp(resolve(file)).ensureAlpha().extend({ left: crop.left, top: crop.top, right: 560 - crop.left - crop.width, bottom: 560 - crop.top - crop.height, background: { r: 0, g: 0, b: 0, alpha: 0 } }).raw().toBuffer()
     expect(pixels[(360 * 560 + 114) * 4 + 3]).toBe(255)
   })
-  it.each(backgroundDerivatives.assets)('$file保持原主体像素，透明白底可合成且来源哈希一致', async asset => {
-    const original = readFileSync(resolve(asset.source)), derived = readFileSync(resolve(asset.file))
+  it.each(zodiacManifest.webp_export.files)('$file原图透明且保持生成稿主体RGB和内嵌来源', async asset => {
+    const original = readFileSync(resolve(asset.source)), published = readFileSync(resolve(asset.file))
     const hash = (value: Buffer) => createHash('sha256').update(value).digest('hex')
     expect(hash(original)).toBe(asset.source_sha256)
-    expect(hash(derived)).toBe(asset.sha256)
-    const metadata = await sharp(derived).metadata()
-    expect(metadata).toMatchObject({ format: 'webp', width: asset.width, height: asset.height, hasAlpha: true })
+    expect(hash(published)).toBe(asset.sha256)
+    expect(published.length).toBe(asset.bytes)
+    expect(asset.original_webp_sha256).not.toBe(asset.sha256)
+    expect(existsSync(resolve(`${asset.file}.json`))).toBe(false)
+    const metadata = await sharp(published).metadata()
+    const [width, height] = asset.dimensions
+    expect(metadata).toMatchObject({ format: 'webp', width, height, hasAlpha: true })
+    expect(asset.uncropped_dimensions).toEqual([560, 560])
+    expect([asset.crop.width, asset.crop.height]).toEqual(asset.dimensions)
     expect(metadata.xmp?.toString()).toContain(asset.source)
     expect(metadata.xmp?.toString()).toContain(asset.source_sha256)
-    const before = await sharp(original).ensureAlpha().raw().toBuffer(), after = await sharp(derived).ensureAlpha().raw().toBuffer()
-    let removed = 0, retained = 0
+    expect(metadata.xmp?.toString()).toContain(JSON.stringify(asset.crop))
+    const before = await sharp(original).extract(asset.crop).ensureAlpha().raw().toBuffer(), after = await sharp(published).ensureAlpha().raw().toBuffer()
+    for (const index of [0, width - 1, (height - 1) * width, width * height - 1]) expect(after[index * 4 + 3]).toBe(0)
+    let removed = 0, retained = 0, minX = width, maxX = 0, minY = height, maxY = 0
     for (let index = 0; index < after.length; index += 4) {
       if (after[index + 3] === 0) { removed++; continue }
       retained++
+      const x = index / 4 % width, y = Math.floor(index / 4 / width)
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x)
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y)
       if (before[index] !== after[index] || before[index + 1] !== after[index + 1] || before[index + 2] !== after[index + 2]) throw new Error(`${asset.file}主体像素发生改变`)
     }
+    expect([minX, minY, width - 1 - maxX, height - 1 - maxY]).toEqual([4, 4, 4, 4])
+    expect(retained).toBe(560 * 560 - asset.uncropped_transparent_pixels)
     expect(removed).toBe(asset.transparent_pixels)
-    expect(removed).toBeGreaterThan(asset.width * asset.height * .5)
-    expect(retained).toBeGreaterThan(asset.width * asset.height * .1)
+    expect(removed).toBeGreaterThan(0)
+    expect(retained).toBeGreaterThan(width * height * .25)
   })
 })
 

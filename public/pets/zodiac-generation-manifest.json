@@ -713,291 +713,630 @@
         "file": "public/pets/zodiac-rat/lv1.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv1.png",
         "dimensions": [
-          560,
-          560
+          381,
+          258
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 98818,
-        "sha256": "6283a0391e204504a5786f948f1a8851f1dc8f6122c0924bc1f387c2b2adb919"
+        "bytes": 81374,
+        "sha256": "d6a38510752f3eb1039f41b5814ecb7537f1b9ef4360c6e860461dffaec1d5a3",
+        "source_sha256": "898f85205c7e1ac0b006c3454121e4410fd5777d8d43642b605c9a4d4e9d3e2e",
+        "original_webp_sha256": "6283a0391e204504a5786f948f1a8851f1dc8f6122c0924bc1f387c2b2adb919",
+        "transparent_pixels": 41545,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 256847,
+        "crop": {
+          "left": 89,
+          "top": 150,
+          "width": 381,
+          "height": 258
+        }
       },
       {
         "file": "public/pets/zodiac-rat/lv2.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv2.png",
         "dimensions": [
-          560,
-          560
+          357,
+          373
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 122602,
-        "sha256": "77a5ad40501ab00aac4c86a300200f9ea60348a51d043afd8984cc8cad4ca0f8"
+        "bytes": 97542,
+        "sha256": "fc2b43cf2b760392da5eeaebc86d8d1c722c770ece4b77d8d8ed178e2546e177",
+        "source_sha256": "54449d5335f52cb8f91e17281b06b61250b5d2b58f3a4a91e8c048b8b8de5c0f",
+        "original_webp_sha256": "77a5ad40501ab00aac4c86a300200f9ea60348a51d043afd8984cc8cad4ca0f8",
+        "transparent_pixels": 66084,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 246523,
+        "crop": {
+          "left": 101,
+          "top": 92,
+          "width": 357,
+          "height": 373
+        }
       },
       {
         "file": "public/pets/zodiac-rat/lv3.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv3.png",
         "dimensions": [
-          560,
-          560
+          435,
+          367
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 135710,
-        "sha256": "68998c19dae7f1b1a8b90596dff6c9be45d3020f8b119855b25108f4afc05521"
+        "bytes": 100050,
+        "sha256": "8aacd06be253d4fbb20d25f9b64826b22e51244841820ade5ebeb26b2206ab5d",
+        "source_sha256": "87cbc3f024918cd8066e15ef9ee3ff1b16952882fc64886aab7c5d87d98746ff",
+        "original_webp_sha256": "68998c19dae7f1b1a8b90596dff6c9be45d3020f8b119855b25108f4afc05521",
+        "transparent_pixels": 92733,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 246688,
+        "crop": {
+          "left": 63,
+          "top": 87,
+          "width": 435,
+          "height": 367
+        }
       },
       {
         "file": "public/pets/zodiac-rat/lv4.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv4.png",
         "dimensions": [
-          560,
-          560
+          305,
+          407
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 111138,
-        "sha256": "41b79881b467fe2957f3f1544e85f5489b02a1670367a321f131fd87dda04f37"
+        "bytes": 88266,
+        "sha256": "9554ab092d9b300880beaa3c4b4bf16486a9a257a791eda9913d82b7f5673d7e",
+        "source_sha256": "58022df1f1b2d94c988ab2aabf859086c13dfd9decf5d788f069ab210783d52c",
+        "original_webp_sha256": "41b79881b467fe2957f3f1544e85f5489b02a1670367a321f131fd87dda04f37",
+        "transparent_pixels": 67801,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 257266,
+        "crop": {
+          "left": 127,
+          "top": 78,
+          "width": 305,
+          "height": 407
+        }
       },
       {
         "file": "public/pets/zodiac-rat/lv5.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv5.png",
         "dimensions": [
-          560,
-          560
+          380,
+          412
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 141816,
-        "sha256": "b1d3908eed06770679ca639a5699af246add3fe24f807ba7051cabe7218ff413"
+        "bytes": 111636,
+        "sha256": "e0c18d70187f0e4142c30de666c7d12145ee1c8b0e4ea275b73e89044506b321",
+        "source_sha256": "47a899dc4fe5d3746a4e8bdcc6b1fc9ebea82d2923b77985b2a053caa725cd92",
+        "original_webp_sha256": "b1d3908eed06770679ca639a5699af246add3fe24f807ba7051cabe7218ff413",
+        "transparent_pixels": 83324,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 240364,
+        "crop": {
+          "left": 90,
+          "top": 74,
+          "width": 380,
+          "height": 412
+        }
       },
       {
         "file": "public/pets/zodiac-rat/lv6.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv6.png",
         "dimensions": [
-          560,
-          560
+          331,
+          424
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 134710,
-        "sha256": "8f0511f14f3aff5764e97634bd0ae4f1ae73d42d7a15548bbd82f99b78693195"
+        "bytes": 106876,
+        "sha256": "7bdbd3399a19109281c3b75daa6bc73696c919514859650f6d4d412f726146fe",
+        "source_sha256": "5dccfe87f572029aaf4f359333bdf573e620c4398692bccc9e2e0353b6880388",
+        "original_webp_sha256": "8f0511f14f3aff5764e97634bd0ae4f1ae73d42d7a15548bbd82f99b78693195",
+        "transparent_pixels": 67415,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 240671,
+        "crop": {
+          "left": 114,
+          "top": 67,
+          "width": 331,
+          "height": 424
+        }
       },
       {
         "file": "public/pets/zodiac-rat/lv7.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv7.png",
         "dimensions": [
-          560,
-          560
+          387,
+          436
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 158950,
-        "sha256": "2ba7890303f5866dea13b2c898a1640dd3b144860dc8171de09fdb28e570aaa2"
+        "bytes": 121008,
+        "sha256": "c68d342f9efd8fef35f85c5d3a60f81f5758f3152c9bab069700b4a1e5b1afcd",
+        "source_sha256": "35e596f1825011b490be962ab6e39de030410ea9f8f4d1562703878fd5e957d3",
+        "original_webp_sha256": "2ba7890303f5866dea13b2c898a1640dd3b144860dc8171de09fdb28e570aaa2",
+        "transparent_pixels": 88463,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 233331,
+        "crop": {
+          "left": 85,
+          "top": 62,
+          "width": 387,
+          "height": 436
+        }
       },
       {
         "file": "public/pets/zodiac-rat/lv8.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-rat/lv8.png",
         "dimensions": [
-          560,
-          560
+          369,
+          426
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 147178,
-        "sha256": "b04f95180e97beb1b507b964504a60cdb2e155efef68eeab321971bcfef39110"
+        "bytes": 118192,
+        "sha256": "12e7fbe3ea06e797dedfdb8307e8d3285bfd919e2ed6713da8793a701eb9d14d",
+        "source_sha256": "1ebc43831d017770014bf6870353c743e6085a17a1eb7ca8ca38c180af43303c",
+        "original_webp_sha256": "b04f95180e97beb1b507b964504a60cdb2e155efef68eeab321971bcfef39110",
+        "transparent_pixels": 78339,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 234745,
+        "crop": {
+          "left": 95,
+          "top": 66,
+          "width": 369,
+          "height": 426
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv1.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv1.png",
         "dimensions": [
-          560,
-          560
+          398,
+          225
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 93510,
-        "sha256": "40f8b0370c141cabfb9474f966580ec1e466d6eaac32e7f5712c798097c7a385"
+        "bytes": 80170,
+        "sha256": "86f1cb6fda3843ae6b9d55d03b89448fb4787d84c4ba3991207d498ec261796a",
+        "source_sha256": "4e7399e832d350dc021c87a52d44350a592f6f130f25eb2d45f46b5b7f3b4960",
+        "original_webp_sha256": "40f8b0370c141cabfb9474f966580ec1e466d6eaac32e7f5712c798097c7a385",
+        "transparent_pixels": 33353,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 257403,
+        "crop": {
+          "left": 84,
+          "top": 168,
+          "width": 398,
+          "height": 225
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv2.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv2.png",
         "dimensions": [
-          560,
-          560
+          338,
+          354
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 116588,
-        "sha256": "e3a45131c345b05ae60fe12b6e2365e33eac44f1311fee7ff681db517205d1dd"
+        "bytes": 95898,
+        "sha256": "30fd646956e200c7283696da186c487df41bd762caabfed74d4c640c934ffa7c",
+        "source_sha256": "80030d9ecebe18d5bf7e41d3a130279a4472aeaeb215424b4eef29815e2e5ea1",
+        "original_webp_sha256": "e3a45131c345b05ae60fe12b6e2365e33eac44f1311fee7ff681db517205d1dd",
+        "transparent_pixels": 52571,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 246519,
+        "crop": {
+          "left": 111,
+          "top": 103,
+          "width": 338,
+          "height": 354
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv3.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv3.png",
         "dimensions": [
-          560,
-          560
+          398,
+          346
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 142640,
-        "sha256": "bd2947f5b3897b121a0b6d42c01e061dd9464874cceb5f98bce6947173306d0c"
+        "bytes": 113058,
+        "sha256": "75bc05cbca0ba6284dd3028f7d35a0f0fe9d47d0195d5a51982648843806f4f9",
+        "source_sha256": "a73145fbc2a2aaea1d274149e668c2bbcc901bc53c40bddc1f2b2a2f47e89149",
+        "original_webp_sha256": "bd2947f5b3897b121a0b6d42c01e061dd9464874cceb5f98bce6947173306d0c",
+        "transparent_pixels": 61803,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 237695,
+        "crop": {
+          "left": 81,
+          "top": 94,
+          "width": 398,
+          "height": 346
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv4.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv4.png",
         "dimensions": [
-          560,
-          560
+          432,
+          319
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 149498,
-        "sha256": "d70761f5a66e42f3b60ffabd5c62d83a21a1eb6aaac9daa55ee70bcafed2ce41"
+        "bytes": 127620,
+        "sha256": "8128768befc49630dc3d8d7d22ff004080e0abed5801cea41669d444a80c4d01",
+        "source_sha256": "d223a84714b926e8fa1da13fc12c5031db0a9d852751895be4afbb2f0935a291",
+        "original_webp_sha256": "d70761f5a66e42f3b60ffabd5c62d83a21a1eb6aaac9daa55ee70bcafed2ce41",
+        "transparent_pixels": 49893,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 225685,
+        "crop": {
+          "left": 66,
+          "top": 118,
+          "width": 432,
+          "height": 319
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv5.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv5.png",
         "dimensions": [
-          560,
-          560
+          389,
+          446
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 158952,
-        "sha256": "ef99d6ecd7abc82f0d13a8ee7cef55987420c87cbfe09ec82da98b8df7134ade"
+        "bytes": 124208,
+        "sha256": "3dbe1100b57d03f71aed8bb199413e0bbd34b5114f397327a4b164bc8d687ef5",
+        "source_sha256": "edc13ec46af25a192b404a256c0e2c5e58b9e8fa0549fee0fabb5b312d01b605",
+        "original_webp_sha256": "ef99d6ecd7abc82f0d13a8ee7cef55987420c87cbfe09ec82da98b8df7134ade",
+        "transparent_pixels": 86468,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 226574,
+        "crop": {
+          "left": 85,
+          "top": 55,
+          "width": 389,
+          "height": 446
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv6.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv6.png",
         "dimensions": [
-          560,
-          560
+          416,
+          448
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 182188,
-        "sha256": "e9e29a3b51afeaaba383f1bbf88e37907165eff485234c8432baed91dcafbf29"
+        "bytes": 157794,
+        "sha256": "0bd824dca88d0e1959ef22943b52e282014e386ae4d35efff7b42e0513c36a58",
+        "source_sha256": "31dfc99e5cab7c7107441424700fdeff7db1d9cf8982d16acd637b74ad0a30e2",
+        "original_webp_sha256": "e9e29a3b51afeaaba383f1bbf88e37907165eff485234c8432baed91dcafbf29",
+        "transparent_pixels": 79430,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 206662,
+        "crop": {
+          "left": 77,
+          "top": 56,
+          "width": 416,
+          "height": 448
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv7.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv7.png",
         "dimensions": [
-          560,
-          560
+          384,
+          447
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 163484,
-        "sha256": "efab727a58667a1fb2d2169f8e0283386330674e2cf9fbddc7154d9830f5c3e4"
+        "bytes": 126896,
+        "sha256": "df19a1fdc37578d72df11ddc2efff840cc8e549fdb433f14f93bcfcf1f882882",
+        "source_sha256": "54c69899e450c964168b4558812b791f3dc28ea017636b44a6a849681b7021e4",
+        "original_webp_sha256": "efab727a58667a1fb2d2169f8e0283386330674e2cf9fbddc7154d9830f5c3e4",
+        "transparent_pixels": 87198,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 229150,
+        "crop": {
+          "left": 88,
+          "top": 56,
+          "width": 384,
+          "height": 447
+        }
       },
       {
         "file": "public/pets/zodiac-ox/lv8.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-ox/lv8.png",
         "dimensions": [
-          560,
-          560
+          395,
+          438
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 178292,
-        "sha256": "7fa0b246d200a58734885c7cc7a3f1721539e12f3729bc0ef9631b2f1a029e85"
+        "bytes": 145354,
+        "sha256": "d796ebf034aec0d45ecf546aba2a47002cf90ce228f6db8a72bba1e73a53adb6",
+        "source_sha256": "65918d8338d083679847987b9819c14c9c9c8e5b154318322c9bf4714b843f9c",
+        "original_webp_sha256": "7fa0b246d200a58734885c7cc7a3f1721539e12f3729bc0ef9631b2f1a029e85",
+        "transparent_pixels": 70058,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 210648,
+        "crop": {
+          "left": 87,
+          "top": 60,
+          "width": 395,
+          "height": 438
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv1.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv1.png",
         "dimensions": [
-          560,
-          560
+          301,
+          220
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 77114,
-        "sha256": "91142f418076ea04b2f0d735b18b94377f7f8461184bcdd7914761779f3c4301"
+        "bytes": 64184,
+        "sha256": "2b2e4c9c0120f6791b78de89ed4d8142b6cac6ffcb89fb8ec39bd04c7bd1df02",
+        "source_sha256": "37ba97305f5ddca71574212776229fd3eca255b43c2c7506f8996a09a1fd51bb",
+        "original_webp_sha256": "91142f418076ea04b2f0d735b18b94377f7f8461184bcdd7914761779f3c4301",
+        "transparent_pixels": 21140,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 268520,
+        "crop": {
+          "left": 129,
+          "top": 169,
+          "width": 301,
+          "height": 220
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv2.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv2.png",
         "dimensions": [
-          560,
-          560
+          264,
+          329
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 92696,
-        "sha256": "92eb773636d0dd7498379ed904a5b907e858f40b2431b5fa9d0d43500869f22b"
+        "bytes": 74096,
+        "sha256": "093cf9dccc67101713b779c5f80804b159e280dd8d31ffad388878d4b8044098",
+        "source_sha256": "d31b88529b06ae319505b063771c6fb0163822f620f1a694d0ba3da225def5cd",
+        "original_webp_sha256": "92eb773636d0dd7498379ed904a5b907e858f40b2431b5fa9d0d43500869f22b",
+        "transparent_pixels": 34702,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 261446,
+        "crop": {
+          "left": 148,
+          "top": 115,
+          "width": 264,
+          "height": 329
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv3.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv3.png",
         "dimensions": [
-          560,
-          560
+          412,
+          297
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 118130,
-        "sha256": "88b3b94b5361494740ef4c1a9e3cfc677358bd892f00f059320efe21a49e641b"
+        "bytes": 88672,
+        "sha256": "aafbeca9f4f8c2f38cc0853b7a5cbf319a0a0bb526dfa89eee4f1a0b16cbf74d",
+        "source_sha256": "cf8b342ba37bf9f09a4d6d8c3d324af9c79fcb4772bda50994ef5df725a82f53",
+        "original_webp_sha256": "88b3b94b5361494740ef4c1a9e3cfc677358bd892f00f059320efe21a49e641b",
+        "transparent_pixels": 62209,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 253445,
+        "crop": {
+          "left": 75,
+          "top": 131,
+          "width": 412,
+          "height": 297
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv4.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv4.png",
         "dimensions": [
-          560,
-          560
+          385,
+          356
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 143202,
-        "sha256": "5900ff919e70f3f4cc94bc0473c046615e7a60534a463f0d889e7f3eb1eeb4f9"
+        "bytes": 119142,
+        "sha256": "70c6152e49b801ff598600e04b13ba84dd7d9eade37935344f5102f62330833d",
+        "source_sha256": "aa779e2f456802580fb428dae9d4704579d465b839d935efdc0248a1e68ed755",
+        "original_webp_sha256": "5900ff919e70f3f4cc94bc0473c046615e7a60534a463f0d889e7f3eb1eeb4f9",
+        "transparent_pixels": 55156,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 231696,
+        "crop": {
+          "left": 87,
+          "top": 101,
+          "width": 385,
+          "height": 356
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv5.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv5.png",
         "dimensions": [
-          560,
-          560
+          395,
+          398
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 147688,
-        "sha256": "16cdc51f99c2b135198acb1f43ee88b520f22948dcd8aa319a156ec978e402be"
+        "bytes": 118870,
+        "sha256": "a6faa705036919589308fcebde29f63754eceba7ebb61e68e40b1c08a2c22382",
+        "source_sha256": "b69c1b4020e867d57e2b84636c1ba2f0c29f774ade611d7cc92a2deddd678ecd",
+        "original_webp_sha256": "16cdc51f99c2b135198acb1f43ee88b520f22948dcd8aa319a156ec978e402be",
+        "transparent_pixels": 71444,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 227834,
+        "crop": {
+          "left": 82,
+          "top": 80,
+          "width": 395,
+          "height": 398
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv6.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv6.png",
         "dimensions": [
-          560,
-          560
+          371,
+          415
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 145946,
-        "sha256": "b300707d760c1200821a66586feabf1830ce2b793a091584baaf5bbdc928a717"
+        "bytes": 117382,
+        "sha256": "c9ad7717893428303052ed1f3602e5edadc211f2ef04b88dcef89c815f489db0",
+        "source_sha256": "2315082c25c28ef5a1745927c2abae5e2c5ad85acbd079a5c27c096f45390935",
+        "original_webp_sha256": "b300707d760c1200821a66586feabf1830ce2b793a091584baaf5bbdc928a717",
+        "transparent_pixels": 66947,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 226582,
+        "crop": {
+          "left": 94,
+          "top": 71,
+          "width": 371,
+          "height": 415
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv7.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv7.png",
         "dimensions": [
-          560,
-          560
+          391,
+          416
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 157620,
-        "sha256": "dce56e8c06fdf480abac288861068fe9987c599fd6a2fed04705700514e467fb"
+        "bytes": 123704,
+        "sha256": "5ba2070806c1e74a348027854ec8c2b8be20d8b4fe15ef742a4af808233adc47",
+        "source_sha256": "79039066061ca31dcee72835fa58e018dd7476e048502706c4833c594b79ed04",
+        "original_webp_sha256": "dce56e8c06fdf480abac288861068fe9987c599fd6a2fed04705700514e467fb",
+        "transparent_pixels": 74079,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 225023,
+        "crop": {
+          "left": 84,
+          "top": 71,
+          "width": 391,
+          "height": 416
+        }
       },
       {
         "file": "public/pets/zodiac-snake/lv8.webp",
         "source": ".impeccable/generated/codex-zodiac-20261031-native-a7c9/zodiac-snake/lv8.png",
         "dimensions": [
-          560,
-          560
+          381,
+          396
         ],
         "format": "WEBP",
         "lossless": true,
-        "bytes": 141796,
-        "sha256": "bc7350e8e56f2c7c8e01777e56b788685c6d22ccbd8fd8406c6e99ede1071166"
+        "bytes": 108930,
+        "sha256": "f75878ee5eae3edeb0096dc4b86ec1993dfe013a3ebca2d19bd0897a19f4c0d5",
+        "source_sha256": "0a1f6fb3e2ef87ce94755c7c73149f68461391787d11d0c04a9b7bb810885d13",
+        "original_webp_sha256": "bc7350e8e56f2c7c8e01777e56b788685c6d22ccbd8fd8406c6e99ede1071166",
+        "transparent_pixels": 74112,
+        "uncropped_dimensions": [
+          560,
+          560
+        ],
+        "uncropped_transparent_pixels": 236836,
+        "crop": {
+          "left": 89,
+          "top": 80,
+          "width": 381,
+          "height": 396
+        }
       }
     ],
-    "validation": "24/24 decode successfully; 24 unique SHA-256; decoded RGB pixels exactly match source PNG."
+    "validation": "24/24 decode successfully; 24 unique SHA-256; decoded RGB pixels exactly match source PNG.",
+    "updated_at": "2026-11-01T15:23:27.523Z",
+    "background": "transparent",
+    "processing": "Preserve source RGB. Remove 4-connected edge background (RGB minimum >=225, channel spread <=25). Refine alpha only in the bottom 20% of image height above the subject base using a local Apple Vision VNGenerateForegroundInstanceMaskRequest mask, zeroing mask alpha below 8/255. Preserve the original foreground flower patch of ox Lv.4 (x=70..190,y=340..432). Encode lossless WebP. Apply the existing transparent image to its canonical pet path. Preserve the generated PNG source. No new model call or image upload. Crop fully transparent outer margins with 4 px transparent padding; preserve all visible pixels without resampling or warping."
   }
 }
