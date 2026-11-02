@@ -1,3 +1,4 @@
+import { MAX_BACKUP_MB } from './shop'
 import type { Locale, Localized, OperationActor, Pet, Student } from './types'
 import { growthProgress } from './growth'
 import type { GrowthStep } from './garden-settings'
@@ -51,7 +52,7 @@ const errors: Record<string, [string, string]> = {
   invalidImage: ['图片无效，请选择有效的单帧 PNG、JPEG 或 WebP 图片，尺寸不超过 2000 万像素。', 'Choose a valid single-frame PNG, JPEG or WebP image with no more than 20 million pixels.'],
   imageTooLarge: ['原图不能超过 2 MB，处理后的图片不能超过 256 KB，请换一张较小的图片。', 'The original image must be under 2 MB and the processed image under 256 KB. Please use a smaller image.'],
   imageStorageFull: ['当前班级的商品图片总量超过 10 MB，请移除或替换部分图片后重试。', 'Reward images for this class exceed the 10 MB storage limit. Remove or replace some images and try again.'],
-  backupTooLarge: ['备份大小或记录数量超过可恢复上限（文件最大 50 MB），请减少商品图片或数据量后重试。', 'The backup exceeds the size or record limits for restoring (50 MB maximum). Reduce reward images or data and try again.'],
+  backupTooLarge: [`备份大小或记录数量超过可恢复上限（文件最大 ${MAX_BACKUP_MB} MB），请减少商品图片或数据量后重试。`, `The backup exceeds the size or record limits for restoring (${MAX_BACKUP_MB} MB maximum). Reduce reward images or data and try again.`],
   stockLimitExceeded: ['库存与待退回商品数量超出系统上限，请降低库存后重试。', 'Stock plus pending returns exceeds the system limit. Reduce stock and try again.'],
   invalidBackup: ['备份数据不完整或记录不一致，未修改现有数据。', 'The backup is incomplete or inconsistent. Your current data is unchanged.'],
   fileTooLarge: ['文件超过 5 MB，请使用较小的备份。', 'This file exceeds the 5 MB limit.'],

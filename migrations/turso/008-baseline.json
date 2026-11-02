@@ -1,0 +1,169 @@
+{
+  "version": 8,
+  "name": "baseline-v8",
+  "kind": "baseline",
+  "schema": [
+    {
+      "type": "index",
+      "name": "class_members_user",
+      "tbl_name": "class_members",
+      "sql": "CREATE INDEX class_members_user ON class_members(user_id)"
+    },
+    {
+      "type": "index",
+      "name": "classes_owner",
+      "tbl_name": "classes",
+      "sql": "CREATE INDEX classes_owner ON classes(owner_id)"
+    },
+    {
+      "type": "index",
+      "name": "evaluations_student",
+      "tbl_name": "evaluations",
+      "sql": "CREATE INDEX evaluations_student ON evaluations(student_id, created_at)"
+    },
+    {
+      "type": "index",
+      "name": "growth_evaluation_unique",
+      "tbl_name": "growth_events",
+      "sql": "CREATE UNIQUE INDEX growth_evaluation_unique ON growth_events(evaluation_id) WHERE kind = 'evaluation'"
+    },
+    {
+      "type": "index",
+      "name": "growth_events_student",
+      "tbl_name": "growth_events",
+      "sql": "CREATE INDEX growth_events_student ON growth_events(student_id, generation, seq)"
+    },
+    {
+      "type": "index",
+      "name": "items_class",
+      "tbl_name": "items",
+      "sql": "CREATE INDEX items_class ON items(class_id)"
+    },
+    {
+      "type": "index",
+      "name": "items_class_background",
+      "tbl_name": "items",
+      "sql": "CREATE UNIQUE INDEX items_class_background ON items(class_id, background_id) WHERE class_id IS NOT NULL AND background_id IS NOT NULL"
+    },
+    {
+      "type": "index",
+      "name": "items_template_background",
+      "tbl_name": "items",
+      "sql": "CREATE UNIQUE INDEX items_template_background ON items(owner_id, background_id) WHERE class_id IS NULL AND background_id IS NOT NULL"
+    },
+    {
+      "type": "index",
+      "name": "redemption_background_owned",
+      "tbl_name": "redemptions",
+      "sql": "CREATE UNIQUE INDEX redemption_background_owned ON redemptions(student_id, background_id) WHERE undone = 0 AND background_id IS NOT NULL"
+    },
+    {
+      "type": "index",
+      "name": "rules_class",
+      "tbl_name": "rules",
+      "sql": "CREATE INDEX rules_class ON rules(class_id)"
+    },
+    {
+      "type": "index",
+      "name": "rules_owner",
+      "tbl_name": "rules",
+      "sql": "CREATE INDEX rules_owner ON rules(owner_id)"
+    },
+    {
+      "type": "index",
+      "name": "settings_class_version",
+      "tbl_name": "settings_versions",
+      "sql": "CREATE UNIQUE INDEX settings_class_version ON settings_versions(class_id, version) WHERE class_id IS NOT NULL"
+    },
+    {
+      "type": "index",
+      "name": "settings_template_version",
+      "tbl_name": "settings_versions",
+      "sql": "CREATE UNIQUE INDEX settings_template_version ON settings_versions(owner_id, version) WHERE class_id IS NULL"
+    },
+    {
+      "type": "index",
+      "name": "students_class",
+      "tbl_name": "students",
+      "sql": "CREATE INDEX students_class ON students(class_id)"
+    },
+    {
+      "type": "table",
+      "name": "badges",
+      "tbl_name": "badges",
+      "sql": "CREATE TABLE badges (id TEXT PRIMARY KEY, student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE, generation INTEGER NOT NULL, pet_id TEXT NOT NULL, earned_at INTEGER NOT NULL, level INTEGER NOT NULL CHECK(level BETWEEN 2 AND 8), amount INTEGER NOT NULL DEFAULT 1 CHECK(amount BETWEEN 0 AND 100), active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0, 1)), source_event TEXT, UNIQUE(student_id, generation, level))"
+    },
+    {
+      "type": "table",
+      "name": "class_invites",
+      "tbl_name": "class_invites",
+      "sql": "CREATE TABLE class_invites (class_id TEXT PRIMARY KEY REFERENCES classes(id) ON DELETE CASCADE, code_hash TEXT UNIQUE NOT NULL, expires_at INTEGER NOT NULL, created_by TEXT NOT NULL REFERENCES users(id), created_at INTEGER NOT NULL)"
+    },
+    {
+      "type": "table",
+      "name": "class_members",
+      "tbl_name": "class_members",
+      "sql": "CREATE TABLE class_members (class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, joined_at INTEGER NOT NULL, PRIMARY KEY(class_id, user_id))"
+    },
+    {
+      "type": "table",
+      "name": "classes",
+      "tbl_name": "classes",
+      "sql": "CREATE TABLE classes (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, created_at INTEGER NOT NULL)"
+    },
+    {
+      "type": "table",
+      "name": "evaluations",
+      "tbl_name": "evaluations",
+      "sql": "CREATE TABLE evaluations (id TEXT PRIMARY KEY, batch_id TEXT NOT NULL, student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE, points INTEGER NOT NULL, reason TEXT NOT NULL, category TEXT NOT NULL, generation INTEGER NOT NULL, created_at INTEGER NOT NULL, undone INTEGER NOT NULL DEFAULT 0, actor_user_id TEXT REFERENCES users(id) ON DELETE SET NULL, actor_name TEXT NOT NULL DEFAULT '', actor_subject TEXT NOT NULL DEFAULT '', undone_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL, undone_by_name TEXT NOT NULL DEFAULT '', undone_by_subject TEXT NOT NULL DEFAULT '')"
+    },
+    {
+      "type": "table",
+      "name": "growth_events",
+      "tbl_name": "growth_events",
+      "sql": "CREATE TABLE \"growth_events\" (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT UNIQUE NOT NULL, student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE, generation INTEGER NOT NULL, kind TEXT NOT NULL, settings_id TEXT NOT NULL REFERENCES \"settings_versions\"(id), evaluation_id TEXT REFERENCES evaluations(id) ON DELETE CASCADE, pet_id TEXT, initial_undone INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL)"
+    },
+    {
+      "type": "table",
+      "name": "items",
+      "tbl_name": "items",
+      "sql": "CREATE TABLE items (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, cost INTEGER NOT NULL, active INTEGER NOT NULL DEFAULT 1, description TEXT NOT NULL DEFAULT '{\"zh\":\"\",\"en\":\"\"}', category TEXT NOT NULL DEFAULT 'other', icon TEXT NOT NULL DEFAULT 'gift', image TEXT, image_key TEXT, image_bytes INTEGER NOT NULL DEFAULT 0, stock INTEGER NOT NULL DEFAULT -1 CHECK(stock >= -1), class_id TEXT REFERENCES classes(id) ON DELETE CASCADE, background_id TEXT)"
+    },
+    {
+      "type": "table",
+      "name": "redemptions",
+      "tbl_name": "redemptions",
+      "sql": "CREATE TABLE redemptions (id TEXT PRIMARY KEY, student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE, item_id TEXT, item_name TEXT NOT NULL, cost INTEGER NOT NULL, created_at INTEGER NOT NULL, undone INTEGER NOT NULL DEFAULT 0, stock_deducted INTEGER NOT NULL DEFAULT 0, actor_user_id TEXT REFERENCES users(id) ON DELETE SET NULL, actor_name TEXT NOT NULL DEFAULT '', actor_subject TEXT NOT NULL DEFAULT '', undone_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL, undone_by_name TEXT NOT NULL DEFAULT '', undone_by_subject TEXT NOT NULL DEFAULT '', background_id TEXT)"
+    },
+    {
+      "type": "table",
+      "name": "rules",
+      "tbl_name": "rules",
+      "sql": "CREATE TABLE rules (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, points INTEGER NOT NULL, category TEXT NOT NULL, custom INTEGER NOT NULL DEFAULT 0, class_id TEXT REFERENCES classes(id) ON DELETE CASCADE)"
+    },
+    {
+      "type": "table",
+      "name": "sessions",
+      "tbl_name": "sessions",
+      "sql": "CREATE TABLE sessions (token TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL)"
+    },
+    {
+      "type": "table",
+      "name": "settings_versions",
+      "tbl_name": "settings_versions",
+      "sql": "CREATE TABLE \"settings_versions\" (id TEXT PRIMARY KEY, owner_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, version INTEGER NOT NULL, value TEXT NOT NULL, created_at INTEGER NOT NULL, class_id TEXT REFERENCES classes(id) ON DELETE CASCADE)"
+    },
+    {
+      "type": "table",
+      "name": "students",
+      "tbl_name": "students",
+      "sql": "CREATE TABLE students (id TEXT PRIMARY KEY, class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE, name TEXT NOT NULL, student_no TEXT NOT NULL DEFAULT '', points INTEGER NOT NULL DEFAULT 0, pet_id TEXT, pet_exp INTEGER NOT NULL DEFAULT 0, generation INTEGER NOT NULL DEFAULT 0, spent_badges INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, background_id TEXT, festival_background_id TEXT, festival_background_expires_at INTEGER)"
+    },
+    {
+      "type": "table",
+      "name": "users",
+      "tbl_name": "users",
+      "sql": "CREATE TABLE users (id TEXT PRIMARY KEY, username TEXT UNIQUE COLLATE NOCASE NOT NULL, password TEXT NOT NULL, created_at INTEGER NOT NULL, display_name TEXT NOT NULL DEFAULT '', subject TEXT NOT NULL DEFAULT '', teaching_role TEXT NOT NULL DEFAULT '')"
+    }
+  ]
+}

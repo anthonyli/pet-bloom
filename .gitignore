@@ -11,3 +11,5 @@ out/
 .next-desktop/
 .desktop/
 dist/
+
+.vercel

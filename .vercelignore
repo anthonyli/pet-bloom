@@ -1,0 +1,13 @@
+.git
+.codegraph
+.next*
+.desktop
+desktop
+dist
+/data/
+*.db*
+.env*
+!.env.example
+node_modules
+tests
+.impeccable

@@ -12,4 +12,6 @@ export const shopCategories: { id: ShopCategory; name: { zh: string; en: string 
 export const MAX_ITEM_IMAGE_BYTES = 2 * 1024 * 1024
 export const MAX_STORED_IMAGE_BYTES = 256 * 1024
 export const MAX_CLASS_IMAGE_BYTES = 10 * 1024 * 1024
-export const MAX_BACKUP_BYTES = 50 * 1024 * 1024
+// Leave headroom beneath Vercel's 4.5 MB request/response limit.
+export const MAX_BACKUP_MB = process.env.NEXT_PUBLIC_CLOUD_DEPLOYMENT === 'true' ? 4 : 50
+export const MAX_BACKUP_BYTES = MAX_BACKUP_MB * 1024 * 1024

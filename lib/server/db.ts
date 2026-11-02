@@ -1,3 +1,5 @@
+import { createClient } from '@libsql/client/web'
+import { ApplicationDatabase, adaptDatabase } from './database-adapter'
 import Database from 'better-sqlite3'
 import { randomUUID } from 'node:crypto'
 import { mkdirSync } from 'node:fs'
@@ -5,6 +7,7 @@ import { dirname, resolve } from 'node:path'
 import { replayGrowth, replayEvents, type GrowthEvent, type GrowthEvaluation } from '../growth'
 import { defaultGardenSettings } from '../garden-settings'
 import { petBackgrounds, versionFiveBackgroundIds, holidayBackgroundIds, versionSevenBackgroundIds } from '../pet-backgrounds'
+import schemaVersion from './schema-version.json'
 
 function migrateVersionTwo(db: Database.Database) {
   const version = db.pragma('user_version', { simple: true }) as number
@@ -281,4 +284,26 @@ export function database() {
   if (!globalDb.petGardenDb) globalDb.petGardenDb = createDatabase(process.env.DATABASE_PATH || './data/pet-garden.db')
   else migrateDatabase(globalDb.petGardenDb)
   return globalDb.petGardenDb
+}
+
+let remoteDatabase: Promise<ApplicationDatabase> | undefined
+export async function applicationDatabase() {
+  const url = process.env.DESKTOP_TOKEN ? undefined : process.env.TURSO_DATABASE_URL
+  if (!url) {
+    if (process.env.VERCEL) throw new Error('TURSO_DATABASE_URL is required on Vercel')
+    return adaptDatabase(database())
+  }
+  if (!process.env.TURSO_AUTH_TOKEN) throw new Error('TURSO_AUTH_TOKEN is required')
+  remoteDatabase ||= (async () => {
+    const client = createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN })
+    const db = new ApplicationDatabase(undefined, client)
+    try {
+      const schema = await db.prepare('SELECT version FROM _pet_bloom_schema WHERE id = 1').get() as { version: number } | undefined
+      // Cloud migrations are additive: the previous release must keep working
+      // between migration commit and promotion of the new deployment.
+      if (!schema || !Number.isInteger(schema.version) || schema.version < schemaVersion.current) throw new Error('Turso schema version mismatch; apply migrations before deploying')
+      return db
+    } catch (error) { client.close(); remoteDatabase = undefined; throw error }
+  })()
+  return remoteDatabase
 }

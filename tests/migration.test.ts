@@ -71,7 +71,7 @@ function versionTwoFixture(db: Database.Database) {
     PRAGMA user_version = 2;
   `)
 }
-function versionThreeFixture() {
+async function versionThreeFixture() {
   const legacy = legacyDatabase(), db = legacy.db
   versionTwoFixture(db)
   db.exec(`
@@ -94,10 +94,10 @@ function versionThreeFixture() {
     UPDATE evaluations SET points = 70 WHERE id = 'new-cycle';
   `)
   const imageBytes = readFileSync(new URL('../public/pets/panda/lv1.webp', import.meta.url))
-  db.prepare('UPDATE items SET image = ?, image_key = ?, image_bytes = ? WHERE id = ?').run(`data:image/webp;base64,${imageBytes.toString('base64')}`, createHash('sha256').update(imageBytes).digest('hex'), imageBytes.length, 'reward')
+  await db.prepare('UPDATE items SET image = ?, image_key = ?, image_bytes = ? WHERE id = ?').run(`data:image/webp;base64,${imageBytes.toString('base64')}`, createHash('sha256').update(imageBytes).digest('hex'), imageBytes.length, 'reward')
   const value = defaultGardenSettings(), changed = structuredClone(value)
   changed.growth[1].experience = 17
-  for (const [id, version, policy] of [['policy-0', 0, value], ['policy-1', 1, changed]] as const) db.prepare('INSERT INTO settings_versions VALUES (?, ?, ?, ?, ?)').run(id, 'teacher', version, JSON.stringify(policy), version + 1)
+  for (const [id, version, policy] of [['policy-0', 0, value], ['policy-1', 1, changed]] as const) await db.prepare('INSERT INTO settings_versions VALUES (?, ?, ?, ?, ?)').run(id, 'teacher', version, JSON.stringify(policy), version + 1)
   const insert = db.prepare('INSERT INTO growth_events VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)')
   for (const row of [
     [2,'g1-start','graduate',1,'start','policy-0',null,'panda',1],
@@ -123,21 +123,21 @@ function versionThreeFixture() {
 
 const withFestivalBackground = (rows: unknown[]) => rows.map(row => ({ ...(row as Record<string, unknown>), festival_background_id: null, festival_background_expires_at: null }))
 const withBackground = (rows: unknown[]) => rows.map(row => ({ ...(row as Record<string, unknown>), background_id: null }))
-function expectBackgroundDefaults(db: Database.Database) {
-  const owners = db.prepare('SELECT id FROM users ORDER BY id').all() as { id: string }[]
-  const classes = db.prepare('SELECT id, owner_id FROM classes ORDER BY id').all() as { id: string; owner_id: string }[]
+async function expectBackgroundDefaults(db: Database.Database) {
+  const owners = await db.prepare('SELECT id FROM users ORDER BY id').all() as { id: string }[]
+  const classes = await db.prepare('SELECT id, owner_id FROM classes ORDER BY id').all() as { id: string; owner_id: string }[]
   const scopes = [...owners.map(row => ({ owner_id: row.id, class_id: null })), ...classes.map(row => ({ owner_id: row.owner_id, class_id: row.id }))]
   for (const scope of scopes) {
-    const rows = db.prepare('SELECT owner_id, class_id, background_id, cost, stock, image, image_key, image_bytes, active FROM items WHERE owner_id = ? AND class_id IS ? AND background_id IS NOT NULL ORDER BY background_id').all(scope.owner_id, scope.class_id)
+    const rows = await db.prepare('SELECT owner_id, class_id, background_id, cost, stock, image, image_key, image_bytes, active FROM items WHERE owner_id = ? AND class_id IS ? AND background_id IS NOT NULL ORDER BY background_id').all(scope.owner_id, scope.class_id)
     expect(rows).toEqual(petBackgrounds.map(background => ({ ...scope, background_id: background.id, cost: 1, stock: -1, image: null, image_key: null, image_bytes: 0, active: 1 })).sort((a, b) => a.background_id.localeCompare(b.background_id)))
   }
-  expect(db.prepare('SELECT background_id FROM students').all().every(row => (row as { background_id: unknown }).background_id === null)).toBe(true)
-  expect(db.prepare('SELECT background_id FROM redemptions').all().every(row => (row as { background_id: unknown }).background_id === null)).toBe(true)
+  expect((await db.prepare('SELECT background_id FROM students').all()).every(row => (row as { background_id: unknown }).background_id === null)).toBe(true)
+  expect((await db.prepare('SELECT background_id FROM redemptions').all()).every(row => (row as { background_id: unknown }).background_id === null)).toBe(true)
 }
 
 // 独立构建已发布v4结构与班级资源，不把v5库改个版本号冒充旧库。
-function versionFourFixture() {
-  const legacy = versionThreeFixture(), db = legacy.db
+async function versionFourFixture() {
+  const legacy = await versionThreeFixture(), db = legacy.db
   db.exec(`
     ALTER TABLE users ADD COLUMN display_name TEXT NOT NULL DEFAULT '';
     ALTER TABLE users ADD COLUMN subject TEXT NOT NULL DEFAULT '';
@@ -171,27 +171,27 @@ function versionFourFixture() {
     ALTER TABLE ${table} ADD COLUMN undone_by_subject TEXT NOT NULL DEFAULT '';
   `)
   for (const classId of ['class', 'class-2']) {
-    db.prepare('INSERT INTO class_members VALUES (?, ?, 100)').run(classId, 'teacher')
-    for (const { id } of db.prepare('SELECT id FROM settings_versions WHERE class_id IS NULL').all() as { id: string }[]) {
+    await db.prepare('INSERT INTO class_members VALUES (?, ?, 100)').run(classId, 'teacher')
+    for (const { id } of await db.prepare('SELECT id FROM settings_versions WHERE class_id IS NULL').all() as { id: string }[]) {
       const copiedId = `${classId}-${id}`
-      db.prepare('INSERT INTO settings_versions SELECT ?, owner_id, version, value, created_at, ? FROM settings_versions WHERE id = ?').run(copiedId, classId, id)
-      db.prepare('UPDATE growth_events SET settings_id = ? WHERE settings_id = ? AND student_id IN (SELECT id FROM students WHERE class_id = ?)').run(copiedId, id, classId)
+      await db.prepare('INSERT INTO settings_versions SELECT ?, owner_id, version, value, created_at, ? FROM settings_versions WHERE id = ?').run(copiedId, classId, id)
+      await db.prepare('UPDATE growth_events SET settings_id = ? WHERE settings_id = ? AND student_id IN (SELECT id FROM students WHERE class_id = ?)').run(copiedId, id, classId)
     }
-    for (const { id } of db.prepare('SELECT id FROM rules WHERE class_id IS NULL').all() as { id: string }[]) db.prepare('INSERT INTO rules SELECT ?, owner_id, name, points, category, custom, ? FROM rules WHERE id = ?').run(`${classId}-${id}`, classId, id)
-    for (const { id } of db.prepare('SELECT id FROM items WHERE class_id IS NULL').all() as { id: string }[]) {
+    for (const { id } of await db.prepare('SELECT id FROM rules WHERE class_id IS NULL').all() as { id: string }[]) await db.prepare('INSERT INTO rules SELECT ?, owner_id, name, points, category, custom, ? FROM rules WHERE id = ?').run(`${classId}-${id}`, classId, id)
+    for (const { id } of await db.prepare('SELECT id FROM items WHERE class_id IS NULL').all() as { id: string }[]) {
       const copiedId = `${classId}-${id}`
-      db.prepare('INSERT INTO items SELECT ?, owner_id, name, cost, active, description, category, icon, image, image_key, image_bytes, stock, ? FROM items WHERE id = ?').run(copiedId, classId, id)
-      db.prepare('UPDATE redemptions SET item_id = ? WHERE item_id = ? AND student_id IN (SELECT id FROM students WHERE class_id = ?)').run(copiedId, id, classId)
+      await db.prepare('INSERT INTO items SELECT ?, owner_id, name, cost, active, description, category, icon, image, image_key, image_bytes, stock, ? FROM items WHERE id = ?').run(copiedId, classId, id)
+      await db.prepare('UPDATE redemptions SET item_id = ? WHERE item_id = ? AND student_id IN (SELECT id FROM students WHERE class_id = ?)').run(copiedId, id, classId)
     }
   }
-  db.prepare('INSERT INTO users (id, username, password, created_at) VALUES (?, ?, ?, 1)').run('no-classes', 'legacy-no-classes', 'fixture-hash-not-a-password')
+  await db.prepare('INSERT INTO users (id, username, password, created_at) VALUES (?, ?, ?, 1)').run('no-classes', 'legacy-no-classes', 'fixture-hash-not-a-password')
   db.pragma('user_version = 4')
   return legacy
 }
 
 const v5BackgroundItemId = (owner: string, classId: string | null, backgroundId: string) => `v5-${owner}-${classId ?? 'template'}-${backgroundId}`
-function versionFiveFixture() {
-  const legacy = versionFourFixture(), db = legacy.db
+async function versionFiveFixture() {
+  const legacy = await versionFourFixture(), db = legacy.db
   db.exec(`
     ALTER TABLE students ADD COLUMN background_id TEXT;
     ALTER TABLE items ADD COLUMN background_id TEXT;
@@ -200,7 +200,7 @@ function versionFiveFixture() {
     CREATE UNIQUE INDEX items_class_background ON items(class_id, background_id) WHERE class_id IS NOT NULL AND background_id IS NOT NULL;
     CREATE UNIQUE INDEX items_template_background ON items(owner_id, background_id) WHERE class_id IS NULL AND background_id IS NOT NULL;
   `)
-  const owners = db.prepare('SELECT id FROM users').all() as { id: string }[], classes = db.prepare('SELECT id, owner_id FROM classes').all() as { id: string; owner_id: string }[]
+  const owners = await db.prepare('SELECT id FROM users').all() as { id: string }[], classes = await db.prepare('SELECT id, owner_id FROM classes').all() as { id: string; owner_id: string }[]
   const scopes = [...owners.map(row => ({ owner: row.id, classId: null })), ...classes.map(row => ({ owner: row.owner_id, classId: row.id }))]
   const insert = db.prepare('INSERT INTO items (id, owner_id, class_id, name, cost, active, description, category, icon, stock, background_id) VALUES (?, ?, ?, ?, 1, 1, ?, ?, ?, -1, ?)')
   for (const scope of scopes) for (const backgroundId of versionFiveBackgroundIds) {
@@ -210,10 +210,10 @@ function versionFiveFixture() {
   db.pragma('user_version = 5')
   return legacy
 }
-function versionSixFixture() {
+async function versionSixFixture() {
   // v6复用真实v5结构，仅追加冻结的28节日，不调用当前createDatabase或使用实时41项目录播种。
-  const legacy = versionFiveFixture(), db = legacy.db
-  const owners = db.prepare('SELECT id FROM users').all() as { id: string }[], classes = db.prepare('SELECT id, owner_id FROM classes').all() as { id: string; owner_id: string }[]
+  const legacy = await versionFiveFixture(), db = legacy.db
+  const owners = await db.prepare('SELECT id FROM users').all() as { id: string }[], classes = await db.prepare('SELECT id, owner_id FROM classes').all() as { id: string; owner_id: string }[]
   const scopes = [...owners.map(row => ({ owner: row.id, classId: null })), ...classes.map(row => ({ owner: row.owner_id, classId: row.id }))]
   const insert = db.prepare('INSERT INTO items (id, owner_id, class_id, name, cost, active, description, category, icon, stock, background_id) VALUES (?, ?, ?, ?, 1, 1, ?, ?, ?, -1, ?)')
   for (const scope of scopes) for (const backgroundId of holidayBackgroundIds) {
@@ -223,9 +223,9 @@ function versionSixFixture() {
   db.pragma('user_version = 6')
   return legacy
 }
-function versionSevenFixture() {
-  const legacy = versionSixFixture(), db = legacy.db
-  const owners = db.prepare('SELECT id FROM users').all() as { id: string }[], classes = db.prepare('SELECT id, owner_id FROM classes').all() as { id: string; owner_id: string }[]
+async function versionSevenFixture() {
+  const legacy = await versionSixFixture(), db = legacy.db
+  const owners = await db.prepare('SELECT id FROM users').all() as { id: string }[], classes = await db.prepare('SELECT id, owner_id FROM classes').all() as { id: string; owner_id: string }[]
   const scopes = [...owners.map(row => ({ owner: row.id, classId: null })), ...classes.map(row => ({ owner: row.owner_id, classId: row.id }))]
   const insert = db.prepare('INSERT INTO items (id, owner_id, class_id, name, cost, active, description, category, icon, stock, background_id) VALUES (?, ?, ?, ?, 1, 1, ?, ?, ?, -1, ?)')
   for (const scope of scopes) for (const backgroundId of versionSevenBackgroundIds) {
@@ -235,32 +235,32 @@ function versionSevenFixture() {
   db.pragma('user_version = 7')
   return legacy
 }
-const databaseRows = (db: Database.Database) => {
-  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as { name: string }[]
-  return Object.fromEntries(tables.map(({ name }) => [name, db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all()]))
+const databaseRows = async (db: Database.Database) => {
+  const tables = await db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as { name: string }[]
+  return Object.fromEntries(await Promise.all(tables.map(async ({ name }) => [name, (await db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all())])))
 }
 
 describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
-  it('保留原毕业徽章ID和消费，补发旧周期及当前周期，不奖励未领养学生', () => {
+  it('保留原毕业徽章ID和消费，补发旧周期及当前周期，不奖励未领养学生', async () => {
     const legacy = legacyDatabase()
     legacy.db.close()
     const db = createDatabase(legacy.path)
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(8)
-      expectBackgroundDefaults(db)
-      expect(db.prepare('SELECT * FROM badges WHERE id = ?').get('original-badge')).toMatchObject({ level: 8, earned_at: 11, pet_id: 'panda' })
-      expect(db.prepare('SELECT * FROM badges WHERE student_id = ? AND generation = 1').all('graduate')).toHaveLength(7)
-      expect(db.prepare('SELECT * FROM badges WHERE student_id = ? AND generation = 2').all('graduate')).toMatchObject([{ level: 2, pet_id: 'westie', earned_at: 20 }])
-      expect(db.prepare('SELECT level, earned_at FROM badges WHERE student_id = ? ORDER BY level').all('regressed')).toEqual([{ level: 2, earned_at: 30 }, { level: 3, earned_at: 30 }])
-      expect(db.prepare('SELECT * FROM badges WHERE student_id = ?').all('egg')).toEqual([])
-      expect(db.prepare('SELECT spent_badges FROM students WHERE id = ?').get('graduate')).toEqual({ spent_badges: 1 })
-      expect(db.prepare('SELECT stock, image, category, icon FROM items WHERE class_id = ? AND background_id IS NULL').get('class')).toEqual({ stock: -1, image: null, category: 'other', icon: 'gift' })
-      expect(db.prepare('SELECT stock_deducted FROM redemptions').get()).toEqual({ stock_deducted: 0 })
-      expect(db.prepare('SELECT class_id, user_id FROM class_members').all()).toEqual([{ class_id: 'class', user_id: 'teacher' }])
-      expect(db.prepare('SELECT display_name, subject, teaching_role FROM users').get()).toEqual({ display_name: '', subject: '', teaching_role: '' })
-      expect(db.prepare('SELECT actor_user_id, actor_name, actor_subject FROM evaluations').all().every(row => (row as { actor_user_id: unknown }).actor_user_id === null && (row as { actor_name: string }).actor_name === '' && (row as { actor_subject: string }).actor_subject === '')).toBe(true)
+      await expectBackgroundDefaults(db)
+      expect(await db.prepare('SELECT * FROM badges WHERE id = ?').get('original-badge')).toMatchObject({ level: 8, earned_at: 11, pet_id: 'panda' })
+      expect(await db.prepare('SELECT * FROM badges WHERE student_id = ? AND generation = 1').all('graduate')).toHaveLength(7)
+      expect(await db.prepare('SELECT * FROM badges WHERE student_id = ? AND generation = 2').all('graduate')).toMatchObject([{ level: 2, pet_id: 'westie', earned_at: 20 }])
+      expect(await db.prepare('SELECT level, earned_at FROM badges WHERE student_id = ? ORDER BY level').all('regressed')).toEqual([{ level: 2, earned_at: 30 }, { level: 3, earned_at: 30 }])
+      expect(await db.prepare('SELECT * FROM badges WHERE student_id = ?').all('egg')).toEqual([])
+      expect(await db.prepare('SELECT spent_badges FROM students WHERE id = ?').get('graduate')).toEqual({ spent_badges: 1 })
+      expect(await db.prepare('SELECT stock, image, category, icon FROM items WHERE class_id = ? AND background_id IS NULL').get('class')).toEqual({ stock: -1, image: null, category: 'other', icon: 'gift' })
+      expect(await db.prepare('SELECT stock_deducted FROM redemptions').get()).toEqual({ stock_deducted: 0 })
+      expect(await db.prepare('SELECT class_id, user_id FROM class_members').all()).toEqual([{ class_id: 'class', user_id: 'teacher' }])
+      expect(await db.prepare('SELECT display_name, subject, teaching_role FROM users').get()).toEqual({ display_name: '', subject: '', teaching_role: '' })
+      expect((await db.prepare('SELECT actor_user_id, actor_name, actor_subject FROM evaluations').all()).every(row => (row as { actor_user_id: unknown }).actor_user_id === null && (row as { actor_name: string }).actor_name === '' && (row as { actor_subject: string }).actor_subject === '')).toBe(true)
       expect(db.pragma('foreign_key_check')).toEqual([])
-      const before = db.prepare('SELECT * FROM badges ORDER BY id').all(), resources = db.prepare('SELECT * FROM settings_versions ORDER BY id').all()
+      const before = await db.prepare('SELECT * FROM badges ORDER BY id').all(), resources = await db.prepare('SELECT * FROM settings_versions ORDER BY id').all()
       db.close()
       const reopened = createDatabase(legacy.path)
       try {
@@ -284,165 +284,165 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(check.prepare("SELECT name FROM sqlite_master WHERE name = 'class_members'").get()).toBeUndefined()
     } finally { check.close() }
   })
-  it('真实v2数据库升级保留徽章并补齐有序成长事件', () => {
+  it('真实v2数据库升级保留徽章并补齐有序成长事件', async () => {
     const legacy = legacyDatabase()
     versionTwoFixture(legacy.db)
     legacy.db.close()
     const db = createDatabase(legacy.path)
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(8)
-      expectBackgroundDefaults(db)
-      expect(db.prepare('SELECT amount, active, source_event FROM badges WHERE id = ?').get('original-badge')).toMatchObject({ amount: 1, active: 1, source_event: expect.any(String) })
-      expect(db.prepare('SELECT kind FROM growth_events WHERE student_id = ? AND generation = 2 ORDER BY seq').all('graduate')).toEqual([{ kind: 'start' }, { kind: 'evaluation' }])
-      expect(db.prepare('SELECT version FROM settings_versions WHERE class_id = ?').all('class')).toEqual([{ version: 0 }])
-      expect(db.prepare('SELECT version FROM settings_versions WHERE class_id IS NULL').all()).toEqual([{ version: 0 }])
+      await expectBackgroundDefaults(db)
+      expect(await db.prepare('SELECT amount, active, source_event FROM badges WHERE id = ?').get('original-badge')).toMatchObject({ amount: 1, active: 1, source_event: expect.any(String) })
+      expect(await db.prepare('SELECT kind FROM growth_events WHERE student_id = ? AND generation = 2 ORDER BY seq').all('graduate')).toEqual([{ kind: 'start' }, { kind: 'evaluation' }])
+      expect(await db.prepare('SELECT version FROM settings_versions WHERE class_id = ?').all('class')).toEqual([{ version: 0 }])
+      expect(await db.prepare('SELECT version FROM settings_versions WHERE class_id IS NULL').all()).toEqual([{ version: 0 }])
       expect(db.pragma('foreign_key_check')).toEqual([])
     } finally { db.close() }
   })
-  it('v3两班复制完整资源链和有限库存，历史ID/seq/小数/奖励不变并按班重映射引用', () => {
-    const legacy = versionThreeFixture()
-    const beforeStudents = legacy.db.prepare('SELECT * FROM students ORDER BY id').all()
-    const beforeBadges = legacy.db.prepare('SELECT * FROM badges ORDER BY id').all()
-    const beforeEvents = legacy.db.prepare('SELECT * FROM growth_events ORDER BY seq').all() as { settings_id: string }[]
-    const beforeRedemptions = legacy.db.prepare('SELECT * FROM redemptions ORDER BY id').all() as { item_id: string }[]
-    const templates = legacy.db.prepare('SELECT * FROM settings_versions ORDER BY version').all()
-    const oldItems = legacy.db.prepare('SELECT * FROM items ORDER BY id').all() as Record<string, unknown>[]
+  it('v3两班复制完整资源链和有限库存，历史ID/seq/小数/奖励不变并按班重映射引用', async () => {
+    const legacy = await versionThreeFixture()
+    const beforeStudents = await legacy.db.prepare('SELECT * FROM students ORDER BY id').all()
+    const beforeBadges = await legacy.db.prepare('SELECT * FROM badges ORDER BY id').all()
+    const beforeEvents = await legacy.db.prepare('SELECT * FROM growth_events ORDER BY seq').all() as { settings_id: string }[]
+    const beforeRedemptions = await legacy.db.prepare('SELECT * FROM redemptions ORDER BY id').all() as { item_id: string }[]
+    const templates = await legacy.db.prepare('SELECT * FROM settings_versions ORDER BY version').all()
+    const oldItems = await legacy.db.prepare('SELECT * FROM items ORDER BY id').all() as Record<string, unknown>[]
     legacy.db.close()
     const db = createDatabase(legacy.path)
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(8)
-      expectBackgroundDefaults(db)
-      expect(db.prepare('SELECT * FROM students ORDER BY id').all()).toEqual(withFestivalBackground(withBackground(beforeStudents)))
-      expect(db.prepare('SELECT * FROM badges ORDER BY id').all()).toEqual(beforeBadges)
-      expect(db.prepare('SELECT id,owner_id,version,value,created_at FROM settings_versions WHERE class_id IS NULL ORDER BY version').all()).toEqual(templates)
-      const events = db.prepare('SELECT * FROM growth_events ORDER BY seq').all() as { settings_id: string }[]
+      await expectBackgroundDefaults(db)
+      expect(await db.prepare('SELECT * FROM students ORDER BY id').all()).toEqual(withFestivalBackground(withBackground(beforeStudents)))
+      expect(await db.prepare('SELECT * FROM badges ORDER BY id').all()).toEqual(beforeBadges)
+      expect(await db.prepare('SELECT id,owner_id,version,value,created_at FROM settings_versions WHERE class_id IS NULL ORDER BY version').all()).toEqual(templates)
+      const events = await db.prepare('SELECT * FROM growth_events ORDER BY seq').all() as { settings_id: string }[]
       expect(events.map(({ settings_id, ...row }) => row)).toEqual(beforeEvents.map(({ settings_id, ...row }) => row))
       expect(events.every((event, i) => event.settings_id !== beforeEvents[i].settings_id)).toBe(true)
-      const redemptions = db.prepare('SELECT id,student_id,item_id,item_name,cost,created_at,undone,stock_deducted FROM redemptions ORDER BY id').all() as { item_id: string }[]
+      const redemptions = await db.prepare('SELECT id,student_id,item_id,item_name,cost,created_at,undone,stock_deducted FROM redemptions ORDER BY id').all() as { item_id: string }[]
       expect(redemptions.map(({ item_id, ...row }) => row)).toEqual(beforeRedemptions.map(({ item_id, ...row }) => row))
       expect(redemptions.every((row, i) => row.item_id !== beforeRedemptions[i].item_id)).toBe(true)
       for (const classId of ['class', 'class-2']) {
-        expect(db.prepare('SELECT version,value FROM settings_versions WHERE class_id = ? ORDER BY version').all(classId)).toEqual((templates as { version: number; value: string }[]).map(({ version, value }) => ({ version, value })))
-        expect(db.prepare('SELECT name,points,category,custom FROM rules WHERE class_id = ?').all(classId)).toEqual([{ name: '{"zh":"旧规则","en":"Legacy rule"}', points: 3, category: 'study', custom: 1 }])
-        expect(db.prepare('SELECT active,stock FROM items WHERE class_id = ? AND background_id IS NULL ORDER BY active DESC').all(classId)).toEqual([{ active: 1, stock: 2 }, { active: 0, stock: 0 }])
-        const copiedItems = db.prepare('SELECT * FROM items WHERE class_id = ? AND background_id IS NULL ORDER BY active, name').all(classId) as Record<string, unknown>[]
+        expect(await db.prepare('SELECT version,value FROM settings_versions WHERE class_id = ? ORDER BY version').all(classId)).toEqual((templates as { version: number; value: string }[]).map(({ version, value }) => ({ version, value })))
+        expect(await db.prepare('SELECT name,points,category,custom FROM rules WHERE class_id = ?').all(classId)).toEqual([{ name: '{"zh":"旧规则","en":"Legacy rule"}', points: 3, category: 'study', custom: 1 }])
+        expect(await db.prepare('SELECT active,stock FROM items WHERE class_id = ? AND background_id IS NULL ORDER BY active DESC').all(classId)).toEqual([{ active: 1, stock: 2 }, { active: 0, stock: 0 }])
+        const copiedItems = await db.prepare('SELECT * FROM items WHERE class_id = ? AND background_id IS NULL ORDER BY active, name').all(classId) as Record<string, unknown>[]
         expect(copiedItems.map(({ id, class_id, ...row }) => row)).toEqual(oldItems.map(({ id, ...row }) => row).sort((a, b) => Number(a.active) - Number(b.active) || String(a.name).localeCompare(String(b.name))).map(row => ({ ...row, background_id: null })))
         expect(copiedItems.every(item => !oldItems.some(original => original.id === item.id))).toBe(true)
       }
-      expect(db.prepare('SELECT class_id,user_id FROM class_members ORDER BY class_id').all()).toEqual([{ class_id: 'class', user_id: 'teacher' }, { class_id: 'class-2', user_id: 'teacher' }])
-      expect(db.prepare('SELECT e.id FROM growth_events e JOIN students s ON s.id = e.student_id JOIN settings_versions v ON v.id = e.settings_id WHERE v.class_id != s.class_id OR v.class_id IS NULL').all()).toEqual([])
-      expect(db.prepare('SELECT r.id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN items i ON i.id = r.item_id WHERE i.class_id != s.class_id OR i.class_id IS NULL').all()).toEqual([])
-      expect(db.prepare('SELECT actor_user_id,undone_by_user_id,actor_name,undone_by_name FROM redemptions').all()).toEqual(expect.arrayContaining([{ actor_user_id: null, undone_by_user_id: null, actor_name: '', undone_by_name: '' }]))
-      const latest = db.prepare('SELECT * FROM settings_versions WHERE class_id = ? ORDER BY version DESC LIMIT 1').get('class') as { owner_id: string; value: string }
-      expect(() => db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, ?)').run('next-class', latest.owner_id, latest.value, 'class')).not.toThrow()
-      expect(() => db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, ?)').run('next-class-2', latest.owner_id, latest.value, 'class-2')).not.toThrow()
-      expect(() => db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, NULL)').run('next-template', latest.owner_id, latest.value)).not.toThrow()
-      expect(() => db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, NULL)').run('duplicate-template', latest.owner_id, latest.value)).toThrow()
-      expect(() => db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, ?)').run('duplicate', latest.owner_id, latest.value, 'class')).toThrow()
+      expect(await db.prepare('SELECT class_id,user_id FROM class_members ORDER BY class_id').all()).toEqual([{ class_id: 'class', user_id: 'teacher' }, { class_id: 'class-2', user_id: 'teacher' }])
+      expect(await db.prepare('SELECT e.id FROM growth_events e JOIN students s ON s.id = e.student_id JOIN settings_versions v ON v.id = e.settings_id WHERE v.class_id != s.class_id OR v.class_id IS NULL').all()).toEqual([])
+      expect(await db.prepare('SELECT r.id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN items i ON i.id = r.item_id WHERE i.class_id != s.class_id OR i.class_id IS NULL').all()).toEqual([])
+      expect(await db.prepare('SELECT actor_user_id,undone_by_user_id,actor_name,undone_by_name FROM redemptions').all()).toEqual(expect.arrayContaining([{ actor_user_id: null, undone_by_user_id: null, actor_name: '', undone_by_name: '' }]))
+      const latest = await db.prepare('SELECT * FROM settings_versions WHERE class_id = ? ORDER BY version DESC LIMIT 1').get('class') as { owner_id: string; value: string }
+      await expect(Promise.resolve(db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, ?)').run('next-class', latest.owner_id, latest.value, 'class'))).resolves.toBeDefined()
+      await expect(Promise.resolve(db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, ?)').run('next-class-2', latest.owner_id, latest.value, 'class-2'))).resolves.toBeDefined()
+      await expect(Promise.resolve(db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, NULL)').run('next-template', latest.owner_id, latest.value))).resolves.toBeDefined()
+      await expect(async () => (await db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, NULL)').run('duplicate-template', latest.owner_id, latest.value))).rejects.toThrow()
+      await expect(async () => (await db.prepare('INSERT INTO settings_versions (id,owner_id,version,value,created_at,class_id) VALUES (?, ?, 2, ?, 100, ?)').run('duplicate', latest.owner_id, latest.value, 'class'))).rejects.toThrow()
       expect(db.pragma('foreign_key_check')).toEqual([])
     } finally { db.close() }
   })
   it.each([1, 2, 3] as const)('v%s物理删除商品留下的历史兑换迁移为空引用，双班不误关联且可导出恢复及退款', async version => {
-    const legacy = version === 3 ? versionThreeFixture() : legacyDatabase()
+    const legacy = version === 3 ? (await versionThreeFixture()) : legacyDatabase()
     if (version === 2) versionTwoFixture(legacy.db)
     if (version < 3) legacy.db.exec(`
       INSERT INTO classes VALUES ('class-2', 'teacher', '另一个原班级', 2);
       INSERT INTO students (id,class_id,name,created_at) VALUES ('second','class-2','另班学生',2);
     `)
-    if (version >= 2) legacy.db.prepare('UPDATE redemptions SET stock_deducted = 0 WHERE id = ?').run('spent')
-    legacy.db.prepare('INSERT INTO redemptions (id,student_id,item_id,item_name,cost,created_at,undone) VALUES (?, ?, ?, ?, 2, 80, 1)').run('orphan-undone', 'second', 'reward', JSON.stringify({ zh: '原商品退款记录', en: 'Original refunded reward' }))
-    legacy.db.prepare('DELETE FROM items WHERE id = ?').run('reward')
-    legacy.db.prepare('INSERT INTO items (id,owner_id,name,cost,active) VALUES (?, ?, ?, 1, 1)').run('replacement-reward', 'teacher', JSON.stringify({ zh: '奖励', en: 'Reward' }))
-    if (version >= 2) legacy.db.prepare('UPDATE items SET stock = 5 WHERE id = ?').run('replacement-reward')
+    if (version >= 2) await legacy.db.prepare('UPDATE redemptions SET stock_deducted = 0 WHERE id = ?').run('spent')
+    await legacy.db.prepare('INSERT INTO redemptions (id,student_id,item_id,item_name,cost,created_at,undone) VALUES (?, ?, ?, ?, 2, 80, 1)').run('orphan-undone', 'second', 'reward', JSON.stringify({ zh: '原商品退款记录', en: 'Original refunded reward' }))
+    await legacy.db.prepare('DELETE FROM items WHERE id = ?').run('reward')
+    await legacy.db.prepare('INSERT INTO items (id,owner_id,name,cost,active) VALUES (?, ?, ?, 1, 1)').run('replacement-reward', 'teacher', JSON.stringify({ zh: '奖励', en: 'Reward' }))
+    if (version >= 2) await legacy.db.prepare('UPDATE items SET stock = 5 WHERE id = ?').run('replacement-reward')
     const historicalColumns = 'id,student_id,item_name,cost,created_at,undone'
-    const originalHistory = legacy.db.prepare(`SELECT ${historicalColumns} FROM redemptions ORDER BY id`).all()
-    const originalStudents = withFestivalBackground(withBackground(legacy.db.prepare('SELECT * FROM students ORDER BY id').all()))
+    const originalHistory = await legacy.db.prepare(`SELECT ${historicalColumns} FROM redemptions ORDER BY id`).all()
+    const originalStudents = withFestivalBackground(withBackground(await legacy.db.prepare('SELECT * FROM students ORDER BY id').all()))
     legacy.db.close()
     const db = createDatabase(legacy.path), garden = new Garden(db)
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(8)
-      expectBackgroundDefaults(db)
-      expect(db.prepare(`SELECT ${historicalColumns} FROM redemptions ORDER BY id`).all()).toEqual(originalHistory)
-      expect(db.prepare('SELECT * FROM students ORDER BY id').all()).toEqual(originalStudents)
-      expect(db.prepare("SELECT id,item_id,stock_deducted FROM redemptions WHERE id IN ('spent','orphan-undone') ORDER BY id").all()).toEqual([
+      await expectBackgroundDefaults(db)
+      expect(await db.prepare(`SELECT ${historicalColumns} FROM redemptions ORDER BY id`).all()).toEqual(originalHistory)
+      expect(await db.prepare('SELECT * FROM students ORDER BY id').all()).toEqual(originalStudents)
+      expect(await db.prepare("SELECT id,item_id,stock_deducted FROM redemptions WHERE id IN ('spent','orphan-undone') ORDER BY id").all()).toEqual([
         { id: 'orphan-undone', item_id: null, stock_deducted: 0 },
         { id: 'spent', item_id: null, stock_deducted: 0 }
       ])
-      expect(db.prepare('SELECT r.id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN items i ON i.id = r.item_id WHERE i.class_id IS NULL OR i.class_id != s.class_id').all()).toEqual([])
-      expect(db.prepare('SELECT id FROM items WHERE name = ? AND class_id IS NOT NULL').all(JSON.stringify({ zh: '奖励', en: 'Reward' }))).toHaveLength(2)
-      if (version === 3) expect(db.prepare('SELECT i.active,i.stock,i.class_id FROM redemptions r JOIN items i ON i.id = r.item_id WHERE r.id = ?').get('second-spent')).toEqual({ active: 0, stock: 0, class_id: 'class-2' })
-      garden.saveProfile('teacher', { displayName: '历史教师', subject: '语文', teachingRole: 'homeroom' })
-      const originalClasses = db.prepare('SELECT * FROM classes ORDER BY id').all()
-      const migratedHistory = db.prepare('SELECT * FROM redemptions ORDER BY id').all() as { id: string }[]
-      const backup = exportBackup(garden, 'teacher')
+      expect(await db.prepare('SELECT r.id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN items i ON i.id = r.item_id WHERE i.class_id IS NULL OR i.class_id != s.class_id').all()).toEqual([])
+      expect(await db.prepare('SELECT id FROM items WHERE name = ? AND class_id IS NOT NULL').all(JSON.stringify({ zh: '奖励', en: 'Reward' }))).toHaveLength(2)
+      if (version === 3) expect(await db.prepare('SELECT i.active,i.stock,i.class_id FROM redemptions r JOIN items i ON i.id = r.item_id WHERE r.id = ?').get('second-spent')).toEqual({ active: 0, stock: 0, class_id: 'class-2' })
+      await garden.saveProfile('teacher', { displayName: '历史教师', subject: '语文', teachingRole: 'homeroom' })
+      const originalClasses = await db.prepare('SELECT * FROM classes ORDER BY id').all()
+      const migratedHistory = await db.prepare('SELECT * FROM redemptions ORDER BY id').all() as { id: string }[]
+      const backup = await exportBackup(garden, 'teacher')
       expect(backup.version).toBe(7)
       expect(backup.redemptions.filter(row => ['spent', 'orphan-undone'].includes(row.id)).map(row => row.item_id)).toEqual([null, null])
       const imported = await restoreBackup(garden, 'teacher', backup)
       expect(imported.imported).toBe(2)
       expect(imported.classIds).toHaveLength(2)
       expect(imported.classIds.every(id => !['class', 'class-2'].includes(id))).toBe(true)
-      expect(db.prepare("SELECT * FROM classes WHERE id IN ('class','class-2') ORDER BY id").all()).toEqual(originalClasses)
-      expect(db.prepare("SELECT * FROM students WHERE class_id IN ('class','class-2') ORDER BY id").all()).toEqual(originalStudents)
-      expect(db.prepare("SELECT * FROM redemptions WHERE student_id IN (SELECT id FROM students WHERE class_id IN ('class','class-2')) ORDER BY id").all()).toEqual(migratedHistory)
-      expect(garden.snapshot('teacher').classes).toHaveLength(4)
+      expect(await db.prepare("SELECT * FROM classes WHERE id IN ('class','class-2') ORDER BY id").all()).toEqual(originalClasses)
+      expect(await db.prepare("SELECT * FROM students WHERE class_id IN ('class','class-2') ORDER BY id").all()).toEqual(originalStudents)
+      expect(await db.prepare("SELECT * FROM redemptions WHERE student_id IN (SELECT id FROM students WHERE class_id IN ('class','class-2')) ORDER BY id").all()).toEqual(migratedHistory)
+      expect((await garden.snapshot('teacher')).classes).toHaveLength(4)
       for (const [index, sourceClass] of backup.classes.entries()) {
-        const restored = garden.snapshot('teacher', imported.classIds[index]), original = garden.snapshot('teacher', sourceClass.id)
+        const restored = await garden.snapshot('teacher', imported.classIds[index]), original = await garden.snapshot('teacher', sourceClass.id)
         const studentValues = (state: typeof restored) => state.students.map(({ name, points, pet_exp, generation, spent_badges }) => ({ name, points, pet_exp, generation, spent_badges })).sort((a, b) => a.name.localeCompare(b.name))
         expect(studentValues(restored)).toEqual(studentValues(original))
         expect(restored.redemptions.map(({ item_name, cost, undone, stock_deducted }) => ({ item_name, cost, undone, stock_deducted }))).toEqual(original.redemptions.map(({ item_name, cost, undone, stock_deducted }) => ({ item_name, cost, undone, stock_deducted })))
       }
       const importedFirstClass = imported.classIds[backup.classes.findIndex(row => row.id === 'class')]
-      const importedStudent = garden.snapshot('teacher', importedFirstClass).students.find(row => row.name === '毕业学生')!
-      const importedRedemption = garden.snapshot('teacher', importedFirstClass).redemptions.find(row => row.student_id === importedStudent.id && row.undone === 0)!
-      expect(db.prepare('SELECT item_id,stock_deducted FROM redemptions WHERE id = ?').get(importedRedemption.id)).toEqual({ item_id: null, stock_deducted: 0 })
-      const inventory = db.prepare('SELECT id,class_id,stock,active FROM items ORDER BY id').all()
+      const importedStudent = (await garden.snapshot('teacher', importedFirstClass)).students.find(row => row.name === '毕业学生')!
+      const importedRedemption = (await garden.snapshot('teacher', importedFirstClass)).redemptions.find(row => row.student_id === importedStudent.id && row.undone === 0)!
+      expect(await db.prepare('SELECT item_id,stock_deducted FROM redemptions WHERE id = ?').get(importedRedemption.id)).toEqual({ item_id: null, stock_deducted: 0 })
+      const inventory = await db.prepare('SELECT id,class_id,stock,active FROM items ORDER BY id').all()
       for (const [redemptionId, studentId] of [['spent', 'graduate'], [importedRedemption.id, importedStudent.id]]) {
-        expect(garden.student('teacher', studentId).spent_badges).toBe(1)
-        garden.undoRedemption('teacher', redemptionId)
-        expect(garden.student('teacher', studentId).spent_badges).toBe(0)
-        expect(db.prepare('SELECT item_id,item_name,cost,undone,stock_deducted FROM redemptions WHERE id = ?').get(redemptionId)).toEqual({ item_id: null, item_name: JSON.stringify({ zh: '奖励', en: 'Reward' }), cost: 1, undone: 1, stock_deducted: 0 })
-        expect(db.prepare('SELECT id,class_id,stock,active FROM items ORDER BY id').all()).toEqual(inventory)
-        expect(() => garden.undoRedemption('teacher', redemptionId)).toThrow('notFound')
+        expect((await garden.student('teacher', studentId)).spent_badges).toBe(1)
+        await garden.undoRedemption('teacher', redemptionId)
+        expect((await garden.student('teacher', studentId)).spent_badges).toBe(0)
+        expect(await db.prepare('SELECT item_id,item_name,cost,undone,stock_deducted FROM redemptions WHERE id = ?').get(redemptionId)).toEqual({ item_id: null, item_name: JSON.stringify({ zh: '奖励', en: 'Reward' }), cost: 1, undone: 1, stock_deducted: 0 })
+        expect(await db.prepare('SELECT id,class_id,stock,active FROM items ORDER BY id').all()).toEqual(inventory)
+        await expect(async () => (await garden.undoRedemption('teacher', redemptionId))).rejects.toThrow('notFound')
       }
-      expect(db.prepare('SELECT item_id,item_name,cost,undone FROM redemptions WHERE id = ?').get('orphan-undone')).toEqual({ item_id: null, item_name: JSON.stringify({ zh: '原商品退款记录', en: 'Original refunded reward' }), cost: 2, undone: 1 })
-      expect(db.prepare('SELECT r.id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN items i ON i.id = r.item_id WHERE i.class_id IS NULL OR i.class_id != s.class_id').all()).toEqual([])
+      expect(await db.prepare('SELECT item_id,item_name,cost,undone FROM redemptions WHERE id = ?').get('orphan-undone')).toEqual({ item_id: null, item_name: JSON.stringify({ zh: '原商品退款记录', en: 'Original refunded reward' }), cost: 2, undone: 1 })
+      expect(await db.prepare('SELECT r.id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN items i ON i.id = r.item_id WHERE i.class_id IS NULL OR i.class_id != s.class_id').all()).toEqual([])
       expect(db.pragma('foreign_key_check')).toEqual([])
     } finally { db.close() }
   })
-  it('v4复制阶段失败会回滚所有DDL和引用重建', () => {
-    const legacy = versionThreeFixture()
-    const before = legacy.db.prepare('SELECT * FROM growth_events ORDER BY seq').all()
+  it('v4复制阶段失败会回滚所有DDL和引用重建', async () => {
+    const legacy = await versionThreeFixture()
+    const before = await legacy.db.prepare('SELECT * FROM growth_events ORDER BY seq').all()
     legacy.db.exec("CREATE TRIGGER reject_copy BEFORE INSERT ON rules WHEN NEW.id != 'legacy-rule' BEGIN SELECT RAISE(ABORT, 'fixture-copy-failure'); END")
     legacy.db.close()
     expect(() => createDatabase(legacy.path)).toThrow('fixture-copy-failure')
     const db = new Database(legacy.path)
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(3)
-      expect(db.prepare('SELECT * FROM growth_events ORDER BY seq').all()).toEqual(before)
-      expect(db.prepare("SELECT name FROM sqlite_master WHERE name IN ('settings_versions_v4','growth_events_v4','class_members','class_invites')").all()).toEqual([])
+      expect(await db.prepare('SELECT * FROM growth_events ORDER BY seq').all()).toEqual(before)
+      expect(await db.prepare("SELECT name FROM sqlite_master WHERE name IN ('settings_versions_v4','growth_events_v4','class_members','class_invites')").all()).toEqual([])
       expect((db.pragma('table_info(users)') as { name: string }[]).map(row => row.name)).not.toContain('display_name')
-      expect(db.prepare('SELECT COUNT(*) AS n FROM settings_versions').get()).toEqual({ n: 2 })
+      expect(await db.prepare('SELECT COUNT(*) AS n FROM settings_versions').get()).toEqual({ n: 2 })
       expect(db.pragma('foreign_key_check')).toEqual([])
     } finally { db.close() }
   })
-  it('真实v4补null列与逐班逐教师41背景，旧数据/图片/署名不变且重开不重复或重新上架', () => {
-    const legacy = versionFourFixture()
+  it('真实v4补null列与逐班逐教师41背景，旧数据/图片/署名不变且重开不重复或重新上架', async () => {
+    const legacy = await versionFourFixture()
     const tables = ['users', 'classes', 'class_members', 'class_invites', 'settings_versions', 'rules', 'students', 'evaluations', 'growth_events', 'badges', 'items', 'redemptions']
-    const before = Object.fromEntries(tables.map(table => [table, legacy.db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()]))
+    const before = Object.fromEntries(await Promise.all(tables.map(async table => [table, (await legacy.db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all())])))
     for (const table of ['students', 'items', 'redemptions']) expect((legacy.db.pragma(`table_info(${table})`) as { name: string }[]).some(row => row.name === 'background_id')).toBe(false)
     legacy.db.close()
     const db = createDatabase(legacy.path)
     let after: Record<string, unknown[]>
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(8)
-      expectBackgroundDefaults(db)
+      await expectBackgroundDefaults(db)
       for (const table of tables) {
-        const rows = db.prepare(`SELECT * FROM ${table}${table === 'items' ? ' WHERE background_id IS NULL' : ''} ORDER BY rowid`).all()
+        const rows = await db.prepare(`SELECT * FROM ${table}${table === 'items' ? ' WHERE background_id IS NULL' : ''} ORDER BY rowid`).all()
         const expected = ['students', 'items', 'redemptions'].includes(table) ? withBackground(before[table]) : before[table]
         expect(rows).toEqual(table === 'students' ? withFestivalBackground(expected) : expected)
       }
-      db.prepare("UPDATE items SET active = 0, cost = 3 WHERE class_id = 'class' AND background_id = 'garden'").run()
-      after = Object.fromEntries(tables.map(table => [table, db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()]))
+      await db.prepare("UPDATE items SET active = 0, cost = 3 WHERE class_id = 'class' AND background_id = 'garden'").run()
+      after = Object.fromEntries(await Promise.all(tables.map(async table => [table, (await db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all())])))
       expect(db.pragma('foreign_key_check')).toEqual([])
     } finally { db.close() }
     const reopened = createDatabase(legacy.path)
@@ -453,23 +453,23 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(reopened.prepare('SELECT COUNT(*) AS n FROM items WHERE background_id IS NOT NULL').get()).toEqual({ n: 4 * 41 })
     } finally { reopened.close() }
   })
-  it('v5背景初始化中途失败回滚新增字段、已插入背景及版本，保留完整v4原表', () => {
-    const legacy = versionFourFixture()
-    const tables = legacy.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as { name: string }[]
-    const before = Object.fromEntries(tables.map(({ name }) => [name, legacy.db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all()]))
+  it('v5背景初始化中途失败回滚新增字段、已插入背景及版本，保留完整v4原表', async () => {
+    const legacy = await versionFourFixture()
+    const tables = await legacy.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as { name: string }[]
+    const before = Object.fromEntries(await Promise.all(tables.map(async ({ name }) => [name, (await legacy.db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all())])))
     legacy.db.exec("CREATE TRIGGER reject_background_seed BEFORE INSERT ON items WHEN NEW.name LIKE '%星光%' BEGIN SELECT RAISE(ABORT, 'fixture-background-seed-failure'); END")
     legacy.db.close()
     expect(() => createDatabase(legacy.path)).toThrow('fixture-background-seed-failure')
     const db = new Database(legacy.path)
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(4)
-      for (const { name } of tables) expect(db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all()).toEqual(before[name])
+      for (const { name } of tables) expect(await db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all()).toEqual(before[name])
       for (const table of ['students', 'items', 'redemptions']) expect((db.pragma(`table_info(${table})`) as { name: string }[]).some(row => row.name === 'background_id')).toBe(false)
       expect(db.pragma('foreign_key_check')).toEqual([])
     } finally { db.close() }
   })
-  it('真实v4经v5/v6/v7时依次只插原四/28节日/9国内节日，不从实时目录扩大旧迁移', () => {
-    const legacy = versionFourFixture()
+  it('真实v4经v5/v6/v7时依次只插原四/28节日/9国内节日，不从实时目录扩大旧迁移', async () => {
+    const legacy = await versionFourFixture()
     legacy.db.exec(`
       CREATE TABLE fixture_background_seed_audit (item_id TEXT NOT NULL, schema_version INTEGER NOT NULL);
       CREATE TRIGGER fixture_audit_background_seed AFTER INSERT ON items BEGIN
@@ -480,32 +480,32 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     const db = createDatabase(legacy.path)
     try {
       expect(db.pragma('user_version', { simple: true })).toBe(8)
-      expect(db.prepare('SELECT schema_version, COUNT(*) AS n FROM fixture_background_seed_audit GROUP BY schema_version ORDER BY schema_version').all()).toEqual([{ schema_version: 4, n: 4 * 4 }, { schema_version: 5, n: 4 * 28 }, { schema_version: 6, n: 4 * 9 }])
-      const seeded = (version: number) => (db.prepare('SELECT DISTINCT i.background_id FROM fixture_background_seed_audit a JOIN items i ON i.id = a.item_id WHERE a.schema_version = ? ORDER BY i.background_id').all(version) as { background_id: string }[]).map(row => row.background_id)
-      expect(seeded(4)).toEqual([...versionFiveBackgroundIds].sort())
-      expect(seeded(5)).toEqual([...holidayBackgroundIds].sort())
-      expect(seeded(6)).toEqual([...versionSevenBackgroundIds].sort())
+      expect(await db.prepare('SELECT schema_version, COUNT(*) AS n FROM fixture_background_seed_audit GROUP BY schema_version ORDER BY schema_version').all()).toEqual([{ schema_version: 4, n: 4 * 4 }, { schema_version: 5, n: 4 * 28 }, { schema_version: 6, n: 4 * 9 }])
+      const seeded = async (version: number) => (await db.prepare('SELECT DISTINCT i.background_id FROM fixture_background_seed_audit a JOIN items i ON i.id = a.item_id WHERE a.schema_version = ? ORDER BY i.background_id').all(version) as { background_id: string }[]).map(row => row.background_id)
+      expect(await seeded(4)).toEqual([...versionFiveBackgroundIds].sort())
+      expect(await seeded(5)).toEqual([...holidayBackgroundIds].sort())
+      expect(await seeded(6)).toEqual([...versionSevenBackgroundIds].sort())
       expect(db.pragma('foreign_key_check')).toEqual([])
     } finally { db.close() }
   })
-  it('真实v5升级按阶段追加28+9，原四缺失/下架/班价/持有装备不变，无班用户模板也补且v7重开不补回删除项', () => {
-    const legacy = versionFiveFixture(), db = legacy.db
+  it('真实v5升级按阶段追加28+9，原四缺失/下架/班价/持有装备不变，无班用户模板也补且v7重开不补回删除项', async () => {
+    const legacy = await versionFiveFixture(), db = legacy.db
     expect(db.pragma('user_version', { simple: true })).toBe(5)
-    expect(db.prepare('SELECT DISTINCT background_id FROM items WHERE background_id IS NOT NULL ORDER BY background_id').all()).toEqual([...versionFiveBackgroundIds].sort().map(background_id => ({ background_id })))
+    expect(await db.prepare('SELECT DISTINCT background_id FROM items WHERE background_id IS NOT NULL ORDER BY background_id').all()).toEqual([...versionFiveBackgroundIds].sort().map(background_id => ({ background_id })))
     const ownedItem = v5BackgroundItemId('teacher', 'class', 'garden')
-    db.prepare('INSERT INTO redemptions (id, student_id, item_id, item_name, cost, created_at, background_id, actor_user_id, actor_name, actor_subject) SELECT ?, ?, id, name, 1, 90, background_id, owner_id, ?, ? FROM items WHERE id = ?').run('v5-owned-garden', 'regressed', '历史v5教师', '科学', ownedItem)
-    db.prepare("UPDATE students SET background_id = 'garden', spent_badges = 1 WHERE id = 'regressed'").run()
-    db.prepare('UPDATE items SET active = 0, cost = 3 WHERE id = ?').run(ownedItem)
-    db.prepare('UPDATE items SET cost = 5 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'starlight'))
-    for (const id of [v5BackgroundItemId('teacher', 'class', 'beach'), v5BackgroundItemId('teacher', null, 'garden')]) db.prepare('DELETE FROM items WHERE id = ?').run(id)
-    db.prepare('UPDATE items SET active = 0, cost = 7 WHERE id = ?').run(v5BackgroundItemId('no-classes', null, 'classroom'))
-    const before = databaseRows(db), oldItems = before.items as { id: string }[], oldIds = new Set(oldItems.map(row => row.id))
+    await db.prepare('INSERT INTO redemptions (id, student_id, item_id, item_name, cost, created_at, background_id, actor_user_id, actor_name, actor_subject) SELECT ?, ?, id, name, 1, 90, background_id, owner_id, ?, ? FROM items WHERE id = ?').run('v5-owned-garden', 'regressed', '历史v5教师', '科学', ownedItem)
+    await db.prepare("UPDATE students SET background_id = 'garden', spent_badges = 1 WHERE id = 'regressed'").run()
+    await db.prepare('UPDATE items SET active = 0, cost = 3 WHERE id = ?').run(ownedItem)
+    await db.prepare('UPDATE items SET cost = 5 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'starlight'))
+    for (const id of [v5BackgroundItemId('teacher', 'class', 'beach'), v5BackgroundItemId('teacher', null, 'garden')]) await db.prepare('DELETE FROM items WHERE id = ?').run(id)
+    await db.prepare('UPDATE items SET active = 0, cost = 7 WHERE id = ?').run(v5BackgroundItemId('no-classes', null, 'classroom'))
+    const before = await databaseRows(db), oldItems = before.items as { id: string }[], oldIds = new Set(oldItems.map(row => row.id))
     db.close()
     const migrated = createDatabase(legacy.path)
-    let after: ReturnType<typeof databaseRows>
+    let after: Awaited<ReturnType<typeof databaseRows>>
     try {
       expect(migrated.pragma('user_version', { simple: true })).toBe(8)
-      for (const [table, rows] of Object.entries(before)) if (table !== 'items') expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows) : rows)
+      for (const [table, rows] of Object.entries(before)) if (table !== 'items') expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows as unknown[]) : rows)
       const all = migrated.prepare('SELECT * FROM items ORDER BY rowid').all() as { id: string; owner_id: string; class_id: string | null; background_id: string | null; cost: number; active: number; stock: number; image: string | null; category: string }[]
       expect(all.filter(row => oldIds.has(row.id))).toEqual(oldItems)
       const added = all.filter(row => !oldIds.has(row.id))
@@ -520,24 +520,24 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(migrated.prepare("SELECT id FROM items WHERE owner_id = 'teacher' AND class_id IS NULL AND background_id = 'garden'").all()).toEqual([])
       migrated.prepare('DELETE FROM items WHERE class_id = ? AND background_id = ?').run('class-2', holidayBackgroundIds[0])
       migrated.prepare('UPDATE items SET active = 0, cost = 6 WHERE owner_id = ? AND class_id IS NULL AND background_id = ?').run('no-classes', holidayBackgroundIds[1])
-      after = databaseRows(migrated)
+      after = (await databaseRows(migrated))
       expect(migrated.pragma('foreign_key_check')).toEqual([])
     } finally { migrated.close() }
     const reopened = createDatabase(legacy.path)
-    try { expect(databaseRows(reopened)).toEqual(after!); expect(reopened.pragma('user_version', { simple: true })).toBe(8) } finally { reopened.close() }
+    try { expect(await databaseRows(reopened)).toEqual(after!); expect(reopened.pragma('user_version', { simple: true })).toBe(8) } finally { reopened.close() }
   })
-  it('v6追加节日中途失败全表回滚并保留真实v5版本及原四状态，重试按28+9升级不补回旧缺失', () => {
-    const legacy = versionFiveFixture(), db = legacy.db
-    db.prepare('DELETE FROM items WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'beach'))
-    db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'garden'))
-    const before = databaseRows(db), rejected = holidayBackgroundIds[1]
+  it('v6追加节日中途失败全表回滚并保留真实v5版本及原四状态，重试按28+9升级不补回旧缺失', async () => {
+    const legacy = await versionFiveFixture(), db = legacy.db
+    await db.prepare('DELETE FROM items WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'beach'))
+    await db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'garden'))
+    const before = await databaseRows(db), rejected = holidayBackgroundIds[1]
     db.exec(`CREATE TRIGGER reject_holiday_seed BEFORE INSERT ON items WHEN NEW.background_id = '${rejected.replaceAll("'", "''")}' BEGIN SELECT RAISE(ABORT, 'fixture-holiday-seed-failure'); END`)
     db.close()
     expect(() => createDatabase(legacy.path)).toThrow('fixture-holiday-seed-failure')
     const check = new Database(legacy.path)
     try {
       expect(check.pragma('user_version', { simple: true })).toBe(5)
-      expect(databaseRows(check)).toEqual(before)
+      expect(await databaseRows(check)).toEqual(before)
       expect(check.prepare('SELECT DISTINCT background_id FROM items WHERE background_id IS NOT NULL ORDER BY background_id').all()).toEqual([...versionFiveBackgroundIds].sort().map(background_id => ({ background_id })))
       check.exec('DROP TRIGGER reject_holiday_seed')
     } finally { check.close() }
@@ -551,30 +551,30 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(rows.filter(row => new Set<string>(versionSevenBackgroundIds).has(row.background_id))).toHaveLength(4 * 9)
     } finally { retried.close() }
   })
-  it('真实v6仅追加9国内节日到逐班及无班教师模板，冻结32内的缺失/下架/原价/持有装备不变且重开不复活', () => {
-    const legacy = versionSixFixture(), db = legacy.db
+  it('真实v6仅追加9国内节日到逐班及无班教师模板，冻结32内的缺失/下架/原价/持有装备不变且重开不复活', async () => {
+    const legacy = await versionSixFixture(), db = legacy.db
     expect(db.pragma('user_version', { simple: true })).toBe(6)
     const frozenIds = [...versionFiveBackgroundIds, ...holidayBackgroundIds]
-    expect(db.prepare('SELECT DISTINCT background_id FROM items WHERE background_id IS NOT NULL ORDER BY background_id').all()).toEqual([...frozenIds].sort().map(background_id => ({ background_id })))
-    expect(db.prepare('SELECT COUNT(*) AS n FROM items WHERE background_id IS NOT NULL').get()).toEqual({ n: 4 * 32 })
+    expect(await db.prepare('SELECT DISTINCT background_id FROM items WHERE background_id IS NOT NULL ORDER BY background_id').all()).toEqual([...frozenIds].sort().map(background_id => ({ background_id })))
+    expect(await db.prepare('SELECT COUNT(*) AS n FROM items WHERE background_id IS NOT NULL').get()).toEqual({ n: 4 * 32 })
     const gardenItem = v5BackgroundItemId('teacher', 'class', 'garden'), holidayItem = `v6-teacher-class-${holidayBackgroundIds[0]}`
     const insertOwned = db.prepare('INSERT INTO redemptions (id, student_id, item_id, item_name, cost, created_at, background_id, actor_user_id, actor_name, actor_subject) SELECT ?, ?, id, name, ?, 90, background_id, owner_id, ?, ? FROM items WHERE id = ?')
     insertOwned.run('v6-owned-garden', 'regressed', 1, '历史v6教师', '科学', gardenItem)
     insertOwned.run('v6-owned-holiday', 'graduate', 2, '历史v6教师', '科学', holidayItem)
-    db.prepare("UPDATE students SET background_id = 'garden', spent_badges = 1 WHERE id = 'regressed'").run()
-    db.prepare('UPDATE students SET background_id = ?, spent_badges = 3 WHERE id = ?').run(holidayBackgroundIds[0], 'graduate')
-    db.prepare('UPDATE items SET active = 0, cost = 7 WHERE id = ?').run(gardenItem)
-    db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(holidayItem)
-    db.prepare('UPDATE items SET cost = 5 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class-2', 'starlight'))
-    db.prepare('UPDATE items SET cost = 6 WHERE id = ?').run(`v6-no-classes-template-${holidayBackgroundIds[1]}`)
-    for (const id of [v5BackgroundItemId('teacher', 'class', 'beach'), v5BackgroundItemId('teacher', null, 'garden'), `v6-teacher-class-2-${holidayBackgroundIds[2]}`, `v6-no-classes-template-${holidayBackgroundIds[3]}`]) db.prepare('DELETE FROM items WHERE id = ?').run(id)
-    const before = databaseRows(db), oldItems = before.items as { id: string }[], oldIds = new Set(oldItems.map(row => row.id))
+    await db.prepare("UPDATE students SET background_id = 'garden', spent_badges = 1 WHERE id = 'regressed'").run()
+    await db.prepare('UPDATE students SET background_id = ?, spent_badges = 3 WHERE id = ?').run(holidayBackgroundIds[0], 'graduate')
+    await db.prepare('UPDATE items SET active = 0, cost = 7 WHERE id = ?').run(gardenItem)
+    await db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(holidayItem)
+    await db.prepare('UPDATE items SET cost = 5 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class-2', 'starlight'))
+    await db.prepare('UPDATE items SET cost = 6 WHERE id = ?').run(`v6-no-classes-template-${holidayBackgroundIds[1]}`)
+    for (const id of [v5BackgroundItemId('teacher', 'class', 'beach'), v5BackgroundItemId('teacher', null, 'garden'), `v6-teacher-class-2-${holidayBackgroundIds[2]}`, `v6-no-classes-template-${holidayBackgroundIds[3]}`]) await db.prepare('DELETE FROM items WHERE id = ?').run(id)
+    const before = await databaseRows(db), oldItems = before.items as { id: string }[], oldIds = new Set(oldItems.map(row => row.id))
     db.close()
     const migrated = createDatabase(legacy.path)
-    let after: ReturnType<typeof databaseRows>
+    let after: Awaited<ReturnType<typeof databaseRows>>
     try {
       expect(migrated.pragma('user_version', { simple: true })).toBe(8)
-      for (const [table, rows] of Object.entries(before)) if (table !== 'items') expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows) : rows)
+      for (const [table, rows] of Object.entries(before)) if (table !== 'items') expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows as unknown[]) : rows)
       const all = migrated.prepare('SELECT * FROM items ORDER BY rowid').all() as { id: string; owner_id: string; class_id: string | null; background_id: string | null; cost: number; active: number; stock: number; image: string | null; image_key: string | null; image_bytes: number; category: string }[]
       expect(all.filter(row => oldIds.has(row.id))).toEqual(oldItems)
       const added = all.filter(row => !oldIds.has(row.id))
@@ -587,25 +587,25 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(migrated.prepare('SELECT active, cost FROM items WHERE id = ?').get(holidayItem)).toEqual({ active: 0, cost: 8 })
       migrated.prepare('DELETE FROM items WHERE class_id = ? AND background_id = ?').run('class', versionSevenBackgroundIds[0])
       migrated.prepare('UPDATE items SET active = 0, cost = 9 WHERE owner_id = ? AND class_id IS NULL AND background_id = ?').run('no-classes', versionSevenBackgroundIds[1])
-      after = databaseRows(migrated)
+      after = (await databaseRows(migrated))
       expect(migrated.pragma('foreign_key_check')).toEqual([])
     } finally { migrated.close() }
     const reopened = createDatabase(legacy.path)
-    try { expect(reopened.pragma('user_version', { simple: true })).toBe(8); expect(databaseRows(reopened)).toEqual(after!) } finally { reopened.close() }
+    try { expect(reopened.pragma('user_version', { simple: true })).toBe(8); expect(await databaseRows(reopened)).toEqual(after!) } finally { reopened.close() }
   })
-  it.each([5, 6] as const)('真实v%s在v7追加9中途失败时连同前阶段全迁移零写入，重试保留旧缺失和下架', version => {
-    const legacy = version === 5 ? versionFiveFixture() : versionSixFixture(), db = legacy.db
-    db.prepare('DELETE FROM items WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'beach'))
-    db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'garden'))
+  it.each([5, 6] as const)('真实v%s在v7追加9中途失败时连同前阶段全迁移零写入，重试保留旧缺失和下架', async version => {
+    const legacy = version === 5 ? (await versionFiveFixture()) : (await versionSixFixture()), db = legacy.db
+    await db.prepare('DELETE FROM items WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'beach'))
+    await db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(v5BackgroundItemId('teacher', 'class', 'garden'))
     const rejected = versionSevenBackgroundIds[1]
     db.exec(`CREATE TRIGGER reject_v7_seed BEFORE INSERT ON items WHEN NEW.background_id = '${rejected.replaceAll("'", "''")}' BEGIN SELECT RAISE(ABORT, 'fixture-v7-seed-failure'); END`)
-    const before = databaseRows(db), schema = db.prepare('SELECT * FROM sqlite_master ORDER BY name').all()
+    const before = await databaseRows(db), schema = await db.prepare('SELECT * FROM sqlite_master ORDER BY name').all()
     db.close()
     expect(() => createDatabase(legacy.path)).toThrow('fixture-v7-seed-failure')
     const check = new Database(legacy.path)
     try {
       expect(check.pragma('user_version', { simple: true })).toBe(version)
-      expect(databaseRows(check)).toEqual(before)
+      expect(await databaseRows(check)).toEqual(before)
       expect(check.prepare('SELECT * FROM sqlite_master ORDER BY name').all()).toEqual(schema)
       expect(check.pragma('foreign_key_check')).toEqual([])
       check.exec('DROP TRIGGER reject_v7_seed')
@@ -621,31 +621,31 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(retried.pragma('foreign_key_check')).toEqual([])
     } finally { retried.close() }
   })
-  it('真实v7到v8只补两个空临时列，原价格/下架/删除/拥有/长期背景与全表不变且重开幂等', () => {
-    const legacy = versionSevenFixture(), db = legacy.db
+  it('真实v7到v8只补两个空临时列，原价格/下架/删除/拥有/长期背景与全表不变且重开幂等', async () => {
+    const legacy = await versionSevenFixture(), db = legacy.db
     expect((db.pragma('table_info(students)') as { name: string }[]).map(row => row.name)).not.toContain('festival_background_id')
     const itemId = v5BackgroundItemId('teacher', 'class', 'garden')
-    db.prepare('INSERT INTO redemptions (id, student_id, item_id, item_name, cost, created_at, background_id, actor_user_id, actor_name, actor_subject) SELECT ?, ?, id, name, 1, 90, background_id, owner_id, ?, ? FROM items WHERE id = ?').run('v7-owned-garden', 'regressed', '历史v7教师', '科学', itemId)
-    db.prepare("UPDATE students SET background_id = 'garden', spent_badges = 1 WHERE id = 'regressed'").run()
-    db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(itemId)
-    db.prepare('DELETE FROM items WHERE class_id = ? AND background_id = ?').run('class-2', 'diwali')
-    const before = databaseRows(db)
+    await db.prepare('INSERT INTO redemptions (id, student_id, item_id, item_name, cost, created_at, background_id, actor_user_id, actor_name, actor_subject) SELECT ?, ?, id, name, 1, 90, background_id, owner_id, ?, ? FROM items WHERE id = ?').run('v7-owned-garden', 'regressed', '历史v7教师', '科学', itemId)
+    await db.prepare("UPDATE students SET background_id = 'garden', spent_badges = 1 WHERE id = 'regressed'").run()
+    await db.prepare('UPDATE items SET active = 0, cost = 8 WHERE id = ?').run(itemId)
+    await db.prepare('DELETE FROM items WHERE class_id = ? AND background_id = ?').run('class-2', 'diwali')
+    const before = await databaseRows(db)
     db.close()
     const migrated = createDatabase(legacy.path)
-    let after: ReturnType<typeof databaseRows>
+    let after: Awaited<ReturnType<typeof databaseRows>>
     try {
       expect(migrated.pragma('user_version', { simple: true })).toBe(8)
-      for (const [table, rows] of Object.entries(before)) expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows) : rows)
+      for (const [table, rows] of Object.entries(before)) expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows as unknown[]) : rows)
       const columns = migrated.pragma('table_info(students)') as { name: string; type: string; dflt_value: unknown }[]
       expect(columns.slice(-2)).toMatchObject([{ name: 'festival_background_id', type: 'TEXT', dflt_value: null }, { name: 'festival_background_expires_at', type: 'INTEGER', dflt_value: null }])
       expect(migrated.pragma('foreign_key_check')).toEqual([])
       migrated.prepare('UPDATE students SET festival_background_id = ?, festival_background_expires_at = ? WHERE id = ?').run('national-day', Date.UTC(2026, 9, 1, 16), 'regressed')
-      after = databaseRows(migrated)
+      after = (await databaseRows(migrated))
     } finally { migrated.close() }
     const reopened = createDatabase(legacy.path)
     try {
       expect(reopened.pragma('user_version', { simple: true })).toBe(8)
-      expect(databaseRows(reopened)).toEqual(after!)
+      expect(await databaseRows(reopened)).toEqual(after!)
     } finally { reopened.close() }
   })
   it('两个数据库连接同时排队兑换同背景只有一次扣费，退款后另一连接可重兑', async () => {
@@ -654,24 +654,24 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     const path = join(directory, 'shared.db'), first = new Garden(createDatabase(path))
     let second: Garden | undefined
     try {
-      const owner = first.register({ username: 'concurrent-background', password: 'Concurrent-test-password' }).user.id
-      first.saveProfile(owner, { displayName: '并发测试教师', subject: '科学', teachingRole: 'homeroom' })
-      const classId = first.createClass(owner, { name: '并发背景班' }).id
-      const studentId = first.addStudents(owner, { classId, students: [{ name: '并发背景学生' }] })[0]
-      first.adopt(owner, studentId, { petId: 'panda' })
-      first.evaluate(owner, { studentIds: [studentId], custom: { points: 700 } })
-      const itemId = first.snapshot(owner, classId).items.find(item => item.background_id === 'garden')!.id
+      const owner = (await first.register({ username: 'concurrent-background', password: 'Concurrent-test-password' })).user.id
+      await first.saveProfile(owner, { displayName: '并发测试教师', subject: '科学', teachingRole: 'homeroom' })
+      const classId = (await first.createClass(owner, { name: '并发背景班' })).id
+      const studentId = (await first.addStudents(owner, { classId, students: [{ name: '并发背景学生' }] }))[0]
+      await first.adopt(owner, studentId, { petId: 'panda' })
+      await first.evaluate(owner, { studentIds: [studentId], custom: { points: 700 } })
+      const itemId = (await first.snapshot(owner, classId)).items.find(item => item.background_id === 'garden')!.id
       second = new Garden(createDatabase(path))
-      const requests = await Promise.allSettled([first, second].map(connection => Promise.resolve().then(() => connection.redeem(owner, { studentId, itemId }))))
+      const requests = await Promise.allSettled([first, second].map(connection => Promise.resolve().then(async () => (await connection.redeem(owner, { studentId, itemId })))))
       expect(requests.filter(result => result.status === 'fulfilled')).toHaveLength(1)
       expect((requests.find(result => result.status === 'rejected') as PromiseRejectedResult).reason).toMatchObject({ code: 'backgroundAlreadyOwned', status: 409 })
-      expect(first.snapshot(owner, classId).students[0]).toMatchObject({ spent_badges: 1, owned_background_ids: ['garden'] })
-      expect(second.snapshot(owner, classId).redemptions).toHaveLength(1)
-      first.setBackground(owner, studentId, { backgroundId: 'garden' })
-      second.undoRedemption(owner, second.snapshot(owner, classId).redemptions[0].id)
-      expect(() => first.setBackground(owner, studentId, { backgroundId: 'garden' })).toThrow('backgroundNotOwned')
-      first.redeem(owner, { studentId, itemId })
-      expect(second.snapshot(owner, classId).students[0]).toMatchObject({ background_id: null, spent_badges: 1, owned_background_ids: ['garden'] })
+      expect((await first.snapshot(owner, classId)).students[0]).toMatchObject({ spent_badges: 1, owned_background_ids: ['garden'] })
+      expect((await second.snapshot(owner, classId)).redemptions).toHaveLength(1)
+      await first.setBackground(owner, studentId, { backgroundId: 'garden' })
+      await second.undoRedemption(owner, (await second.snapshot(owner, classId)).redemptions[0].id)
+      await expect(async () => (await first.setBackground(owner, studentId, { backgroundId: 'garden' }))).rejects.toThrow('backgroundNotOwned')
+      await first.redeem(owner, { studentId, itemId })
+      expect((await second.snapshot(owner, classId)).students[0]).toMatchObject({ background_id: null, spent_badges: 1, owned_background_ids: ['garden'] })
     } finally { second?.db.close(); first.db.close() }
   })
   it('不会把更高版本的数据库降级', () => {

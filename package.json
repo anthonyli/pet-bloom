@@ -14,6 +14,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "deploy:vercel": "node scripts/deploy-vercel.mjs",
+    "deploy:check": "node scripts/deploy-vercel.mjs --check",
+    "db:check": "node scripts/migrate-turso.mjs --check",
+    "db:migrate": "node scripts/migrate-turso.mjs",
     "desktop:dev": "node scripts/desktop.mjs --dev",
     "desktop:test": "node scripts/desktop-smoke.mjs",
     "desktop:build:mac": "node scripts/desktop.mjs --mac --all-arch",
@@ -23,6 +27,7 @@
     "desktop:release:prepare": "node scripts/desktop-release.mjs"
   },
   "dependencies": {
+    "@libsql/client": "0.18.0",
     "@radix-ui/react-checkbox": "^1.4.1",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-select": "^2.4.1",

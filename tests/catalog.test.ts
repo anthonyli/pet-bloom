@@ -72,18 +72,18 @@ describe('真实八阶段宠物与参考图鉴分类', () => {
   it.each(['zodiac-rat', 'zodiac-ox', 'zodiac-snake'])('新增生肖 %s 可以领养、评价和备份恢复', async (petId) => {
     const garden = new Garden(createDatabase(':memory:'))
     try {
-      const owner = garden.register({ username: 'catalog-teacher', password: 'Catalog-password-123' }).user.id
-      garden.saveProfile(owner, { displayName: '图鉴老师', subject: '科学', teachingRole: 'homeroom' })
-      const classId = garden.createClass(owner, { name: '分类测试' }).id
-      const [student] = garden.addStudents(owner, { classId, students: [{ name: '生肖学生' }] })
-      garden.adopt(owner, student, { petId })
-      const rule = garden.snapshot(owner).rules.find(item => item.points === 3)!
-      garden.evaluate(owner, { studentIds: [student], ruleId: rule.id })
-      const result = await restoreBackup(garden, owner, exportBackup(garden, owner))
+      const owner = (await garden.register({ username: 'catalog-teacher', password: 'Catalog-password-123' })).user.id
+      await garden.saveProfile(owner, { displayName: '图鉴老师', subject: '科学', teachingRole: 'homeroom' })
+      const classId = (await garden.createClass(owner, { name: '分类测试' })).id
+      const [student] = await garden.addStudents(owner, { classId, students: [{ name: '生肖学生' }] })
+      await garden.adopt(owner, student, { petId })
+      const rule = (await garden.snapshot(owner)).rules.find(item => item.points === 3)!
+      await garden.evaluate(owner, { studentIds: [student], ruleId: rule.id })
+      const result = await restoreBackup(garden, owner, await exportBackup(garden, owner))
       expect(result.imported).toBe(1)
-      const restored = garden.snapshot(owner, result.classIds[0]).students[0]
+      const restored = (await garden.snapshot(owner, result.classIds[0])).students[0]
       expect(restored.id).not.toBe(student)
-      expect(garden.snapshot(owner, classId).students[0].id).toBe(student)
+      expect((await garden.snapshot(owner, classId)).students[0].id).toBe(student)
       expect(restored.pet_id).toBe(petId)
       expect(restored.points).toBe(3)
       expect(restored.pet_exp).toBe(3)

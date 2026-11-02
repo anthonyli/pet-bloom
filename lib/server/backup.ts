@@ -1,3 +1,4 @@
+import type { Statement } from './database-adapter'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import type { Garden } from './garden'
@@ -8,7 +9,7 @@ import { defaultGardenSettings, gardenSettingsSchema } from '../garden-settings'
 import { MAX_BACKUP_BYTES, MAX_CLASS_IMAGE_BYTES, MAX_STORED_IMAGE_BYTES, shopCategoryIds, shopIconIds } from '../shop'
 import { validateStoredImage } from './item-images'
 import { versionFiveBackgroundIds, holidayBackgroundIds, versionSevenBackgroundIds } from '../pet-backgrounds'
-import { initializeBackgroundItems } from './db'
+import { initializeBackgroundItems } from './database-defaults'
 
 const id = z.string().min(1).max(100)
 const name = z.string().min(1).max(80)
@@ -426,26 +427,26 @@ async function validateImages(items: CurrentBackup['items'] | ScopedBackup['item
   }
 }
 
-export function exportBackup(garden: Garden, owner: string) {
+export async function exportBackup(garden: Garden, owner: string) {
   const db = garden.db
-  return db.transaction(() => {
-    garden.requireProfile(owner)
-    const resources = (table: string, columns: string, order = 'r.rowid') => db.prepare(`
+  return await db.transaction(async () => {
+    await garden.requireProfile(owner)
+    const resources = async (table: string, columns: string, order = 'r.rowid') => (await db.prepare(`
       SELECT ${columns} FROM ${table} r LEFT JOIN classes c ON c.id = r.class_id
       WHERE (r.class_id IS NULL AND r.owner_id = ?) OR c.owner_id = ?
       ORDER BY CASE WHEN r.class_id IS NULL THEN 0 ELSE 1 END, c.rowid, ${order}
-    `).all(owner, owner)
+    `).all(owner, owner))
     const data: BackgroundBackup = {
       version: 7, exportedAt: new Date().toISOString(),
-      settings: (resources('settings_versions', 'r.id, r.class_id, r.version, r.value, r.created_at', 'r.version') as { id: string; class_id: string | null; version: number; value: string; created_at: number }[]).map(row => ({ ...row, value: JSON.parse(row.value) })),
-      rules: resources('rules', 'r.id, r.class_id, r.name, r.points, r.category, r.custom') as ScopedBackup['rules'],
-      items: resources('items', 'r.id, r.class_id, r.name, r.cost, r.active, r.description, r.category, r.icon, r.image, r.image_key, r.image_bytes, r.stock, r.background_id') as BackgroundBackup['items'],
-      classes: db.prepare('SELECT id, name, created_at FROM classes WHERE owner_id = ? ORDER BY rowid').all(owner) as ScopedBackup['classes'],
-      students: db.prepare('SELECT s.id, s.class_id, s.name, s.student_no, s.points, s.pet_id, s.pet_exp, s.generation, s.spent_badges, s.created_at, s.background_id FROM students s JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY s.rowid').all(owner) as BackgroundBackup['students'],
-      evaluations: db.prepare('SELECT e.id, e.batch_id, e.student_id, e.points, e.reason, e.category, e.generation, e.created_at, e.undone, e.actor_name, e.actor_subject, e.undone_by_name, e.undone_by_subject FROM evaluations e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY e.rowid').all(owner) as ScopedBackup['evaluations'],
-      badges: db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY b.rowid').all(owner) as ScopedBackup['badges'],
-      redemptions: db.prepare('SELECT r.id, r.student_id, r.item_id, r.item_name, r.cost, r.created_at, r.undone, r.stock_deducted, r.actor_name, r.actor_subject, r.undone_by_name, r.undone_by_subject, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY r.rowid').all(owner) as BackgroundBackup['redemptions'],
-      events: db.prepare('SELECT e.* FROM growth_events e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY e.seq').all(owner) as ScopedBackup['events']
+      settings: (await resources('settings_versions', 'r.id, r.class_id, r.version, r.value, r.created_at', 'r.version') as { id: string; class_id: string | null; version: number; value: string; created_at: number }[]).map(row => ({ ...row, value: JSON.parse(row.value) })),
+      rules: await resources('rules', 'r.id, r.class_id, r.name, r.points, r.category, r.custom') as ScopedBackup['rules'],
+      items: await resources('items', 'r.id, r.class_id, r.name, r.cost, r.active, r.description, r.category, r.icon, r.image, r.image_key, r.image_bytes, r.stock, r.background_id') as BackgroundBackup['items'],
+      classes: await db.prepare('SELECT id, name, created_at FROM classes WHERE owner_id = ? ORDER BY rowid').all(owner) as ScopedBackup['classes'],
+      students: await db.prepare('SELECT s.id, s.class_id, s.name, s.student_no, s.points, s.pet_id, s.pet_exp, s.generation, s.spent_badges, s.created_at, s.background_id FROM students s JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY s.rowid').all(owner) as BackgroundBackup['students'],
+      evaluations: await db.prepare('SELECT e.id, e.batch_id, e.student_id, e.points, e.reason, e.category, e.generation, e.created_at, e.undone, e.actor_name, e.actor_subject, e.undone_by_name, e.undone_by_subject FROM evaluations e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY e.rowid').all(owner) as ScopedBackup['evaluations'],
+      badges: await db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY b.rowid').all(owner) as ScopedBackup['badges'],
+      redemptions: await db.prepare('SELECT r.id, r.student_id, r.item_id, r.item_name, r.cost, r.created_at, r.undone, r.stock_deducted, r.actor_name, r.actor_subject, r.undone_by_name, r.undone_by_subject, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY r.rowid').all(owner) as BackgroundBackup['redemptions'],
+      events: await db.prepare('SELECT e.* FROM growth_events e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY e.seq').all(owner) as ScopedBackup['events']
     }
     if (!festivalSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
     return data
@@ -453,7 +454,7 @@ export function exportBackup(garden: Garden, owner: string) {
 }
 
 export async function restoreBackup(garden: Garden, owner: string, input: unknown) {
-  garden.requireProfile(owner)
+  await garden.requireProfile(owner)
   let serialized: string | undefined
   try { serialized = JSON.stringify(input) } catch { throw new DomainError('invalidBackup') }
   if (serialized === undefined) throw new DomainError('invalidBackup')
@@ -502,24 +503,26 @@ export async function restoreBackup(garden: Garden, owner: string, input: unknow
   for (const kind of rowKinds) for (const row of data[kind]) add(kind, row.id)
   for (const row of data.evaluations) if (!mappings.has(`batch:${row.batch_id}`)) add('batch', row.batch_id)
   const classIds = data.classes.map(row => ref('classes', row.id)), db = garden.db
-  return db.transaction(() => {
-    garden.requireProfile(owner)
+  return await db.transaction(async () => {
+    await garden.requireProfile(owner)
+    const statements: Statement[] = []
     for (const row of data.classes) {
       const classId = ref('classes', row.id)
-      db.prepare('INSERT INTO classes (id, owner_id, name, created_at) VALUES (?, ?, ?, ?)').run(classId, owner, row.name, row.created_at)
-      db.prepare('INSERT INTO class_members (class_id, user_id, joined_at) VALUES (?, ?, ?)').run(classId, owner, Date.now())
+      statements.push({ sql: 'INSERT INTO classes (id, owner_id, name, created_at) VALUES (?, ?, ?, ?)', args: [classId, owner, row.name, row.created_at] })
+      statements.push({ sql: 'INSERT INTO class_members (class_id, user_id, joined_at) VALUES (?, ?, ?)', args: [classId, owner, Date.now()] })
     }
-    for (const row of data.settings) if (row.class_id !== null) db.prepare('INSERT INTO settings_versions (id, owner_id, class_id, version, value, created_at) VALUES (?, ?, ?, ?, ?, ?)').run(ref('settings', row.id), owner, ref('classes', row.class_id), row.version, JSON.stringify(row.value), row.created_at)
-    for (const row of data.students) db.prepare('INSERT INTO students (id, class_id, name, student_no, points, pet_id, pet_exp, generation, spent_badges, created_at, background_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(ref('students', row.id), ref('classes', row.class_id), row.name, row.student_no, row.points, row.pet_id, row.pet_exp, row.generation, row.spent_badges, row.created_at, row.background_id)
-    for (const row of data.rules) if (row.class_id !== null) db.prepare('INSERT INTO rules (id, owner_id, class_id, name, points, category, custom) VALUES (?, ?, ?, ?, ?, ?, ?)').run(ref('rules', row.id), owner, ref('classes', row.class_id), row.name, row.points, row.category, row.custom)
-    for (const row of data.evaluations) db.prepare('INSERT INTO evaluations (id, batch_id, student_id, points, reason, category, generation, created_at, undone, actor_user_id, actor_name, actor_subject, undone_by_user_id, undone_by_name, undone_by_subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL, ?, ?)').run(ref('evaluations', row.id), ref('batch', row.batch_id), ref('students', row.student_id), row.points, row.reason, row.category, row.generation, row.created_at, row.undone, row.actor_name, row.actor_subject, row.undone_by_name, row.undone_by_subject)
-    for (const row of data.events) db.prepare('INSERT INTO growth_events (id, student_id, generation, kind, settings_id, evaluation_id, pet_id, initial_undone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(ref('events', row.id), ref('students', row.student_id), row.generation, row.kind, ref('settings', row.settings_id), row.evaluation_id ? ref('evaluations', row.evaluation_id) : null, row.pet_id, row.initial_undone, row.created_at)
-    for (const row of data.badges) db.prepare('INSERT INTO badges (id, student_id, generation, pet_id, earned_at, level, amount, active, source_event) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(ref('badges', row.id), ref('students', row.student_id), row.generation, row.pet_id, row.earned_at, row.level, row.amount, row.active, ref('events', row.source_event))
-    for (const row of data.items) if (row.class_id !== null) db.prepare('INSERT INTO items (id, owner_id, class_id, name, cost, active, description, category, icon, image, image_key, image_bytes, stock, background_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(ref('items', row.id), owner, ref('classes', row.class_id), row.name, row.cost, row.active, row.description, row.category, row.icon, row.image, row.image_key, row.image_bytes, row.stock, row.background_id)
-    for (const row of data.redemptions) db.prepare('INSERT INTO redemptions (id, student_id, item_id, item_name, cost, created_at, undone, stock_deducted, actor_user_id, actor_name, actor_subject, undone_by_user_id, undone_by_name, undone_by_subject, background_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL, ?, ?, ?)').run(ref('redemptions', row.id), ref('students', row.student_id), row.item_id ? ref('items', row.item_id) : null, row.item_name, row.cost, row.created_at, row.undone, row.stock_deducted, row.actor_name, row.actor_subject, row.undone_by_name, row.undone_by_subject, row.background_id)
-    if (version < 5) for (const classId of classIds) initializeBackgroundItems(db, owner, classId)
-    else if (version === 5) for (const classId of classIds) initializeBackgroundItems(db, owner, classId, [...holidayBackgroundIds, ...versionSevenBackgroundIds])
-    else if (version === 6) for (const classId of classIds) initializeBackgroundItems(db, owner, classId, versionSevenBackgroundIds)
+    for (const row of data.settings) if (row.class_id !== null) statements.push({ sql: 'INSERT INTO settings_versions (id, owner_id, class_id, version, value, created_at) VALUES (?, ?, ?, ?, ?, ?)', args: [ref('settings', row.id), owner, ref('classes', row.class_id), row.version, JSON.stringify(row.value), row.created_at] })
+    for (const row of data.students) statements.push({ sql: 'INSERT INTO students (id, class_id, name, student_no, points, pet_id, pet_exp, generation, spent_badges, created_at, background_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', args: [ref('students', row.id), ref('classes', row.class_id), row.name, row.student_no, row.points, row.pet_id, row.pet_exp, row.generation, row.spent_badges, row.created_at, row.background_id] })
+    for (const row of data.rules) if (row.class_id !== null) statements.push({ sql: 'INSERT INTO rules (id, owner_id, class_id, name, points, category, custom) VALUES (?, ?, ?, ?, ?, ?, ?)', args: [ref('rules', row.id), owner, ref('classes', row.class_id), row.name, row.points, row.category, row.custom] })
+    for (const row of data.evaluations) statements.push({ sql: 'INSERT INTO evaluations (id, batch_id, student_id, points, reason, category, generation, created_at, undone, actor_user_id, actor_name, actor_subject, undone_by_user_id, undone_by_name, undone_by_subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL, ?, ?)', args: [ref('evaluations', row.id), ref('batch', row.batch_id), ref('students', row.student_id), row.points, row.reason, row.category, row.generation, row.created_at, row.undone, row.actor_name, row.actor_subject, row.undone_by_name, row.undone_by_subject] })
+    for (const row of data.events) statements.push({ sql: 'INSERT INTO growth_events (id, student_id, generation, kind, settings_id, evaluation_id, pet_id, initial_undone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', args: [ref('events', row.id), ref('students', row.student_id), row.generation, row.kind, ref('settings', row.settings_id), row.evaluation_id ? ref('evaluations', row.evaluation_id) : null, row.pet_id, row.initial_undone, row.created_at] })
+    for (const row of data.badges) statements.push({ sql: 'INSERT INTO badges (id, student_id, generation, pet_id, earned_at, level, amount, active, source_event) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', args: [ref('badges', row.id), ref('students', row.student_id), row.generation, row.pet_id, row.earned_at, row.level, row.amount, row.active, ref('events', row.source_event)] })
+    for (const row of data.items) if (row.class_id !== null) statements.push({ sql: 'INSERT INTO items (id, owner_id, class_id, name, cost, active, description, category, icon, image, image_key, image_bytes, stock, background_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', args: [ref('items', row.id), owner, ref('classes', row.class_id), row.name, row.cost, row.active, row.description, row.category, row.icon, row.image, row.image_key, row.image_bytes, row.stock, row.background_id] })
+    for (const row of data.redemptions) statements.push({ sql: 'INSERT INTO redemptions (id, student_id, item_id, item_name, cost, created_at, undone, stock_deducted, actor_user_id, actor_name, actor_subject, undone_by_user_id, undone_by_name, undone_by_subject, background_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL, ?, ?, ?)', args: [ref('redemptions', row.id), ref('students', row.student_id), row.item_id ? ref('items', row.item_id) : null, row.item_name, row.cost, row.created_at, row.undone, row.stock_deducted, row.actor_name, row.actor_subject, row.undone_by_name, row.undone_by_subject, row.background_id] })
+    await db.batch(statements)
+    if (version < 5) for (const classId of classIds) await initializeBackgroundItems(db, owner, classId)
+    else if (version === 5) for (const classId of classIds) await initializeBackgroundItems(db, owner, classId, [...holidayBackgroundIds, ...versionSevenBackgroundIds])
+    else if (version === 6) for (const classId of classIds) await initializeBackgroundItems(db, owner, classId, versionSevenBackgroundIds)
     return { imported: classIds.length, classIds }
   }).immediate()
 }
