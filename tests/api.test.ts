@@ -50,6 +50,48 @@ afterEach(() => {
   delete process.env.DATABASE_PATH
 })
 describe('真实 Route Handler 请求契约', () => {
+  it.each(['teacher@example.com', 'teacher+class@example.com'])('邮箱用户名 %s 可以注册、登录，不能重复注册', async username => {
+    const password = 'Email-password-123'
+    const registered = await request('auth/register', 'POST', { username: `  ${username}  `, password }, '')
+    expect(registered.status).toBe(200)
+    const { user } = await registered.json()
+    expect(user.username).toBe(username)
+    const session = registered.headers.get('set-cookie')!.split(';')[0]
+    expect((await (await request('state', 'GET', undefined, session)).json()).user.id).toBe(user.id)
+
+    const login = await request('auth/login', 'POST', { username: username.toUpperCase(), password }, '')
+    expect(login.status).toBe(200)
+    expect((await login.json()).user.id).toBe(user.id)
+    const wrongPassword = await request('auth/login', 'POST', { username, password: 'Wrong-password-123' }, '')
+    expect(wrongPassword.status).toBe(401)
+    expect(await wrongPassword.json()).toEqual({ error: 'invalidCredentials' })
+
+    const duplicate = await request('auth/register', 'POST', { username: username.toUpperCase(), password }, '')
+    expect(duplicate.status).toBe(409)
+    expect(await duplicate.json()).toEqual({ error: 'usernameTaken' })
+  })
+  it.each([
+    [{ username: 'ab', password: 'Valid-password-123' }, 'invalidUsername'],
+    [{ username: 'a'.repeat(31), password: 'Valid-password-123' }, 'invalidUsername'],
+    [{ username: 'teacher/name', password: 'Valid-password-123' }, 'invalidUsername'],
+    [{ username: 'teacher\nname', password: 'Valid-password-123' }, 'invalidUsername'],
+    [{ username: '   ', password: 'Valid-password-123' }, 'invalidUsername'],
+    [{ username: 123, password: 'Valid-password-123' }, 'invalidUsername'],
+    [{ password: 'Valid-password-123' }, 'invalidUsername'],
+    [{ username: 'invalid-password-test', password: '1234567' }, 'invalidPassword'],
+    [{ username: 'invalid-password-test', password: 'a'.repeat(129) }, 'invalidPassword'],
+    [{ username: 'invalid-password-test', password: 12345678 }, 'invalidPassword'],
+    [{ username: 'invalid-password-test' }, 'invalidPassword']
+  ])('注册及登录为无效输入 %j 返回具体字段错误 %s', async (input, error) => {
+    const usersBefore = database().prepare('SELECT COUNT(*) AS count FROM users').get()
+    for (const path of ['auth/register', 'auth/login']) {
+      const response = await request(path, 'POST', input, '')
+      expect(response.status).toBe(400)
+      expect(await response.json()).toEqual({ error })
+      expect(response.headers.get('set-cookie')).toBeNull()
+    }
+    expect(database().prepare('SELECT COUNT(*) AS count FROM users').get()).toEqual(usersBefore)
+  })
   it('会话使用 HttpOnly、SameSite=Lax Cookie', async () => {
     const response = await request('auth/register', 'POST', { username: 'cookie-test', password: 'Good-password-123' }, '')
     const setCookie = response.headers.get('set-cookie')!

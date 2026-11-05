@@ -16,7 +16,15 @@ import { petBackgroundById } from '../pet-backgrounds'
 import { getFestivalBackgrounds } from './festival-backgrounds'
 import { normalizeItemImage } from './item-images'
 import { DomainError } from './errors'
-export const credentials = z.object({ username: z.string().trim().min(3).max(30).regex(/^[\p{L}\p{N}_ .-]+$/u), password: z.string().min(8).max(128) })
+import { credentials, credentialError } from '../credentials'
+export { credentials } from '../credentials'
+
+function parseCredentials(input: unknown) {
+  const result = credentials.safeParse(input)
+  if (!result.success) throw new DomainError(credentialError(result.error))
+  return result.data
+}
+
 const text = z.string().trim().min(1).max(80)
 const localized = z.object({ zh: text, en: text })
 const category = z.enum(['study', 'behavior', 'health', 'other'])
@@ -90,7 +98,7 @@ export class Garden {
     return await this.user(actor)
   }
   async register(input: unknown) {
-    const data = credentials.parse(input)
+    const data = parseCredentials(input)
     const id = uuid(), salt = randomBytes(16).toString('hex')
     const password = `${salt}:${scryptSync(data.password, salt, 64).toString('hex')}`
     return await this.db.transaction(async () => {
@@ -110,7 +118,7 @@ export class Garden {
     })()
   }
   async login(input: unknown) {
-    const { username, password } = credentials.parse(input)
+    const { username, password } = parseCredentials(input)
     const user = await this.db.prepare('SELECT * FROM users WHERE username = ?').get(username) as { id: string; password: string } | undefined
     // 不存在的账号仍执行哈希，减少账号探测的时序差异
     const [salt, expected] = (user?.password || `${'0'.repeat(32)}:${'0'.repeat(128)}`).split(':')

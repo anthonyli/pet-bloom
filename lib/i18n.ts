@@ -1,4 +1,5 @@
 import { MAX_BACKUP_MB } from './shop'
+import { USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from './credentials'
 import type { Locale, Localized, OperationActor, Pet, Student } from './types'
 import { growthProgress } from './growth'
 import type { GrowthStep } from './garden-settings'
@@ -33,7 +34,9 @@ const errors: Record<string, [string, string]> = {
   unauthorized: ['请先登录，或重新登录后再试。', 'Please sign in to continue.'],
   invalidCredentials: ['用户名或密码不正确。', 'The username or password is incorrect.'],
   usernameTaken: ['这个用户名已被使用，请换一个。', 'This username is already taken.'],
-  invalidInput: ['请检查输入内容。用户名需 3–30 个字符，密码至少 8 位。', 'Please check your input. Use a 3–30 character username and a password of at least 8 characters.'],
+  invalidUsername: [`用户名需 ${USERNAME_MIN_LENGTH}–${USERNAME_MAX_LENGTH} 个字符，可用文字、数字、空格及 _ . - @ +。`, `Use a ${USERNAME_MIN_LENGTH}–${USERNAME_MAX_LENGTH} character username with letters, numbers, spaces or _ . - @ +.`],
+  invalidPassword: [`密码需 ${PASSWORD_MIN_LENGTH}–${PASSWORD_MAX_LENGTH} 个字符。`, `Use a password of ${PASSWORD_MIN_LENGTH}–${PASSWORD_MAX_LENGTH} characters.`],
+  invalidInput: ['请检查输入内容后重试。', 'Please check your input and try again.'],
   notFound: ['找不到该数据，或你没有访问权限，请刷新后重试。', 'This item is unavailable. Please refresh and try again.'],
   petNotGraduated: ['当前宠物还未毕业，达到 8 级后可以领养新宠物。', 'Your current pet must reach level 8 before you adopt another.'],
   badgeAlreadySpent: ['这次撤回会收回已用于兑换的徽章，请先撤销对应兑换。', 'This undo would remove badges already spent. Undo the corresponding redemption first.'],

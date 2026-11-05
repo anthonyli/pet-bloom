@@ -3,9 +3,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { PawPrint, Globe2, ArrowRight, ShieldCheck, UserPlus, LogIn } from 'lucide-react'
 import { Button, Field, Input } from '@/components/ui'
-import { translator, petImage } from '@/lib/i18n'
+import { translator, petImage, errorMessage } from '@/lib/i18n'
+import { credentials, credentialError, USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from '@/lib/credentials'
 import type { Locale } from '@/lib/types'
-import { api, type GardenClient } from './use-garden'
+import { api, ApiError, type GardenClient } from './use-garden'
 
 export function AuthScreen({ locale, client }: { locale: Locale; client: GardenClient }) {
   const t = translator(locale)
@@ -24,9 +25,19 @@ export function AuthScreen({ locale, client }: { locale: Locale; client: GardenC
         <span className="mb-7 inline-flex size-14 items-center justify-center rounded-2xl bg-[#f0ebff] text-primary"><PawPrint size={28} /></span>
         <h2 className="text-3xl font-bold tracking-tight">{mode === 'login' ? t('欢迎回到萌芽', 'Welcome back to PetBloom') : t('开启你的萌芽之旅', 'Get started with PetBloom')}</h2>
         <p className="mb-8 mt-3 text-sm leading-relaxed text-muted">{t('让每一份成长，都悄悄发芽。', 'Let every bit of growth quietly bloom.')}</p>
-        <form className="form-stack" onSubmit={event => { event.preventDefault(); client.run(async () => { await api(`auth/${mode}`, 'POST', { username, password }) }) }}>
-          <Field label={t('用户名', 'Username')} id="username"><Input id="username" autoComplete="username" required minLength={3} maxLength={30} value={username} onChange={event => setUsername(event.target.value)} placeholder={t('输入教师用户名', 'Your teacher username')} /></Field>
-          <Field label={t('密码', 'Password')} id="password"><Input id="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={8} maxLength={128} value={password} onChange={event => setPassword(event.target.value)} placeholder={t('至少 8 个字符', 'At least 8 characters')} /></Field>
+        <form className="form-stack" onSubmit={event => { event.preventDefault(); client.setNotice(null); client.run(async () => {
+          const result = credentials.safeParse({ username, password })
+          if (!result.success) throw new ApiError(credentialError(result.error))
+          await api(`auth/${mode}`, 'POST', result.data)
+        }) }}>
+          <Field label={t('用户名或邮箱', 'Username or email')} id="username">
+            <Input id="username" autoComplete="username" autoCapitalize="none" spellCheck={false} required minLength={USERNAME_MIN_LENGTH} maxLength={USERNAME_MAX_LENGTH} aria-describedby="username-hint" value={username} onChange={event => setUsername(event.target.value)} placeholder={t('输入用户名或邮箱', 'Your username or email')} />
+            <p id="username-hint" className="mt-2 text-xs leading-relaxed text-muted">{errorMessage('invalidUsername', locale)}</p>
+          </Field>
+          <Field label={t('密码', 'Password')} id="password">
+            <Input id="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={PASSWORD_MIN_LENGTH} maxLength={PASSWORD_MAX_LENGTH} aria-describedby="password-hint" value={password} onChange={event => setPassword(event.target.value)} placeholder={t('输入密码', 'Your password')} />
+            <p id="password-hint" className="mt-2 text-xs leading-relaxed text-muted">{errorMessage('invalidPassword', locale)}</p>
+          </Field>
           <Button type="submit" variant="primary" busy={client.busy} className="w-full py-3">{mode === 'login' ? t('登录萌芽', 'Sign in') : t('创建教师账号', 'Create account')}<ArrowRight size={17} /></Button>
         </form>
         <p className="mt-6 text-center text-sm text-muted">{mode === 'login' ? t('第一次来？', 'New here?') : t('已有账号？', 'Already have an account?')}<Button variant="ghost" className="ml-1 px-1 text-primary" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); client.setNotice(null) }}>{mode === 'login' ? <UserPlus size={16} /> : <LogIn size={16} />}{mode === 'login' ? t('创建账号', 'Create an account') : t('前往登录', 'Sign in')}</Button></p>
