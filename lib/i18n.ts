@@ -38,6 +38,7 @@ const errors: Record<string, [string, string]> = {
   invalidPassword: [`密码需 ${PASSWORD_MIN_LENGTH}–${PASSWORD_MAX_LENGTH} 个字符。`, `Use a password of ${PASSWORD_MIN_LENGTH}–${PASSWORD_MAX_LENGTH} characters.`],
   invalidInput: ['请检查输入内容后重试。', 'Please check your input and try again.'],
   notFound: ['找不到该数据，或你没有访问权限，请刷新后重试。', 'This item is unavailable. Please refresh and try again.'],
+  studentArchived: ['该学生已归档。请在“已归档学生”中恢复后再操作。', 'This student is archived. Restore them from Archived students before continuing.'],
   petNotGraduated: ['当前宠物还未毕业，达到 8 级后可以领养新宠物。', 'Your current pet must reach level 8 before you adopt another.'],
   badgeAlreadySpent: ['这次撤回会收回已用于兑换的徽章，请先撤销对应兑换。', 'This undo would remove badges already spent. Undo the corresponding redemption first.'],
   previousPetCycle: ['这条记录属于已结束的宠物成长周期，不能撤回。', 'This record belongs to a completed pet cycle and cannot be undone.'],

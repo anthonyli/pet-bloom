@@ -252,7 +252,7 @@ describe('真实 Route Handler 请求契约', () => {
     const backupResponse = await request('backup')
     expect(backupResponse.status).toBe(200)
     const backup = await backupResponse.json()
-    expect(backup.version).toBe(7)
+    expect(backup.version).toBe(8)
     expect(backup.evaluations).toMatchObject([{ points, actor_name: 'API甲老师', actor_subject: '语文' }])
     const restoreResponse = await request('restore', 'POST', backup)
     expect(restoreResponse.status).toBe(200)
@@ -533,7 +533,7 @@ describe('真实 Route Handler 请求契约', () => {
     const original = await scoringSnapshot()
     expect(original.students[0]).toMatchObject({ background_id: catalog.id, owned_background_ids: [catalog.id], spent_badges: 2 })
     const backup = await (await request('backup')).json()
-    expect(backup.version).toBe(7)
+    expect(backup.version).toBe(8)
     expect(backup.redemptions[0]).toMatchObject({ background_id: catalog.id, cost: 2 })
     expect(JSON.stringify(backup)).not.toContain('owned_background_ids')
     const restoreResponse = await request('restore', 'POST', backup)
@@ -789,5 +789,30 @@ describe('客户端 API 响应完整性', () => {
   it('完整成功响应仍返回原批次', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ batchId: 'saved-batch' })))
     await expect(clientApi('evaluations', 'POST', {})).resolves.toEqual({ batchId: 'saved-batch' })
+  })
+})
+
+
+describe('学生归档 HTTP 契约', () => {
+  it('归档与恢复幂等，名单排除但历史可读，跨教师和匿名访问被拒绝', async () => {
+    const id = await scoringStudent()
+    expect((await request('evaluations', 'POST', { studentIds: [id], custom: { points: 5 } })).status).toBe(200)
+    for (const path of [`students/${id}/archive`, `students/${id}/restore`]) {
+      expect((await request(path, 'POST', {}, otherCookie)).status).toBe(404)
+      expect((await request(path, 'POST', {}, '')).status).toBe(401)
+    }
+    expect((await request(`students/${id}/history`, 'GET', undefined, otherCookie)).status).toBe(404)
+    expect((await request(`state?classId=${classId}`, 'GET', undefined, otherCookie)).status).toBe(404)
+    expect((await request(`students/${id}/archive`, 'POST', {}, cookie, 'https://other.example')).status).toBe(403)
+    for (let i = 0; i < 2; i++) expect((await request(`students/${id}/archive`, 'POST', {})).status).toBe(200)
+    const archived = await scoringSnapshot()
+    expect(archived.students).toEqual([])
+    expect(archived.archived_students[0]).toMatchObject({ id, points: 5, archived_at: expect.any(Number) })
+    const denied = await request('evaluations', 'POST', { studentIds: [id], custom: { points: 1 } })
+    expect(denied.status).toBe(409); expect(await denied.json()).toEqual({ error: 'studentArchived' })
+    expect((await (await request(`students/${id}/history`)).json()).entries).toHaveLength(1)
+    expect((await request(`students/${id}/history?offset=bad`)).status).toBe(400)
+    for (let i = 0; i < 2; i++) expect((await request(`students/${id}/restore`, 'POST', {})).status).toBe(200)
+    expect((await scoringSnapshot()).students[0]).toMatchObject({ id, points: 5, archived_at: null })
   })
 })
