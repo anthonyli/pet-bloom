@@ -24,10 +24,12 @@ const flag = z.union([z.literal(0), z.literal(1)])
 const badge = z.object({ id, student_id: id, generation: positive, pet_id: pet, earned_at: positive })
 const item = z.object({ id, name: translated(80), cost: integer.min(1).max(100), active: flag })
 const redemption = z.object({ id, student_id: id, item_id: id.nullable(), item_name: translated(80), cost: integer.min(1).max(100), created_at: positive, undone: flag })
+const MAX_RULES_PER_SCOPE = 2000
+const MAX_SETTINGS_PER_SCOPE = 10000
 const common = {
   classes: z.array(z.object({ id, name, created_at: positive })).max(200),
   students: z.array(z.object({ id, class_id: id, name, student_no: z.string().max(30), points: integer, pet_id: pet.nullable(), pet_exp: positive, generation: positive, spent_badges: positive, created_at: positive })).max(10000),
-  rules: z.array(z.object({ id, name: translated(80), points: integer.min(-100).max(100).refine(v => v !== 0), category, custom: flag })).max(2000),
+  rules: z.array(z.object({ id, name: translated(80), points: integer.min(-100).max(100).refine(v => v !== 0), category, custom: flag })).max(MAX_RULES_PER_SCOPE),
   evaluations: z.array(z.object({ id, batch_id: id, student_id: id, points: integer.min(-10000).max(10000), reason: translated(80), category, generation: positive, created_at: positive, undone: flag })).max(50000)
 }
 const legacySchema = z.object({ version: z.literal(1), ...common, badges: z.array(badge).max(10000), items: z.array(item), redemptions: z.array(redemption).max(10000) })
@@ -42,7 +44,7 @@ const currentSchema = schema.extend({
   version: z.literal(3),
   students: z.array(common.students.element.extend({ pet_exp: z.number().finite().min(-Number.MAX_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER) })).max(10000),
   badges: z.array(schema.shape.badges.element.extend({ amount: integer.min(0).max(100), active: flag, source_event: id })).max(350000),
-  settings: z.array(z.object({ id, version: positive, value: gardenSettingsSchema, created_at: positive })).min(1).max(10000),
+  settings: z.array(z.object({ id, version: positive, value: gardenSettingsSchema, created_at: positive })).min(1).max(MAX_SETTINGS_PER_SCOPE),
   events: z.array(z.object({ id, seq: positive, student_id: id, generation: positive, kind: z.enum(['start', 'evaluation', 'rebase', 'undo', 'change']), settings_id: id, evaluation_id: id.nullable(), pet_id: pet.nullable(), initial_undone: flag, created_at: positive })).max(200000)
 })
 type CurrentBackup = z.infer<typeof currentSchema>
@@ -56,12 +58,12 @@ const scopedSchema = z.object({
   version: z.literal(4), exportedAt: z.string().datetime().optional(),
   classes: z.array(common.classes.element.strict()).max(200),
   students: z.array(currentSchema.shape.students.element.strict()).max(10000),
-  rules: z.array(common.rules.element.extend(scope).strict()).max(201 * 2000),
+  rules: z.array(common.rules.element.extend(scope).strict()).max(201 * MAX_RULES_PER_SCOPE),
   evaluations: z.array(common.evaluations.element.extend({ ...actorText, points: integer }).strict()).max(50000),
   badges: z.array(currentSchema.shape.badges.element.strict()).max(350000),
   items: z.array(schema.shape.items.element.extend(scope).strict()),
   redemptions: z.array(schema.shape.redemptions.element.extend(actorText).strict()).max(10000),
-  settings: z.array(currentSchema.shape.settings.element.extend(scope).strict()).min(1).max(201 * 10000),
+  settings: z.array(currentSchema.shape.settings.element.extend(scope).strict()).min(1).max(201 * MAX_SETTINGS_PER_SCOPE),
   events: z.array(currentSchema.shape.events.element.strict()).max(200000)
 }).strict()
 type ScopedBackup = z.infer<typeof scopedSchema>
@@ -329,9 +331,24 @@ function splitLegacy(data: CurrentBackup): ScopedBackup {
   return result
 }
 
+// Share only the count limits: export must not replay every student's history.
+// A null class_id is the personal template, separate from every class.
+function exceedsScopedRecordLimits(data: Pick<ScopedBackup, 'rules' | 'settings'>) {
+  for (const [rows, limit] of [[data.rules, MAX_RULES_PER_SCOPE], [data.settings, MAX_SETTINGS_PER_SCOPE]] as const) {
+    const counts = new Map<string | null, number>()
+    for (const row of rows) {
+      const count = (counts.get(row.class_id) || 0) + 1
+      if (count > limit) return true
+      counts.set(row.class_id, count)
+    }
+  }
+  return false
+}
+
 function validateScoped(data: ScopedBackup | BackgroundBackup) {
   validateIds(data)
   const fail = () => { throw new DomainError('invalidBackup') }
+  if (exceedsScopedRecordLimits(data)) fail()
   const bundles = new Map<string | null, CurrentBackup>()
   const bundle = (classId: string | null) => {
     const value = bundles.get(classId)
@@ -376,7 +393,7 @@ function validateScoped(data: ScopedBackup | BackgroundBackup) {
     }
   }
   for (const value of bundles.values()) {
-    if (!value.settings.length || value.settings.length > 10000 || value.rules.length > 2000) fail()
+    if (!value.settings.length) fail()
     validateCurrent(value)
   }
 }
@@ -448,7 +465,7 @@ export async function exportBackup(garden: Garden, owner: string) {
       redemptions: await db.prepare('SELECT r.id, r.student_id, r.item_id, r.item_name, r.cost, r.created_at, r.undone, r.stock_deducted, r.actor_name, r.actor_subject, r.undone_by_name, r.undone_by_subject, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY r.rowid').all(owner) as BackgroundBackup['redemptions'],
       events: await db.prepare('SELECT e.* FROM growth_events e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY e.seq').all(owner) as ScopedBackup['events']
     }
-    if (!festivalSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
+    if (exceedsScopedRecordLimits(data) || !festivalSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
     return data
   }).deferred()
 }
