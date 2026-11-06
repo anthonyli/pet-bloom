@@ -109,7 +109,7 @@ try {
   await page.screenshot({ path: path.join(output, 'zh-class-summary.png'), fullPage: true, animations: 'disabled' })
   await page.keyboard.press('Escape')
   await page.getByRole('dialog').waitFor({ state: 'hidden' })
-  await page.waitForFunction(() => document.activeElement?.textContent?.includes('测试班级 23'))
+  await page.waitForFunction(element => element === document.activeElement, await row.elementHandle())
   assert.equal(await row.evaluate(el => el === document.activeElement), true)
   await page.getByLabel('搜索班级名称').fill('no-such-class')
   await page.getByRole('button', { name: '搜索', exact: true }).click()
