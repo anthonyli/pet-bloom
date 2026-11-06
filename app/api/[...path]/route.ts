@@ -42,7 +42,8 @@ async function handler(request: NextRequest, context: { params: Promise<{ path: 
     if (method === 'POST' && ['auth/login', 'auth/register'].includes(path)) {
       // 同一账号的登录/注册失败限制；不信任任意代理头作为客户端身份
       const input = await body(request)
-      const username = typeof input?.username === 'string' ? input.username.toLowerCase().slice(0, 100) : 'invalid'
+      // 与 credentials 的 trim 保持一致，避免同一账号通过首尾空白获取新额度。
+      const username = typeof input?.username === 'string' ? input.username.trim().toLowerCase().slice(0, 100) : 'invalid'
       const key = `${path}:${username}`
       for (const [entry, value] of limits) if (value.expires < Date.now()) limits.delete(entry)
       if (limits.size > 10000) throw new DomainError('rateLimited', 429)
