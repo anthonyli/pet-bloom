@@ -17,6 +17,8 @@ import { getFestivalBackgrounds } from './festival-backgrounds'
 import { normalizeItemImage } from './item-images'
 import { DomainError } from './errors'
 import { credentials, credentialError } from '../credentials'
+import { isGlobalAdmin } from './admin-access'
+import type { AdminClassPage, AdminClassDetail, AdminClassSummary } from '../admin-types'
 export { credentials } from '../credentials'
 
 function parseCredentials(input: unknown) {
@@ -39,6 +41,47 @@ const uuid = () => randomUUID()
 export class Garden {
   public db: ApplicationDatabase
   constructor(db: Database.Database | ApplicationDatabase) { this.db = adaptDatabase(db) }
+  async adminAccess(actor: string) {
+    await this.user(actor)
+    return { allowed: isGlobalAdmin(actor) }
+  }
+  private async requireGlobalAdmin(actor: string) {
+    if (!(await this.adminAccess(actor)).allowed) throw new DomainError('forbidden', 403)
+  }
+  private async adminClassProjection() {
+    // ABCD-14 owns the archived_at migration. Work before and after it lands.
+    const columns = await this.db.prepare('PRAGMA table_info(students)').all() as { name: string }[]
+    const archiveSupported = columns.some(column => column.name === 'archived_at')
+    const sql = `SELECT c.id, c.name, c.owner_id, c.created_at,
+      u.display_name AS owner_name, u.subject AS owner_subject,
+      (SELECT COUNT(*) FROM students s WHERE s.class_id = c.id ${archiveSupported ? 'AND s.archived_at IS NULL' : ''}) AS active_students,
+      ${archiveSupported ? '(SELECT COUNT(*) FROM students s WHERE s.class_id = c.id AND s.archived_at IS NOT NULL)' : '0'} AS archived_students,
+      (SELECT COUNT(*) FROM class_members m WHERE m.class_id = c.id) AS teacher_count
+      FROM classes c JOIN users u ON u.id = c.owner_id`
+    return { sql, archiveSupported }
+  }
+  async adminClasses(actor: string, input: unknown): Promise<AdminClassPage> {
+    await this.requireGlobalAdmin(actor)
+    const { page, pageSize, search } = z.object({
+      page: z.coerce.number().int().min(1).max(1000000).default(1),
+      pageSize: z.coerce.number().int().min(1).max(100).default(20),
+      search: z.string().trim().max(80).default('')
+    }).parse(input)
+    const { sql, archiveSupported } = await this.adminClassProjection()
+    // Literal substring search: %, _ and backslash are not wildcard operators.
+    const pattern = `%${search.replace(/[\\%_]/g, value => `\\${value}`)}%`
+    const where = " WHERE c.name LIKE ? ESCAPE '\\'"
+    const { total } = await this.db.prepare(`SELECT COUNT(*) AS total FROM classes c${where}`).get(pattern) as { total: number }
+    const classes = await this.db.prepare(`${sql}${where} ORDER BY c.created_at DESC, c.id ASC LIMIT ? OFFSET ?`).all(pattern, pageSize, (page - 1) * pageSize) as AdminClassSummary[]
+    return { classes, total, page, pageSize, archiveSupported }
+  }
+  async adminClass(actor: string, id: string): Promise<AdminClassDetail> {
+    await this.requireGlobalAdmin(actor)
+    const { sql, archiveSupported } = await this.adminClassProjection()
+    const classroom = await this.db.prepare(`${sql} WHERE c.id = ?`).get(id) as AdminClassSummary | undefined
+    if (!classroom) throw new DomainError('notFound', 404)
+    return { classroom, archiveSupported }
+  }
   private async latestSettings(owner: string, classId?: string): Promise<SettingsVersion> {
     const row = (classId
       ? (await this.db.prepare('SELECT id, version, value, created_at FROM settings_versions WHERE class_id = ? ORDER BY version DESC LIMIT 1').get(classId))
