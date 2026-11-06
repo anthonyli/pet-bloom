@@ -1,0 +1,31 @@
+$ next build && node scripts/prepare-standalone.mjs
+   ▲ Next.js 15.5.25
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 9.0s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/4) ...
+   Generating static pages (1/4) 
+   Generating static pages (2/4) 
+   Generating static pages (3/4) 
+ ✓ Generating static pages (4/4)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ƒ /                                      126 B         102 kB
+├ ƒ /_not-found                            994 B         103 kB
+├ ƒ /[locale]                             139 kB         241 kB
+└ ƒ /api/[...path]                         126 B         102 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/3136abc1-5d11a720b7bbdfe4.js  54.2 kB
+  ├ chunks/348-9ddb01906d31eadc.js       46.2 kB
+  └ other shared chunks (total)          1.93 kB
+
+
+ƒ Middleware                             34.2 kB
+
+ƒ  (Dynamic)  server-rendered on demand
+
+已准备独立服务的静态资源和本地字体。

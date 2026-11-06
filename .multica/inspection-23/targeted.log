@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /Users/anthonyli/multica_workspaces_desktop-api.multica.ai/abcd-li-bafb5d6d36f0/abcd-23-34fe36db69af/worktree
+
+
+ Test Files  4 passed (4)
+      Tests  132 passed (132)
+   Start at  02:11:29
+   Duration  2.44s (transform 276ms, setup 0ms, import 1.23s, tests 2.33s, environment 0ms)
+
