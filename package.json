@@ -13,6 +13,7 @@
     "start": "node scripts/start.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:restore": "node scripts/test-restore.mjs",
     "test:watch": "vitest",
     "deploy:vercel": "node scripts/deploy-vercel.mjs",
     "deploy:check": "node scripts/deploy-vercel.mjs --check",
