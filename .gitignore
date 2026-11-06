@@ -13,3 +13,4 @@ out/
 dist/
 
 .vercel
+.multica/
