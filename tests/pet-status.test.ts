@@ -79,6 +79,25 @@ describe('宠物形态、饥饿与学校日历', () => {
     expect(elapsed).toBeGreaterThanOrEqual(hour)
     expect(elapsed).toBeLessThanOrEqual(24 * hour)
   })
+  it('Goose Bay 回拨只排除实际属于校假的一分钟，补回前一天的59分钟', () => {
+    const hunger = { ...defaultGardenSettings().hunger, timeZone: 'America/Goose_Bay', excludeWeekends: false, excludeHolidays: true, holidays: [{ start: '2009-11-01', end: '2009-11-01' }] }
+    const start = time('2009-11-01T03:00:00Z'), end = time('2009-11-01T04:00:00Z')
+    expect(eligibleElapsed(start, end, hunger)).toBe(59 * 60000)
+    expect(eligibleElapsed(start, end, { ...hunger, holidays: [{ start: '2009-10-31', end: '2009-10-31' }] })).toBe(60000)
+    expect(eligibleElapsed(start, end, { ...hunger, excludeWeekends: true })).toBe(0)
+    expect(eligibleElapsed(start, end, { ...hunger, excludeHolidays: false })).toBe(hour)
+  })
+  it.each([
+    ['2009-11-01T03:00:00Z', 1, 0],
+    ['2009-11-01T03:01:00Z', 0, 1],
+    ['2009-11-01T04:00:00Z', 1, 0]
+  ] as const)('Goose Bay %s 前后1ms按照当时当地日期排除校假', (boundary, before, after) => {
+    const hunger = { ...defaultGardenSettings().hunger, timeZone: 'America/Goose_Bay', excludeWeekends: false, excludeHolidays: true, holidays: [{ start: '2009-11-01', end: '2009-11-01' }] }
+    const at = time(boundary)
+    expect(eligibleElapsed(at - 1, at, hunger)).toBe(before)
+    expect(eligibleElapsed(at, at + 1, hunger)).toBe(after)
+    expect(eligibleElapsed(at - 1, at + 1, hunger)).toBe(before + after)
+  })
   it.each([
     ['America/Havana', '2026-03-07T05:00:00Z', '2026-03-09T04:00:00Z', '2026-03-08', 24],
     ['America/Havana', '2026-10-31T04:00:00Z', '2026-11-02T05:00:00Z', '2026-11-01', 24],

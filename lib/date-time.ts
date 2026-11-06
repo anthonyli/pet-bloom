@@ -35,3 +35,31 @@ export function zonedMidnight(year: number, month: number, day: number, timeZone
   }
   return after
 }
+
+/** Next instant strictly after time at which the local calendar date changes. */
+export function nextZonedDateChange(time: number, timeZone: string) {
+  const offsetAt = (instant: number) => {
+    const local = zonedDateParts(instant, timeZone)
+    // Intl exposes whole seconds; discard milliseconds on both sides.
+    return Date.UTC(local.year, local.month - 1, local.day, local.hour, local.minute, local.second) - Math.floor(instant / 1000) * 1000
+  }
+  const date = zonedDateParts(time, timeZone).date
+  let cursor = time
+  for (;;) {
+    const local = zonedDateParts(cursor, timeZone), offset = offsetAt(cursor)
+    const midnight = Date.UTC(local.year, local.month - 1, local.day + 1) - offset
+    if (offsetAt(midnight) === offset) return midnight
+    // An IANA transition occurs before (or at) the next fixed-offset midnight.
+    // Find it even when a rollback briefly re-enters yesterday. Searching only
+    // for a different date would miss the short date fragment before rollback.
+    let before = cursor, after = midnight
+    while (after - before > 1) {
+      const middle = before + Math.floor((after - before) / 2)
+      if (offsetAt(middle) === offset) before = middle
+      else after = middle
+    }
+    if (zonedDateParts(after, timeZone).date !== date) return after
+    // Ordinary DST changes keep the same date. Continue to its actual end.
+    cursor = after
+  }
+}

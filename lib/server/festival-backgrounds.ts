@@ -1,5 +1,5 @@
 import Holidays from 'date-holidays'
-import { zonedDateParts, zonedMidnight } from '../date-time'
+import { zonedDateParts, nextZonedDateChange } from '../date-time'
 import { holidayBackgroundIds, versionSevenBackgroundIds } from '../pet-backgrounds'
 import type { FestivalBackgroundAvailability } from '../types'
 
@@ -79,19 +79,31 @@ function calendarYear(year: number) {
 
 export function getFestivalBackgrounds(now: number, timeZone: string): FestivalBackgroundAvailability {
   const local = zonedDateParts(now, timeZone)
+  const localDate = Date.UTC(local.year, local.month - 1, local.day)
+  const validUntil = nextZonedDateChange(now, timeZone)
   const currentYear = calendarYear(local.year)
   const supported = new Set(currentYear.map(day => day.id))
   const available = new Map<string, number>()
   for (const year of [local.year - 1, local.year, local.year + 1]) {
     for (const day of calendarYear(year)) {
-      const start = zonedMidnight(day.year, day.month, day.day, timeZone)
-      const end = zonedMidnight(day.year, day.month, day.day + day.days, timeZone)
-      if (start <= now && now < end) available.set(day.id, end)
+      // Compare civil dates, since one date can occupy disjoint time intervals.
+      const start = Date.UTC(day.year, day.month - 1, day.day)
+      const end = Date.UTC(day.year, day.month - 1, day.day + day.days)
+      if (start <= localDate && localDate < end) {
+        let expiresAt = validUntil
+        for (;;) {
+          const next = zonedDateParts(expiresAt, timeZone)
+          const nextDate = Date.UTC(next.year, next.month - 1, next.day)
+          if (nextDate < start || nextDate >= end) break
+          expiresAt = nextZonedDateChange(expiresAt, timeZone)
+        }
+        available.set(day.id, expiresAt)
+      }
     }
   }
   return {
     server_now: now,
-    valid_until: zonedMidnight(local.year, local.month, local.day + 1, timeZone),
+    valid_until: validUntil,
     time_zone: timeZone,
     backgrounds: [...available].map(([background_id, expires_at]) => ({ background_id, expires_at })),
     unsupported_background_ids: Object.keys(festivalRules).filter(id => !supported.has(id))

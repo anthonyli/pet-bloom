@@ -147,6 +147,25 @@ describe('服务端节日免费日历', () => {
     expect(offer?.expires_at).toBe(time('2025-01-02T16:00:00Z'))
     expect(ids(atNoon('2025-01-03'))).not.toContain('hanukkah')
   })
+  it.each([
+    ['2009-11-01T02:59:59.999Z', true, '2009-11-01T03:00:00Z'],
+    ['2009-11-01T03:00:00Z', false, '2009-11-01T03:01:00Z'],
+    ['2009-11-01T03:00:00.001Z', false, '2009-11-01T03:01:00Z'],
+    ['2009-11-01T03:00:59.999Z', false, '2009-11-01T03:01:00Z'],
+    ['2009-11-01T03:01:00Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T03:01:00.001Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T03:30:00Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T03:59:59.999Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T04:00:00Z', false, '2009-11-02T04:00:00Z'],
+    ['2009-11-01T04:00:00.001Z', false, '2009-11-02T04:00:00Z']
+  ] as const)('Goose Bay 万圣节在回拨后按当地日期重新开放：%s', (date, available, until) => {
+    const result = getFestivalBackgrounds(time(date), 'America/Goose_Bay')
+    const offer = result.backgrounds.find(row => row.background_id === 'halloween')
+    expect(Boolean(offer)).toBe(available)
+    if (available) expect(offer?.expires_at).toBe(time(until))
+    expect(result.valid_until).toBe(time(until))
+    expect(result.valid_until).toBeGreaterThan(result.server_now)
+  })
   it('共享时区工具保持当地日期与午夜一致', () => {
     expect(zonedDateParts(time('2026-10-31T16:00:00Z'), 'Asia/Shanghai')).toMatchObject({ date: '2026-11-01', hour: 0 })
     expect(zonedMidnight(2026, 12, 32, 'Asia/Shanghai')).toBe(time('2026-12-31T16:00:00Z'))

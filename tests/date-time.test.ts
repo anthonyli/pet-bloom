@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { zonedDateParts, zonedMidnight } from '../lib/date-time'
+import { nextZonedDateChange, zonedDateParts, zonedMidnight } from '../lib/date-time'
 
 const hour = 3600000
 
@@ -58,5 +58,30 @@ describe('学校民用日的首个有效时刻', () => {
     expect(zonedDateParts(skipped - 1, zone).date).toBe('2011-12-29')
     expect(zonedDateParts(skipped, zone).date).toBe('2011-12-31')
     expect(zonedMidnight(2011, 12, 32, zone)).toBeGreaterThan(after)
+  })
+  it.each([
+    ['2009-11-01T03:00:00Z', '2009-11-01T03:01:00Z'],
+    ['2009-11-01T03:01:00Z', '2009-11-01T04:00:00Z'],
+    ['2009-11-01T04:00:00Z', '2009-11-02T04:00:00Z']
+  ])('Goose Bay 日期片段边界 %s 前后1ms始终返回下一次日期变化', (boundary, next) => {
+    const value = Date.parse(boundary), zone = 'America/Goose_Bay'
+    expect(nextZonedDateChange(value - 1, zone)).toBe(value)
+    for (const time of [value, value + 1]) {
+      const end = nextZonedDateChange(time, zone)
+      expect(end).toBe(Date.parse(next))
+      expect(end).toBeGreaterThan(time)
+      expect(zonedDateParts(end - 1, zone).date).toBe(zonedDateParts(time, zone).date)
+      expect(zonedDateParts(end, zone).date).not.toBe(zonedDateParts(time, zone).date)
+    }
+  })
+  it.each([
+    ['America/New_York', '2026-03-08T05:00:00Z', '2026-03-09T04:00:00Z'],
+    ['America/New_York', '2026-11-01T04:00:00Z', '2026-11-02T05:00:00Z'],
+    ['America/Havana', '2026-11-01T04:00:00Z', '2026-11-02T05:00:00Z'],
+    ['Australia/Lord_Howe', '2026-04-04T13:00:00Z', '2026-04-05T13:30:00Z'],
+    ['Pacific/Apia', '2011-12-29T10:00:00Z', '2011-12-30T10:00:00Z']
+  ])('%s 同日时钟变化不提前截断日期，整日跳过正常前进', (zone, start, end) => {
+    expect(nextZonedDateChange(Date.parse(start), zone)).toBe(Date.parse(end))
+    expect(nextZonedDateChange(Date.parse(start) + 1, zone)).toBe(Date.parse(end))
   })
 })

@@ -40,6 +40,36 @@ beforeEach(async () => {
 afterEach(() => { vi.restoreAllMocks(); garden.db.close() })
 
 describe('服务端节日临时背景权限', () => {
+  it('Goose Bay 回拨后可重新选择万圣节，旧选择不复活且不改永久账本', async () => {
+    await settings(classId, value => { value.hunger.timeZone = 'America/Goose_Bay' })
+    await garden.evaluate(owner, { studentIds: [studentId], custom: { points: 40 } })
+    await own('garden')
+    await garden.setBackground(owner, studentId, { backgroundId: 'garden' })
+    const beforeLedger = await ledger()
+    const first = Date.parse('2009-11-01T03:00:00Z'), rollback = first + 60000, second = first + 3600000
+    time(first - 1)
+    await garden.setBackground(owner, studentId, { backgroundId: 'halloween' })
+    expect((await student()).festival_background_expires_at).toBe(first)
+    for (const now of [first, first + 1, rollback - 1]) {
+      time(now)
+      await expect(garden.setBackground(owner, studentId, { backgroundId: 'halloween' })).rejects.toThrow('backgroundNotOwned')
+      expect((await student()).festival_background_id).toBeNull()
+    }
+    time(rollback)
+    expect((await student()).festival_background_id).toBeNull()
+    for (const now of [rollback, rollback + 1, second - 1]) {
+      time(now)
+      await garden.setBackground(owner, studentId, { backgroundId: 'halloween' })
+      expect((await student()).festival_background_expires_at).toBe(second)
+    }
+    for (const now of [second, second + 1]) {
+      time(now)
+      await expect(garden.setBackground(owner, studentId, { backgroundId: 'halloween' })).rejects.toThrow('backgroundNotOwned')
+      expect(await student()).toMatchObject({ background_id: 'garden', owned_background_ids: ['garden'], spent_badges: 1, festival_background_id: null })
+    }
+    expect(await ledger()).toEqual(beforeLedger)
+  })
+
   it('Havana 缺失午夜按真实日界授权，保留已兑换背景与徽章账本', async () => {
     await settings(classId, value => { value.hunger.timeZone = 'America/Havana' })
     await garden.evaluate(owner, { studentIds: [studentId], custom: { points: 40 } })
