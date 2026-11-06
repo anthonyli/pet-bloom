@@ -79,4 +79,22 @@ describe('宠物形态、饥饿与学校日历', () => {
     expect(elapsed).toBeGreaterThanOrEqual(hour)
     expect(elapsed).toBeLessThanOrEqual(24 * hour)
   })
+  it.each([
+    ['America/Havana', '2026-03-07T05:00:00Z', '2026-03-09T04:00:00Z', '2026-03-08', 24],
+    ['America/Havana', '2026-10-31T04:00:00Z', '2026-11-02T05:00:00Z', '2026-11-01', 24],
+    ['America/Santiago', '2026-09-05T04:00:00Z', '2026-09-07T03:00:00Z', '2026-09-06', 24],
+    ['Africa/Cairo', '2026-04-23T21:30:00Z', '2026-04-24T21:30:00Z', '2026-04-24', 1],
+    ['Pacific/Apia', '2011-12-29T10:00:00Z', '2011-12-31T10:00:00Z', '2011-12-30', 48]
+  ])('%s 缺失、重复或跳过日界不多扣校假、不跨日误计', (zone, start, end, holiday, hours) => {
+    const hunger = { ...defaultGardenSettings().hunger, timeZone: zone, excludeWeekends: false, excludeHolidays: true, holidays: [{ start: holiday, end: holiday }] }
+    expect(eligibleElapsed(time(start), time(end), hunger)).toBe(hours * hour)
+  })
+  it.each([
+    ['America/Havana', '2026-03-07T04:30:00Z', '2026-03-09T04:30:00Z'],
+    ['America/Havana', '2026-10-31T03:30:00Z', '2026-11-02T05:30:00Z'],
+    ['Pacific/Apia', '2011-12-30T09:30:00Z', '2012-01-01T10:30:00Z']
+  ])('%s 跨跳变周末只累计相邻工作日，并正常结束迭代', (zone, start, end) => {
+    const hunger = { ...defaultGardenSettings().hunger, timeZone: zone, excludeWeekends: true, excludeHolidays: false }
+    expect(eligibleElapsed(time(start), time(end), hunger)).toBe(hour)
+  })
 })
