@@ -1,7 +1,7 @@
 import type { GardenSettings } from './garden-settings'
 import { growthLevel } from './growth'
 
-import { zonedDateParts as parts, zonedMidnight as midnight } from './date-time'
+import { zonedDateParts as parts, nextZonedDateChange } from './date-time'
 
 export interface PetStatus { form: 'unadopted' | 'normal' | 'sick' | 'egg'; hungry: boolean; lastFedAt: number }
 export function eligibleElapsed(start: number, end: number, hunger: GardenSettings['hunger'], limit = Infinity) {
@@ -10,9 +10,7 @@ export function eligibleElapsed(start: number, end: number, hunger: GardenSettin
   let cursor = start, elapsed = 0
   while (cursor < end && elapsed < limit) {
     const local = parts(cursor, hunger.timeZone)
-    const nextDate = new Date(Date.UTC(local.year, local.month - 1, local.day + 1))
-    const next = midnight(nextDate.getUTCFullYear(), nextDate.getUTCMonth() + 1, nextDate.getUTCDate(), hunger.timeZone)
-    const boundary = Math.min(end, next > cursor ? next : cursor + 3600000)
+    const boundary = Math.min(end, nextZonedDateChange(cursor, hunger.timeZone))
     const weekday = new Date(Date.UTC(local.year, local.month - 1, local.day)).getUTCDay()
     const excluded = (hunger.excludeWeekends && (weekday === 0 || weekday === 6)) || (hunger.excludeHolidays && hunger.holidays.some(range => range.start <= local.date && local.date <= range.end))
     if (!excluded) elapsed += boundary - cursor
