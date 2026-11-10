@@ -1,0 +1,6 @@
+{
+  "version": 9,
+  "name": "student-archive",
+  "kind": "expand",
+  "statements": ["ALTER TABLE students ADD COLUMN archived_at INTEGER"]
+}

@@ -15,11 +15,13 @@ pnpm db:migrate  # 备份 → 迁移演练 → 原子迁移
 
 `008-baseline.json` 是冻结的 v8 结构，不会在现有数据库执行建表；首次接管会检查结构并写入迁移历史。不要编辑已执行的迁移，校验和不一致会阻止发布。
 
-未来新增字段的文件例如 `009-student-note.json`：
+`009-student-archive.json` 为学生归档追加可空时间列，旧数据保持在班。Migration 009 adds a nullable archive timestamp; existing students remain active.
+
+未来新增字段的文件例如 `010-student-note.json`：
 
 ```json
 {
-  "version": 9,
+  "version": 10,
   "name": "student-note",
   "kind": "expand",
   "statements": [

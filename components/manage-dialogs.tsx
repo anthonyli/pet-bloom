@@ -1,6 +1,6 @@
 'use client'
 import { useRef, useState } from 'react'
-import { Trash2, Plus, Download, Database, ShieldCheck, Settings2, School, UserRound, Upload, Save, Check, X, Sparkles, BookOpen, HandHeart, HeartPulse, Shapes, RefreshCw } from 'lucide-react'
+import { Archive, Trash2, Plus, Download, Database, ShieldCheck, Settings2, School, UserRound, Upload, Save, Check, X, Sparkles, BookOpen, HandHeart, HeartPulse, Shapes, RefreshCw } from 'lucide-react'
 import { Button, Checkbox, Dialog, Field, FileInput, Input, Select, Textarea } from '@/components/ui'
 import { parseStudentList } from '@/lib/student-import'
 import { MAX_BACKUP_MB, MAX_BACKUP_BYTES } from '@/lib/shop'
@@ -22,7 +22,7 @@ export function ClassDialog({ client, locale, classroom, onClose }: { client: Ga
 }
 export function StudentDialog({ client, locale, student, importing, onClose }: { client: GardenClient; locale: Locale; student?: Student; importing?: boolean; onClose: () => void }) {
   const t = translator(locale), [name, setName] = useState(student?.name || ''), [number, setNumber] = useState(student?.student_no || ''), [lines, setLines] = useState(''), [confirmDelete, setConfirmDelete] = useState(false)
-  const [acceptNames, setAcceptNames] = useState(false)
+  const [acceptNames, setAcceptNames] = useState(false), [confirmArchive, setConfirmArchive] = useState(false)
   const parsed = parseStudentList(lines)
   const ambiguous = parsed.some(row => row.ambiguous), invalid = parsed.some(row => row.invalid)
   return <Dialog open onClose={onClose} icon={importing ? Upload : UserRound} title={importing ? t('批量导入学生', 'Import students') : student ? t('编辑学生', 'Edit student') : t('添加学生', 'Add a student')} description={importing ? t('每行一名学生，姓名和学号用空格、逗号或分号分隔。每次最多 500 名。', 'One student per line. Separate the name and student number with a comma, semicolon or space. Up to 500 students.') : undefined}>
@@ -31,6 +31,13 @@ export function StudentDialog({ client, locale, student, importing, onClose }: {
       {importing && parsed.length > 0 && <div className="space-y-3"><div className="table-wrap max-h-40 overflow-y-auto rounded-xl border border-line"><table className="data-table"><thead><tr><th>{t('姓名预览', 'Name preview')}</th><th>{t('学号', 'Student number')}</th></tr></thead><tbody>{parsed.slice(0, 20).map((row, index) => <tr key={index}><td>{row.name}</td><td>{row.studentNo || '—'}</td></tr>)}</tbody></table></div>{invalid && <p role="alert" className="text-sm text-danger">{t('有无效行，请检查姓名、学号长度、引号以及列数（每行最多两列）。', 'Some rows are invalid. Check names, number lengths, quotes, and the two-column limit.')}</p>}{ambiguous && <label className="flex items-start gap-3 text-sm leading-relaxed"><Checkbox checked={acceptNames} onCheckedChange={setAcceptNames} /><span>{t('部分行只有空格且没有明确学号。我确认将整行作为完整姓名保留。', 'Some space-separated rows have no clear student number. Keep each entire row as the full name.')}</span></label>}</div>}
       <Button type="submit" variant="primary" busy={client.busy} disabled={importing && (parsed.length > 500 || !lines.trim() || invalid || (ambiguous && !acceptNames))} className="w-full">{importing ? <Upload size={16} /> : <Save size={16} />}{importing ? t('导入学生', 'Import students') : t('保存学生', 'Save student')}</Button>
     </form>
+    {student && <section className="mt-6 space-y-3 border-t border-line pt-5" aria-label={t('转学或离班', 'Transfer or leave class')}>
+      <p className="text-sm leading-relaxed text-muted">{t('转学或离班时可归档学生，保留积分、宠物、徽章和全部历史。归档后退出在班名单、人数统计和日常操作，可从“已归档学生”恢复。', 'Archive students who transfer or leave. Points, pets, badges and history are kept. Archived students leave the active roster, count and daily activities. Restore them from Archived students.')}</p>
+      {confirmArchive && client.notice?.error && <p role="alert" className="text-sm text-danger">{client.notice.text}</p>}
+      {confirmArchive && <p role="status" className="text-sm font-medium">{t(`确认归档 ${student.name}？`, `Archive ${student.name}?`)}</p>}
+      <div className="flex flex-wrap gap-2"><Button busy={client.busy} onClick={async () => { client.setNotice(null); if (!confirmArchive) return setConfirmArchive(true); if (await client.run(() => api(`students/${student.id}/archive`, 'POST', {}), t('学生已归档，历史记录已保留。', 'Student archived. History preserved.'))) onClose() }}><Archive size={16} />{confirmArchive ? t('确认归档', 'Confirm archive') : t('归档学生', 'Archive student')}</Button>
+      {confirmArchive && <Button variant="ghost" disabled={client.busy} onClick={() => setConfirmArchive(false)}>{t('取消', 'Cancel')}</Button>}</div>
+    </section>}
     {student && <div className="mt-6 border-t border-line pt-5">{confirmDelete && <p className="mb-3 text-sm text-danger">{t('将永久删除此学生及其全部记录。', 'This permanently deletes this student and all their records.')}</p>}<Button variant="danger" busy={client.busy} onClick={async () => { if (!confirmDelete) return setConfirmDelete(true); if (await client.run(() => api(`students/${student.id}`, 'DELETE'), t('学生已删除。', 'Student deleted.'))) onClose() }}><Trash2 size={16} />{confirmDelete ? t('确认删除学生', 'Confirm deletion') : t('删除学生', 'Delete student')}</Button></div>}
   </Dialog>
 }

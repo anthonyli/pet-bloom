@@ -66,7 +66,7 @@ pnpm dev
 ## 已实现功能
 
 - 注册、登录、退出，HttpOnly 会话 Cookie，口令使用 scrypt 哈希；教师资料可随时编辑，教学身份仅用于介绍，不直接授予班级权限。
-- 班级创建、改名、切换；学生添加、编辑、删除、批量文本导入。班级默认私有，只向负责人和已加入的共同管理员开放。
+- 班级创建、改名、切换；学生添加、编辑、删除、批量文本导入。转学／离班学生可从编辑窗口归档，在“已归档学生”中查看档案和分页历史、恢复到原班；归档保留积分、宠物和徽章，退出在班名单、人数和日常操作。班级默认私有，只向负责人和已加入的共同管理员开放。
 - 班级教师可生成、复制或停用邀请码；邀请码为 6 组 4 位十六进制字符，7 天内可多人使用，仅生成时展示明文。新码替换旧码；加入前先预览班级并确认，已有班级的教师也可以继续加入其他班级。
 - 共同管理员可管理班级名称、学生、评价、兑换、规则、成长设置、商店及邀请；仅负责人可删除班级、移除成员、转让负责人及导出该班备份。共同管理员可退出，负责人须先转让；转让给已加入教师后原负责人保留共同管理员身份。移除或转让会使旧邀请码失效，不删除历史记录。
 - 50 种完整八阶段宠物，分为精灵系 2、山海系 6、动画系 1、萌宠系 41（含新增鼠、牛、蛇）。
@@ -80,7 +80,7 @@ pnpm dev
 - 累计积分排行榜，评价及兑换历史保留操作当时的教师称呼与学科，并显示撤回教师；改名、退出或移除不改写历史署名。旧记录无法证明操作者时显示为历史记录。负责人可撤回班内所有记录，共同管理员仅可撤回自己的评价整批或兑换，仍须满足原有周期与徽章余额限制。
 - 徽章奖励商店，商品名称与描述各填写一次、分类图标或上传图片、库存、商品编辑、兑换与退款退库存。
 - 41 种原创本地 SVG 宠物背景：4 种日常场景、22 种国内节日、15 种国际与海外节日，支持分类筛选和中英文名称、描述搜索。国庆以大红与五星红旗呈现，建军节突出「八一」与和平鸽，各节日保留自己的代表元素。在「小商店 → 宠物背景」分页为学生兑换，仅解锁、不自动更换；再去「装扮」筛选、预览、使用或恢复免费默认背景。节日背景不按日期自动更换；节日当天可按学校时区免费临时使用，不扣徽章、不产生兑换记录，到期恢复原长期背景或默认。已兑换背景全年可用。背景归学生持有，换宠、毕业后保留，已拥有的不重复扣费，下架后仍可选用；退款撤销持有，若正在使用则恢复默认背景。
-- v7 JSON 备份仅包含本人当前负责的班级、各班资源和个人初始模板，不含仅共同管理的班级、账号凭据、成员权限或邀请码；保留历史教师署名，但不据此恢复账号关联或授权。支持导入 v1–v6 历史备份，先按各自原格式校验。已完善资料的教师均可导入，事务内创建新的班级副本，导入者为负责人，不覆盖现有班级、共管数据或个人初始模板，也不恢复其他教师权限；失败整体回滚。
+- v8 JSON 备份仅包含本人当前负责的班级、各班资源和个人初始模板，不含仅共同管理的班级、账号凭据、成员权限或邀请码；保留历史教师署名，但不据此恢复账号关联或授权。支持导入 v1–v7 历史备份，先按各自原格式校验。已完善资料的教师均可导入，事务内创建新的班级副本，导入者为负责人，不覆盖现有班级、共管数据或个人初始模板，也不恢复其他教师权限；失败整体回滚。
 - 中文/英文 URL 与切换，响应式桌面和手机界面，键盘可操作的 Radix Dialog。
 
 ## 架构
@@ -98,7 +98,7 @@ pnpm dev
 - `components/`：工作台、账号、管理、宠物、评价及商店界面。
 - `lib/server/db.ts`：SQLite 连接、结构、WAL、外键。
 - `lib/server/garden.ts`：教师资料、班级成员/负责人权限校验、邀请及业务事务。
-- `lib/server/backup.ts`：v7 备份、历史格式校验、编号重映射与原子副本导入。
+- `lib/server/backup.ts`：v8 备份、历史格式校验、编号重映射与原子副本导入。
 - `lib/data/`：宠物、默认规则及背景双语配置；41 种背景及其分类定义于 `lib/data/backgrounds.json`。
 - `public/pets/`：本地宠物图片及来源清单。
 - `public/pet-backgrounds/`：41 种原创本地 SVG 背景场景，来源记录在 `public/pets/SOURCES.md`。
@@ -118,15 +118,15 @@ pnpm dev
 
 撤回会按仍有效的完整记录重新计算，而不是简单减绝对值；徽章按有效记录中的历史最高成长重算。撤回批量评价会整批操作。重新领养后，已结束的旧周期不支持撤回；若撤回将收回已用于兑换的额度，须先退回相关兑换，避免徽章余额变成负数。
 
-商品图片仅接受最大 2 MB 的 PNG/JPEG/WebP，服务端重新编码为最多 512px、256 KB 的 WebP；图片总量按每个班级或个人初始模板分别限制为 10 MB，不是全账号共用额度。图像存入 SQLite，并随 v7 备份导出和副本导入。库存 -1 表示无限；有限库存随兑换扣减，退款时恢复实际扣减的库存，各班库存互不影响。
+商品图片仅接受最大 2 MB 的 PNG/JPEG/WebP，服务端重新编码为最多 512px、256 KB 的 WebP；图片总量按每个班级或个人初始模板分别限制为 10 MB，不是全账号共用额度。图像存入 SQLite，并随 v8 备份导出和副本导入。库存 -1 表示无限；有限库存随兑换扣减，退款时恢复实际扣减的库存，各班库存互不影响。
 
 背景目录 `lib/data/backgrounds.json` 当前有 41 项，含 `category`、中英文名称与描述：日常场景 4 项，国内节日 22 项，国际与海外节日 15 项。国内新增除夕、小年、龙抬头、冬至、植树节、青年节、建党节、建军节和中国农民丰收节；原有节日也强化了各自主题色和代表元素，而非统一浅色风景。全部背景初始各 1 枚徽章，库存固定 `stock=-1`（无限）；仅按班修改价格，允许 1–100 的整数，只影响当前班级之后的兑换，不改变其他班级、个人初始模板或已拥有背景。商店和装扮均可按分类及中英文名称、描述搜索筛选；默认背景始终免费；日常背景及节日以外的长期使用须为每位学生分别兑换，使用已拥有背景或恢复默认不再扣费。37种节日背景在对应节日按学校时区提供临时免费使用，不算永久拥有、不扣徽章、不写兑换记录；到期恢复原长期背景，没有则恢复默认，已兑换背景不受影响。节日不自动切换，教师仍需主动在装扮中选用。商品下架或零徽章不影响当天免费入口，4种日常背景不参加节日免费。
 
 服务端通过离线历法规则判断学校日期（复用宠物状态设置中的学校时区，默认 `Asia/Shanghai`），不接受客户端传入的免费标记或日期。小年兼容腊月二十三、二十四；节日主日不扩展成调休假期；母亲节为5月第二个周日、父亲节为6月第三个周日、感恩节按美国11月第四个周四，复活节按西方日期；光明节为连续8个学校民用日。排灯节固定采用印度新德里 Lakshmi Puja 主日，已逐年核验2026–2030（[Drik Panchang](https://www.drikpanchang.com/festivals/lakshmipuja/festivals-lakshmipuja-timings.html?geoname-id=1261481)、[timeanddate India](https://www.timeanddate.com/holidays/india/diwali)），其他年份明确提示尚无可靠日期，不猜测开放。页面按服务端时刻安排独立到期清理，断网或保存挂起也不会无限保留免费装扮；改变学校时区会清除该班临时选择。
 
-v4 已包含每班设置版本、成长事件及锁定奖励额度；其数据库迁移为旧班级复制原账号配置并保留成长与兑换历史。v5 增加背景商品、兑换快照和当前装备字段，固定初始化原 4 种背景；v6 固定只补原 28 种节日背景。v7 仅一次性向个人初始模板和既有班级补入9种国内节日。当前数据库为 v8，导出备份仍为 v7；v8 只追加临时免费装扮及截止时间，备份明确排除这两个临时字段，保留原长期背景。恢复后临时选择为空，当天免费资格重新由服务端判定。迁移不重建旧背景缺项、不重新上架已有下架商品，也不改动既有价格、持有或当前装备；迁移在事务中执行，失败回滚。背景拥有列表仍由未退款的有效兑换记录派生，不单独导出。
+v4 已包含每班设置版本、成长事件及锁定奖励额度；其数据库迁移为旧班级复制原账号配置并保留成长与兑换历史。v5 增加背景商品、兑换快照和当前装备字段，固定初始化原 4 种背景；v6 固定只补原 28 种节日背景。v7 仅一次性向个人初始模板和既有班级补入9种国内节日。当前数据库为 v9，导出备份为 v8（含归档时间）；数据库 v8 追加临时免费装扮及截止时间，备份明确排除这两个临时字段，保留原长期背景。恢复后临时选择为空，当天免费资格重新由服务端判定。迁移不重建旧背景缺项、不重新上架已有下架商品，也不改动既有价格、持有或当前装备；迁移在事务中执行，失败回滚。背景拥有列表仍由未退款的有效兑换记录派生，不单独导出。
 
-历史备份先按各自原格式校验；v5 的原 schema 及背景标识白名单冻结为原 4 种，v6 冻结为原 32 种，v7 为 41 种。所有版本导入都在事务中创建新的班级副本，不改动既有班级或个人初始模板：v1–v4 新副本初始化全部 41 种背景商品；v5 只补原 28 种节日与本轮 9 种国内节日，保留原 4 种的价格、下架状态及缺项；v6 只补本轮 9 种，保留原 32 种的现有状态；v7 按备份原样恢复商品，不补任何缺失项。
+历史备份先按各自原格式校验；v5 的原 schema 及背景标识白名单冻结为原 4 种，v6 冻结为原 32 种，v7 为 41 种。所有版本导入都在事务中创建新的班级副本，不改动既有班级或个人初始模板：v1–v4 新副本初始化全部 41 种背景商品；v5 只补原 28 种节日与本轮 9 种国内节日，保留原 4 种的价格、下架状态及缺项；v6 只补本轮 9 种，保留原 32 种的现有状态；v7/v8 按备份原样恢复商品，不补任何缺失项。
 
 工作台历史展示当前班级最近 200 条记录，完整历史保留在 SQLite 和导出备份中。每次文本导入上限 500 名学生；备份恢复文件上限 50 MB。当前没有找回密码、邮件验证或管理后台，不要将教师密码复用到其他网站。
 
@@ -169,7 +169,7 @@ pnpm deploy:vercel          # 完整检查 → 待发布构建 → 数据迁移 
 
 正式发布先通过 `--prod --skip-domain` 构建待发布版本，构建成功后运行独立迁移脚本，迁移成功才 `promote` 切换生产域名。之后核对域名的部署 ID，并请求 `/api/health` 确认 Turso 可用。健康检查最多重试 6 次；验证失败返回非零退出码，已提交的兼容迁移会保留，脚本不会用旧备份自动覆盖数据库。测试进程会移除继承的数据库和 Vercel 环境变量。网络需要代理时，可使用标准代理环境变量，例如 `HTTPS_PROXY=http://127.0.0.1:7890 pnpm deploy:vercel`；脚本不会关闭 TLS 校验。
 
-云迁移从现有 schema v8 接管，首次运行只登记基线，不重建业务表、不覆盖数据。迁移文件位于 `migrations/turso`，校验和、已执行版本记录在 `_pet_bloom_migrations`。有待执行迁移时，先导出包含账号、会话和全部业务表的完整快照到 `data/backups/turso/`，验证完整性和外键，并在快照上演练、逐表核对原有字段和记录；演练回滚后保留迁移前的 `snapshot.db`。云端使用单个写事务批次执行变更、核对行数并更新版本，任一步失败则整批回滚。备份目录已排除 Git 和 Vercel 上传。
+云迁移从现有 schema v8 接管，登记基线后执行 v9 归档增量，不重建业务表、不覆盖数据。迁移文件位于 `migrations/turso`，校验和、已执行版本记录在 `_pet_bloom_migrations`。有待执行迁移时，先导出包含账号、会话和全部业务表的完整快照到 `data/backups/turso/`，验证完整性和外键，并在快照上演练、逐表核对原有字段和记录；演练回滚后保留迁移前的 `snapshot.db`。云端使用单个写事务批次执行变更、核对行数并更新版本，任一步失败则整批回滚。备份目录已排除 Git 和 Vercel 上传。
 
 自动迁移仅支持新增表、索引和兼容旧版写入的可空字段；删表、删字段、重命名、覆盖数据被拒绝。新增迁移、版本更新与恢复步骤见 [迁移说明](migrations/turso/README.md)。本地数据不会自动上传；本地 `PRAGMA user_version` 迁移不在云端运行。生产应通过此脚本发布；直接运行 `vercel deploy` 或 Vercel Git 自动部署会绕过迁移流程，不应作为数据库升级的发布入口。
 
@@ -267,11 +267,11 @@ Evaluation and redemption history preserve the teacher’s name and subject at t
 
 Passwords are hashed with scrypt. Sessions use HttpOnly, SameSite=Lax cookies. Every business request checks the authenticated teacher’s class membership or owner permission on the server. The current class’s latest 200 evaluation records are shown in the interface; all records remain in SQLite and backups. Import up to 500 students at a time; backup restores are limited to 50 MB. Class teachers can configure seven growth thresholds and badge amounts (including zero) under Rules, independently for the current class. Changes preserve level and within-level progress immediately; existing rewards retain their original amounts, even after undo and re-earning. Defaults remain 700 experience to graduate, one badge per level, and zero-clamped growth. Optional sick and egg states enable signed experience for subsequent evaluations. At Lv.1, a pet appears sick immediately when the total points on its card are negative, regardless of whether cycle experience is negative; it recovers at zero points. The egg state takes priority when both conditions apply. An egg is a recoverable appearance, not a data reset: it triggers immediately when the total points shown on the student card reach or fall below the configured threshold (default -10), independently of cycle experience, and recovers above it. Hunger reminders use the last active positive evaluation or adoption, the school time zone, and optional weekend/school-holiday exclusions. They never deduct points. Old adoption timestamps fall back to student creation time. Badge spending never removes collection honors. Upload PNG/JPEG/WebP images up to 2 MB; the server re-encodes them to WebP at up to 512px and 256 KB each. Processed images have a separate 10 MB total limit per class or personal initial template, not per account.
 
-Version 7 JSON backups contain only classes currently owned by the exporter, their class-specific resources, images, settings versions, growth events, reward locks and historical teacher names, plus the personal initial template. They include background shop items, background snapshots in redemption records and each student’s permanent equipped background. Temporary festival selections and expiry timestamps are excluded; restored classes start with no temporary selection and festival eligibility is recalculated on the server. Ownership is derived from valid, non-refunded redemptions and is not exported as a separate list. Backups exclude co-admin-only classes, account credentials, membership permissions and invitation codes.
+Version 8 JSON backups contain only classes currently owned by the exporter, their class-specific resources, images, settings versions, growth events, reward locks and historical teacher names, plus the personal initial template. They include background shop items, background snapshots in redemption records and each student’s permanent equipped background. Temporary festival selections and expiry timestamps are excluded; restored classes start with no temporary selection and festival eligibility is recalculated on the server. Ownership is derived from valid, non-refunded redemptions and is not exported as a separate list. Backups exclude co-admin-only classes, account credentials, membership permissions and invitation codes.
 
-Versions 1–6 can also be imported after validation against their original formats. The version 5 schema and background-ID allowlist remain frozen to the original four scenes, and version 6 remains frozen to the original 32; version 7 accepts all 41. Any teacher with a complete profile may import a backup. Import atomically creates new class copies owned by the importing teacher; it never replaces existing classes, co-managed data or the personal initial template, and never restores other teachers’ access or binds historical actor IDs to accounts. Copies imported from versions 1–4 initialize all 41 background items. Version 5 copies add only the original 28 holiday items and the nine new Chinese holidays, preserving the original four items’ prices, delisted status and missing entries. Version 6 copies add only the new nine items and preserve the original 32 items’ state. Version 7 restores the backed-up items without filling missing entries. A failed import rolls back completely.
+Versions 1–7 can also be imported after validation against their original formats. The version 5 schema and background-ID allowlist remain frozen to the original four scenes, and version 6 remains frozen to the original 32; version 7 accepts all 41. Any teacher with a complete profile may import a backup. Import atomically creates new class copies owned by the importing teacher; it never replaces existing classes, co-managed data or the personal initial template, and never restores other teachers’ access or binds historical actor IDs to accounts. Copies imported from versions 1–4 initialize all 41 background items. Version 5 copies add only the original 28 holiday items and the nine new Chinese holidays, preserving the original four items’ prices, delisted status and missing entries. Version 6 copies add only the new nine items and preserve the original 32 items’ state. Versions 7 and 8 restore the backed-up items without filling missing entries. A failed import rolls back completely.
 
-The database is at version 8; backups remain at version 7. Version 8 only adds temporary festival-background and expiry columns, leaving permanent ownership, prices and equipment unchanged. Changing a class’s school time zone clears that class’s temporary selections in the same transaction. The version 4 migration preserves legacy growth and redemption history, settings versions and reward locks while copying account configuration into each existing class. Version 5 adds background fields and seeds the original four scenes. Version 6 remains fixed to adding the original 28 holiday items. Version 7 adds only the nine new Chinese holiday items to personal initial templates and existing classes in a one-time migration. It does not recreate missing older items, relist delisted items, or alter existing prices, ownership or equipped backgrounds. Database migration runs transactionally and rolls back on failure.
+The database is at version 9; version 8 backups preserve student archive timestamps. Version 8 only adds temporary festival-background and expiry columns, leaving permanent ownership, prices and equipment unchanged. Changing a class’s school time zone clears that class’s temporary selections in the same transaction. The version 4 migration preserves legacy growth and redemption history, settings versions and reward locks while copying account configuration into each existing class. Version 5 adds background fields and seeds the original four scenes. Version 6 remains fixed to adding the original 28 holiday items. Version 7 adds only the nine new Chinese holiday items to personal initial templates and existing classes in a one-time migration. It does not recreate missing older items, relist delisted items, or alter existing prices, ownership or equipped backgrounds. Database migration runs transactionally and rolls back on failure.
 
 ### Vercel + Turso (Singapore)
 
@@ -298,3 +298,14 @@ The local SQLite configuration requires a persistent disk and a single server; i
 Run `pnpm typecheck`, `pnpm test` and `pnpm build`. Tests use in-memory databases. Base pet artwork and original rule definitions are imported third-party resources, with asset notes and checksums recorded in `public/pets/`. Confirm the imported artwork’s license before public deployment or redistribution, or replace it with licensed assets. No third-party application scripts are shipped.
 
 The 41 SVG scenes in `public/pet-backgrounds/` (four everyday, 22 Chinese holiday and 15 international or overseas holiday backgrounds) are original vector backgrounds created for this project, not sourced from third-party sites. They do not replace the original pet images. The full catalog and its provenance are recorded in the existing `public/pets/SOURCES.md`.
+
+
+### 学生归档 / Student archive
+
+教师可从学生的“更多操作 → 编辑学生 → 归档学生”确认离班归档。在“班级工具 → 已归档学生”搜索、查看档案和完整分页评价／兑换历史，确认恢复后继续使用同一档案。归档与恢复都保留身份、积分、宠物成长和徽章；归档学生不参与日常名单、在班人数、排行榜、批量评分或兑换。历史撤回沿用原有权限。
+
+Teachers can confirm an archive from More actions → Edit student → Archive student. Open Class tools → Archived students to search, view a profile and paginated evaluation/redemption history, or restore the same student to the class. Archiving preserves identity, points, pet growth and badges, while excluding the student from active counts, rankings, daily scoring and redemptions. Historical undo keeps its existing permissions.
+
+数据库升级到 v9，新增可空的 `students.archived_at`；备份 v8 保存归档时间，仍兼容 v1–v7（旧学生默认为在班）。当前模型每个学生只属于一个班级，本功能不进行跨校数据转交。云迁移与验证方法见 [归档验收说明](docs/student-archive.md)。
+
+Schema v9 adds nullable `students.archived_at`. Backup v8 preserves archive timestamps and accepts v1–v7 as active students. Each student belongs to one class; this feature does not transfer records between schools. See [archive verification](docs/student-archive.md) for migration and test steps.

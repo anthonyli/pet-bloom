@@ -2,7 +2,7 @@
 import { AdminLink } from '@/components/admin-classes'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { PawPrint, Palette, ArrowDownAZ, Hash, Star, TrendingUp, MoreHorizontal, Settings2, Globe2, LogOut, Plus, Search, Trophy, ShoppingBag, History, ListChecks, SlidersHorizontal, BookOpen, Users, Pencil, RefreshCw, Award, Check, X, LoaderCircle, CircleCheck, CircleAlert, Undo2, Upload, Sparkles, School, UserPlus } from 'lucide-react'
+import { Archive, PawPrint, Palette, ArrowDownAZ, Hash, Star, TrendingUp, MoreHorizontal, Settings2, Globe2, LogOut, Plus, Search, Trophy, ShoppingBag, History, ListChecks, SlidersHorizontal, BookOpen, Users, Pencil, RefreshCw, Award, Check, X, LoaderCircle, CircleCheck, CircleAlert, Undo2, Upload, Sparkles, School, UserPlus } from 'lucide-react'
 import { Button, Select, Input, Checkbox, Tooltip, TooltipProvider, cn } from '@/components/ui'
 import { translator, petById, growth } from '@/lib/i18n'
 import type { Locale, Student } from '@/lib/types'
@@ -10,6 +10,7 @@ import { api, useGarden } from './use-garden'
 import { AuthScreen } from './auth-screen'
 import { GrowthBar, PetStateLabel, EvaluationDialog, PetPicker } from './pet-dialogs'
 import { ClassDialog, StudentDialog, RulesDialog, SettingsDialog } from './manage-dialogs'
+import { ArchivedStudentsDialog } from './archived-students-dialog'
 import { HistoryDialog, RankingDialog, ShopDialog } from './activity-dialogs'
 import { LevelUpCelebration } from './level-up-celebration'
 import { PetScene } from './pet-scene'
@@ -19,7 +20,7 @@ import { BadgeDialog } from './badge-dialog'
 import { TeacherProfileScreen } from './teacher-profile'
 import { ClassTeachersDialog, JoinClassDialog } from './class-teachers-dialog'
 
-type Modal = 'newClass' | 'manageClass' | 'student' | 'import' | 'rules' | 'settings' | 'history' | 'ranking' | 'shop' | 'catalog' | 'teachers' | 'join' | null
+type Modal = 'archived' | 'newClass' | 'manageClass' | 'student' | 'import' | 'rules' | 'settings' | 'history' | 'ranking' | 'shop' | 'catalog' | 'teachers' | 'join' | null
 
 export function Workspace({ locale }: { locale: Locale }) {
   const t = translator(locale), client = useGarden(locale)
@@ -113,6 +114,7 @@ export function Workspace({ locale }: { locale: Locale }) {
           { key: 'ranking', icon: Trophy, label: t('荣誉榜', 'Honor roll') },
           { key: 'shop', icon: ShoppingBag, label: t('小商店', 'Reward shop') },
           { key: 'history', icon: History, label: t('评价记录', 'History') },
+          { key: 'archived', icon: Archive, label: t('已归档学生', 'Archived students') },
           { key: 'rules', icon: SlidersHorizontal, label: t('规则', 'Rules') },
           { key: 'catalog', icon: BookOpen, label: t('图鉴', 'Collection') },
           { key: 'teachers', icon: UserPlus, label: t('邀请教师', 'Invite teachers') }
@@ -121,6 +123,7 @@ export function Workspace({ locale }: { locale: Locale }) {
           { key: 'ranking', label: t('荣誉榜', 'Honor roll'), icon: Trophy },
           { key: 'shop', label: t('小商店', 'Reward shop'), icon: ShoppingBag },
           { key: 'history', label: t('评价记录', 'History'), icon: History },
+          { key: 'archived', label: t('已归档学生', 'Archived students'), icon: Archive },
           { key: 'rules', label: t('规则', 'Rules'), icon: SlidersHorizontal },
           { key: 'catalog', label: t('图鉴', 'Collection'), icon: BookOpen },
           { key: 'teachers', label: t('邀请教师', 'Invite teachers'), icon: UserPlus }
@@ -166,6 +169,7 @@ export function Workspace({ locale }: { locale: Locale }) {
     {modal === 'teachers' && classroom && <ClassTeachersDialog client={client} locale={locale} classroom={classroom} onClose={close} />}
     {modal === 'newClass' && <ClassDialog client={client} locale={locale} onClose={close} />}
     {modal === 'manageClass' && classroom && <ClassDialog client={client} locale={locale} classroom={classroom} onClose={close} />}
+    {modal === 'archived' && <ArchivedStudentsDialog client={client} locale={locale} onClose={close} />}
     {(modal === 'student' || modal === 'import') && <StudentDialog client={client} locale={locale} student={editing} importing={modal === 'import'} onClose={close} />}
     {modal === 'rules' && <RulesDialog client={client} locale={locale} onClose={close} />}
     {modal === 'history' && <HistoryDialog client={client} locale={locale} onClose={close} />}

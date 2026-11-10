@@ -5,7 +5,7 @@ import { adaptDatabase, type ApplicationDatabase } from './database-adapter'
 import { z } from 'zod'
 import petsData from '../data/pets.json'
 import rulesData from '../data/rules.json'
-import type { User, Student, Classroom, Rule, Evaluation, ShopItem, Redemption, Snapshot, Badge, TeachingRole, ClassTeachers, InvitationPreview } from '../types'
+import type { User, Student, Classroom, Rule, Evaluation, ShopItem, Redemption, Snapshot, Badge, TeachingRole, ClassTeachers, InvitationPreview, StudentHistory, StudentHistoryEntry } from '../types'
 import { growthLevel, growthProgress, replayEvents, type GrowthEvent, type GrowthEvaluation } from '../growth'
 import { defaultGardenSettings, gardenSettingsSchema, type GardenSettings, type SettingsVersion } from '../garden-settings'
 import { petStatus } from '../pet-status'
@@ -195,6 +195,35 @@ export class Garden {
     await this.classroom(actor, row.class_id)
     return row
   }
+  private async activeStudent(actor: string, id: string) {
+    const student = await this.student(actor, id)
+    if (student.archived_at !== null) throw new DomainError('studentArchived', 409)
+    return student
+  }
+  async setStudentArchived(actor: string, id: string, archived: boolean) {
+    return await this.db.transaction(async () => {
+      await this.student(actor, id)
+      // Retrying an archive preserves the original time; restoring never creates a row.
+      await this.db.prepare(archived
+        ? 'UPDATE students SET archived_at = COALESCE(archived_at, ?) WHERE id = ?'
+        : 'UPDATE students SET archived_at = ? WHERE id = ?').run(archived ? now() : null, id)
+    }).immediate()
+  }
+  async studentHistory(actor: string, id: string, offset = 0): Promise<StudentHistory> {
+    z.number().int().safe().nonnegative().parse(offset)
+    return await this.db.transaction(async () => {
+      await this.student(actor, id)
+      const rows = await this.db.prepare(`
+        SELECT id, 'evaluation' AS kind, reason AS description, points AS amount, created_at, undone, actor_name, actor_subject
+        FROM evaluations WHERE student_id = ?
+        UNION ALL
+        SELECT id, 'redemption' AS kind, item_name AS description, cost AS amount, created_at, undone, actor_name, actor_subject
+        FROM redemptions WHERE student_id = ?
+        ORDER BY created_at DESC, id DESC LIMIT 51 OFFSET ?
+      `).all(id, id, offset) as (Omit<StudentHistoryEntry, 'description'> & { description: string })[]
+      return { entries: rows.slice(0, 50).map(row => ({ ...row, description: JSON.parse(row.description) })), nextOffset: rows.length > 50 ? offset + 50 : null }
+    }).deferred()
+  }
   async createClass(actor: string, input: unknown) {
     const { name } = z.object({ name: text }).parse(input)
     return await this.db.transaction(async () => {
@@ -295,7 +324,7 @@ export class Garden {
   async updateStudent(actor: string, id: string, input: unknown) {
     const data = z.object({ name: text, studentNo: z.string().trim().max(30).default('') }).parse(input)
     await this.db.transaction(async () => {
-      await this.student(actor, id)
+      await this.activeStudent(actor, id)
       await this.db.prepare('UPDATE students SET name = ?, student_no = ? WHERE id = ?').run(data.name, data.studentNo, id)
     }).immediate()
   }
@@ -308,7 +337,7 @@ export class Garden {
   async adopt(actor: string, id: string, input: unknown) {
     const { petId } = z.object({ petId: text.refine(value => petIds.has(value)) }).parse(input)
     return await this.db.transaction(async () => {
-      const student = await this.student(actor, id), settings = await this.settings(actor, student.class_id)
+      const student = await this.activeStudent(actor, id), settings = await this.settings(actor, student.class_id)
       if (student.pet_id && level(student.pet_exp, settings.value.growth) < 8) throw new DomainError('petNotGraduated', 409)
       await this.db.prepare('UPDATE students SET pet_id = ?, pet_exp = 0, generation = generation + 1 WHERE id = ?').run(petId, id)
       await this.addGrowthEvent({ id, generation: student.generation + 1 }, 'start', settings.id, null, petId)
@@ -317,7 +346,7 @@ export class Garden {
   async changePet(actor: string, id: string, input: unknown) {
     const { petId } = z.object({ petId: text.refine(value => petIds.has(value)) }).parse(input)
     return await this.db.transaction(async () => {
-      const student = await this.student(actor, id), settings = await this.settings(actor, student.class_id)
+      const student = await this.activeStudent(actor, id), settings = await this.settings(actor, student.class_id)
       if (!student.pet_id) throw new DomainError('invalidInput')
       if (!settings.value.allowChangePet) throw new DomainError('petChangeDisabled', 409)
       await this.db.prepare('UPDATE students SET pet_id = ? WHERE id = ?').run(petId, id)
@@ -353,7 +382,7 @@ export class Garden {
     const data = parsed.data
     return await this.db.transaction(async () => {
       const user = await this.requireProfile(actor), batchId = uuid()
-      const students = await Promise.all([...new Set(data.studentIds)].map(async id => (await this.student(actor, id))))
+      const students = await Promise.all([...new Set(data.studentIds)].map(async id => (await this.activeStudent(actor, id))))
       if (new Set(students.map(student => student.class_id)).size !== 1) throw new DomainError('invalidInput')
       const classId = students[0].class_id, settings = await this.settings(actor, classId)
       const rule = data.custom ? {
@@ -461,7 +490,7 @@ export class Garden {
   async setBackground(actor: string, studentId: string, input: unknown) {
     const parsed = z.object({ backgroundId: z.string().nullable() }).safeParse(input)
     return await this.db.transaction(async () => {
-      const student = await this.student(actor, studentId)
+      const student = await this.activeStudent(actor, studentId)
       if (!parsed.success || (parsed.data.backgroundId !== null && !petBackgroundById(parsed.data.backgroundId))) throw new DomainError('invalidBackground')
       const { backgroundId } = parsed.data
       if (backgroundId === null || (await this.db.prepare('SELECT 1 FROM redemptions WHERE student_id = ? AND background_id = ? AND undone = 0').get(studentId, backgroundId))) {
@@ -477,7 +506,7 @@ export class Garden {
   async redeem(actor: string, input: unknown) {
     const { studentId, itemId } = z.object({ studentId: text, itemId: text }).parse(input)
     return await this.db.transaction(async () => {
-      const user = await this.requireProfile(actor), student = await this.student(actor, studentId), item = await this.classItem(actor, itemId)
+      const user = await this.requireProfile(actor), student = await this.activeStudent(actor, studentId), item = await this.classItem(actor, itemId)
       if (item.class_id !== student.class_id) throw new DomainError('notFound', 404)
       if (item.background_id && (await this.db.prepare('SELECT 1 FROM redemptions WHERE student_id = ? AND background_id = ? AND undone = 0').get(studentId, item.background_id))) throw new DomainError('backgroundAlreadyOwned', 409)
       if (item.stock === 0) throw new DomainError('outOfStock', 409)
@@ -541,7 +570,7 @@ export class Garden {
       const items = selected ? (await this.db.prepare('SELECT id, name, cost, active, description, category, icon, image_key, stock, background_id FROM items WHERE class_id = ? AND active = 1 ORDER BY rowid').all(selected) as (Omit<ShopItem, 'name' | 'description' | 'image'> & { name: string; description: string; image_key: string | null })[]).map(({ image_key, ...item }) => ({ ...item, name: JSON.parse(item.name), description: JSON.parse(item.description), image: image_key ? `/api/items/${item.id}/image?v=${image_key}` : null })) : []
       const badges = selected ? await this.db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id WHERE s.class_id = ? AND b.active = 1 ORDER BY b.earned_at DESC, b.level DESC').all(selected) as Badge[] : []
       const redemptions = selected ? (await this.db.prepare('SELECT r.*, s.name AS student_name FROM redemptions r JOIN students s ON s.id = r.student_id WHERE s.class_id = ? ORDER BY r.rowid DESC LIMIT 200').all(selected) as (Omit<Redemption, 'item_name'> & { item_name: string })[]).map(item => ({ ...item, item_name: JSON.parse(item.item_name), can_undo: !item.undone && (classroom!.role === 'owner' || item.actor_user_id === actor) })) : []
-      return { user, settings, classes, students, badges, rules, records, items, redemptions, festival_backgrounds }
+      return { user, settings, classes, students: students.filter(student => student.archived_at === null), archived_students: students.filter(student => student.archived_at !== null), badges, rules, records, items, redemptions, festival_backgrounds }
     }).deferred()
   }
   async demo(owner: string, locale: string) {

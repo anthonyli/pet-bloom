@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:restore": "node scripts/test-restore.mjs",
+    "test:archive": "node scripts/test-student-archive.mjs",
     "test:watch": "vitest",
     "test:admin": "node scripts/admin-smoke.mjs",
     "deploy:vercel": "node scripts/deploy-vercel.mjs",

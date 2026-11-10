@@ -20,7 +20,7 @@ export interface ClassTeachers { teachers: ClassTeacher[]; invitation: { created
 export interface InvitationPreview { id: string; name: string; owner_name: string; already_member: boolean; expires_at: number }
 export interface OperationActor { actor_user_id: string | null; actor_name: string; actor_subject: string; undone_by_user_id: string | null; undone_by_name: string; undone_by_subject: string; can_undo: boolean }
 export interface Student {
-  id: string; class_id: string; name: string; student_no: string;
+  id: string; class_id: string; name: string; student_no: string; archived_at: number | null;
   points: number; pet_id: string | null; pet_exp: number; generation: number;
   badge_count: number; spent_badges: number; status?: PetStatus;
   background_id: string | null; owned_background_ids: string[];
@@ -38,4 +38,10 @@ export interface Upgrade { id: string; name: string; level: number; previousLeve
 export interface User { id: string; username: string; display_name: string; subject: string; teaching_role: TeachingRole | null; profile_complete: boolean }
 export interface FestivalBackgroundOffer { background_id: string; expires_at: number }
 export interface FestivalBackgroundAvailability { server_now: number; valid_until: number; time_zone: string; backgrounds: FestivalBackgroundOffer[]; unsupported_background_ids: string[] }
-export interface Snapshot { user: User; settings: SettingsVersion; classes: Classroom[]; students: Student[]; badges: Badge[]; rules: Rule[]; records: Evaluation[]; items: ShopItem[]; redemptions: Redemption[]; festival_backgrounds: FestivalBackgroundAvailability }
+export interface Snapshot { user: User; settings: SettingsVersion; classes: Classroom[]; students: Student[]; archived_students: Student[]; badges: Badge[]; rules: Rule[]; records: Evaluation[]; items: ShopItem[]; redemptions: Redemption[]; festival_backgrounds: FestivalBackgroundAvailability }
+
+export interface StudentHistoryEntry {
+  id: string; kind: 'evaluation' | 'redemption'; description: Localized; amount: number;
+  created_at: number; undone: number; actor_name: string; actor_subject: string
+}
+export interface StudentHistory { entries: StudentHistoryEntry[]; nextOffset: number | null }

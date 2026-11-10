@@ -121,7 +121,7 @@ async function versionThreeFixture() {
   return legacy
 }
 
-const withFestivalBackground = (rows: unknown[]) => rows.map(row => ({ ...(row as Record<string, unknown>), festival_background_id: null, festival_background_expires_at: null }))
+const withFestivalBackground = (rows: unknown[]) => rows.map(row => ({ ...(row as Record<string, unknown>), festival_background_id: null, festival_background_expires_at: null, archived_at: null }))
 const withBackground = (rows: unknown[]) => rows.map(row => ({ ...(row as Record<string, unknown>), background_id: null }))
 async function expectBackgroundDefaults(db: Database.Database) {
   const owners = await db.prepare('SELECT id FROM users ORDER BY id').all() as { id: string }[]
@@ -240,13 +240,13 @@ const databaseRows = async (db: Database.Database) => {
   return Object.fromEntries(await Promise.all(tables.map(async ({ name }) => [name, (await db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all())])))
 }
 
-describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
+describe('SQLite v1/v2/v3/v4/v5/v6/v7到v9真实迁移', () => {
   it('保留原毕业徽章ID和消费，补发旧周期及当前周期，不奖励未领养学生', async () => {
     const legacy = legacyDatabase()
     legacy.db.close()
     const db = createDatabase(legacy.path)
     try {
-      expect(db.pragma('user_version', { simple: true })).toBe(8)
+      expect(db.pragma('user_version', { simple: true })).toBe(9)
       await expectBackgroundDefaults(db)
       expect(await db.prepare('SELECT * FROM badges WHERE id = ?').get('original-badge')).toMatchObject({ level: 8, earned_at: 11, pet_id: 'panda' })
       expect(await db.prepare('SELECT * FROM badges WHERE student_id = ? AND generation = 1').all('graduate')).toHaveLength(7)
@@ -290,7 +290,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     legacy.db.close()
     const db = createDatabase(legacy.path)
     try {
-      expect(db.pragma('user_version', { simple: true })).toBe(8)
+      expect(db.pragma('user_version', { simple: true })).toBe(9)
       await expectBackgroundDefaults(db)
       expect(await db.prepare('SELECT amount, active, source_event FROM badges WHERE id = ?').get('original-badge')).toMatchObject({ amount: 1, active: 1, source_event: expect.any(String) })
       expect(await db.prepare('SELECT kind FROM growth_events WHERE student_id = ? AND generation = 2 ORDER BY seq').all('graduate')).toEqual([{ kind: 'start' }, { kind: 'evaluation' }])
@@ -310,7 +310,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     legacy.db.close()
     const db = createDatabase(legacy.path)
     try {
-      expect(db.pragma('user_version', { simple: true })).toBe(8)
+      expect(db.pragma('user_version', { simple: true })).toBe(9)
       await expectBackgroundDefaults(db)
       expect(await db.prepare('SELECT * FROM students ORDER BY id').all()).toEqual(withFestivalBackground(withBackground(beforeStudents)))
       expect(await db.prepare('SELECT * FROM badges ORDER BY id').all()).toEqual(beforeBadges)
@@ -360,7 +360,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     legacy.db.close()
     const db = createDatabase(legacy.path), garden = new Garden(db)
     try {
-      expect(db.pragma('user_version', { simple: true })).toBe(8)
+      expect(db.pragma('user_version', { simple: true })).toBe(9)
       await expectBackgroundDefaults(db)
       expect(await db.prepare(`SELECT ${historicalColumns} FROM redemptions ORDER BY id`).all()).toEqual(originalHistory)
       expect(await db.prepare('SELECT * FROM students ORDER BY id').all()).toEqual(originalStudents)
@@ -375,7 +375,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       const originalClasses = await db.prepare('SELECT * FROM classes ORDER BY id').all()
       const migratedHistory = await db.prepare('SELECT * FROM redemptions ORDER BY id').all() as { id: string }[]
       const backup = await exportBackup(garden, 'teacher')
-      expect(backup.version).toBe(7)
+      expect(backup.version).toBe(8)
       expect(backup.redemptions.filter(row => ['spent', 'orphan-undone'].includes(row.id)).map(row => row.item_id)).toEqual([null, null])
       const imported = await restoreBackup(garden, 'teacher', backup)
       expect(imported.imported).toBe(2)
@@ -434,7 +434,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     const db = createDatabase(legacy.path)
     let after: Record<string, unknown[]>
     try {
-      expect(db.pragma('user_version', { simple: true })).toBe(8)
+      expect(db.pragma('user_version', { simple: true })).toBe(9)
       await expectBackgroundDefaults(db)
       for (const table of tables) {
         const rows = await db.prepare(`SELECT * FROM ${table}${table === 'items' ? ' WHERE background_id IS NULL' : ''} ORDER BY rowid`).all()
@@ -447,7 +447,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     } finally { db.close() }
     const reopened = createDatabase(legacy.path)
     try {
-      expect(reopened.pragma('user_version', { simple: true })).toBe(8)
+      expect(reopened.pragma('user_version', { simple: true })).toBe(9)
       for (const table of tables) expect(reopened.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()).toEqual(after![table])
       expect(reopened.prepare("SELECT active, cost FROM items WHERE class_id = 'class' AND background_id = 'garden'").get()).toEqual({ active: 0, cost: 3 })
       expect(reopened.prepare('SELECT COUNT(*) AS n FROM items WHERE background_id IS NOT NULL').get()).toEqual({ n: 4 * 41 })
@@ -479,7 +479,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     legacy.db.close()
     const db = createDatabase(legacy.path)
     try {
-      expect(db.pragma('user_version', { simple: true })).toBe(8)
+      expect(db.pragma('user_version', { simple: true })).toBe(9)
       expect(await db.prepare('SELECT schema_version, COUNT(*) AS n FROM fixture_background_seed_audit GROUP BY schema_version ORDER BY schema_version').all()).toEqual([{ schema_version: 4, n: 4 * 4 }, { schema_version: 5, n: 4 * 28 }, { schema_version: 6, n: 4 * 9 }])
       const seeded = async (version: number) => (await db.prepare('SELECT DISTINCT i.background_id FROM fixture_background_seed_audit a JOIN items i ON i.id = a.item_id WHERE a.schema_version = ? ORDER BY i.background_id').all(version) as { background_id: string }[]).map(row => row.background_id)
       expect(await seeded(4)).toEqual([...versionFiveBackgroundIds].sort())
@@ -504,7 +504,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     const migrated = createDatabase(legacy.path)
     let after: Awaited<ReturnType<typeof databaseRows>>
     try {
-      expect(migrated.pragma('user_version', { simple: true })).toBe(8)
+      expect(migrated.pragma('user_version', { simple: true })).toBe(9)
       for (const [table, rows] of Object.entries(before)) if (table !== 'items') expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows as unknown[]) : rows)
       const all = migrated.prepare('SELECT * FROM items ORDER BY rowid').all() as { id: string; owner_id: string; class_id: string | null; background_id: string | null; cost: number; active: number; stock: number; image: string | null; category: string }[]
       expect(all.filter(row => oldIds.has(row.id))).toEqual(oldItems)
@@ -524,7 +524,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(migrated.pragma('foreign_key_check')).toEqual([])
     } finally { migrated.close() }
     const reopened = createDatabase(legacy.path)
-    try { expect(await databaseRows(reopened)).toEqual(after!); expect(reopened.pragma('user_version', { simple: true })).toBe(8) } finally { reopened.close() }
+    try { expect(await databaseRows(reopened)).toEqual(after!); expect(reopened.pragma('user_version', { simple: true })).toBe(9) } finally { reopened.close() }
   })
   it('v6追加节日中途失败全表回滚并保留真实v5版本及原四状态，重试按28+9升级不补回旧缺失', async () => {
     const legacy = await versionFiveFixture(), db = legacy.db
@@ -543,7 +543,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     } finally { check.close() }
     const retried = createDatabase(legacy.path)
     try {
-      expect(retried.pragma('user_version', { simple: true })).toBe(8)
+      expect(retried.pragma('user_version', { simple: true })).toBe(9)
       expect(retried.prepare("SELECT id FROM items WHERE class_id = 'class' AND background_id = 'beach'").all()).toEqual([])
       expect(retried.prepare('SELECT active, cost FROM items WHERE id = ?').get(v5BackgroundItemId('teacher', 'class', 'garden'))).toEqual({ active: 0, cost: 8 })
       const rows = retried.prepare('SELECT background_id FROM items WHERE background_id IS NOT NULL').all() as { background_id: string }[]
@@ -573,7 +573,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     const migrated = createDatabase(legacy.path)
     let after: Awaited<ReturnType<typeof databaseRows>>
     try {
-      expect(migrated.pragma('user_version', { simple: true })).toBe(8)
+      expect(migrated.pragma('user_version', { simple: true })).toBe(9)
       for (const [table, rows] of Object.entries(before)) if (table !== 'items') expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows as unknown[]) : rows)
       const all = migrated.prepare('SELECT * FROM items ORDER BY rowid').all() as { id: string; owner_id: string; class_id: string | null; background_id: string | null; cost: number; active: number; stock: number; image: string | null; image_key: string | null; image_bytes: number; category: string }[]
       expect(all.filter(row => oldIds.has(row.id))).toEqual(oldItems)
@@ -591,7 +591,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(migrated.pragma('foreign_key_check')).toEqual([])
     } finally { migrated.close() }
     const reopened = createDatabase(legacy.path)
-    try { expect(reopened.pragma('user_version', { simple: true })).toBe(8); expect(await databaseRows(reopened)).toEqual(after!) } finally { reopened.close() }
+    try { expect(reopened.pragma('user_version', { simple: true })).toBe(9); expect(await databaseRows(reopened)).toEqual(after!) } finally { reopened.close() }
   })
   it.each([5, 6] as const)('真实v%s在v7追加9中途失败时连同前阶段全迁移零写入，重试保留旧缺失和下架', async version => {
     const legacy = version === 5 ? (await versionFiveFixture()) : (await versionSixFixture()), db = legacy.db
@@ -612,7 +612,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     } finally { check.close() }
     const retried = createDatabase(legacy.path)
     try {
-      expect(retried.pragma('user_version', { simple: true })).toBe(8)
+      expect(retried.pragma('user_version', { simple: true })).toBe(9)
       expect(retried.prepare("SELECT id FROM items WHERE class_id = 'class' AND background_id = 'beach'").all()).toEqual([])
       expect(retried.prepare('SELECT active, cost FROM items WHERE id = ?').get(v5BackgroundItemId('teacher', 'class', 'garden'))).toEqual({ active: 0, cost: 8 })
       const rows = retried.prepare('SELECT background_id FROM items WHERE background_id IS NOT NULL').all() as { background_id: string }[]
@@ -621,7 +621,7 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
       expect(retried.pragma('foreign_key_check')).toEqual([])
     } finally { retried.close() }
   })
-  it('真实v7到v8只补两个空临时列，原价格/下架/删除/拥有/长期背景与全表不变且重开幂等', async () => {
+  it('真实v7到v9只补空临时列和归档列，原价格/下架/删除/拥有/长期背景与全表不变且重开幂等', async () => {
     const legacy = await versionSevenFixture(), db = legacy.db
     expect((db.pragma('table_info(students)') as { name: string }[]).map(row => row.name)).not.toContain('festival_background_id')
     const itemId = v5BackgroundItemId('teacher', 'class', 'garden')
@@ -634,17 +634,17 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
     const migrated = createDatabase(legacy.path)
     let after: Awaited<ReturnType<typeof databaseRows>>
     try {
-      expect(migrated.pragma('user_version', { simple: true })).toBe(8)
+      expect(migrated.pragma('user_version', { simple: true })).toBe(9)
       for (const [table, rows] of Object.entries(before)) expect(migrated.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()).toEqual(table === 'students' ? withFestivalBackground(rows as unknown[]) : rows)
       const columns = migrated.pragma('table_info(students)') as { name: string; type: string; dflt_value: unknown }[]
-      expect(columns.slice(-2)).toMatchObject([{ name: 'festival_background_id', type: 'TEXT', dflt_value: null }, { name: 'festival_background_expires_at', type: 'INTEGER', dflt_value: null }])
+      expect(columns.slice(-3, -1)).toMatchObject([{ name: 'festival_background_id', type: 'TEXT', dflt_value: null }, { name: 'festival_background_expires_at', type: 'INTEGER', dflt_value: null }])
       expect(migrated.pragma('foreign_key_check')).toEqual([])
       migrated.prepare('UPDATE students SET festival_background_id = ?, festival_background_expires_at = ? WHERE id = ?').run('national-day', Date.UTC(2026, 9, 1, 16), 'regressed')
       after = (await databaseRows(migrated))
     } finally { migrated.close() }
     const reopened = createDatabase(legacy.path)
     try {
-      expect(reopened.pragma('user_version', { simple: true })).toBe(8)
+      expect(reopened.pragma('user_version', { simple: true })).toBe(9)
       expect(await databaseRows(reopened)).toEqual(after!)
     } finally { reopened.close() }
   })
@@ -676,10 +676,10 @@ describe('SQLite v1/v2/v3/v4/v5/v6/v7到v8真实迁移', () => {
   })
   it('不会把更高版本的数据库降级', () => {
     const legacy = legacyDatabase()
-    legacy.db.pragma('user_version = 9')
+    legacy.db.pragma('user_version = 10')
     legacy.db.close()
     expect(() => createDatabase(legacy.path)).toThrow('数据库版本高于当前应用版本')
     const check = new Database(legacy.path)
-    try { expect(check.pragma('user_version', { simple: true })).toBe(9) } finally { check.close() }
+    try { expect(check.pragma('user_version', { simple: true })).toBe(10) } finally { check.close() }
   })
 })

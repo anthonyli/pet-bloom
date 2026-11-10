@@ -68,13 +68,12 @@ describe('global read-only admin', () => {
     expect(result.classroom).toMatchObject({ name: 'Alpha 100%_班', owner_id: teacher, active_students: 2, archived_students: 0, teacher_count: 2 })
     expect(Object.keys(result.classroom).sort()).toEqual(['id', 'name', 'owner_id', 'owner_name', 'owner_subject', 'created_at', 'active_students', 'archived_students', 'teacher_count'].sort())
     expect(JSON.stringify(result)).not.toContain('PRIVATE')
-    expect(result.archiveSupported).toBe(false)
+    expect(result.archiveSupported).toBe(true)
     expect((await read('classes/missing')).status).toBe(404)
   })
-  it('uses ABCD-14 archived_at without its migration being duplicated', async () => {
-    await garden.db.exec('ALTER TABLE students ADD COLUMN archived_at INTEGER')
+  it('uses the migrated archived_at column and the student archive operation', async () => {
     const row = await garden.db.prepare('SELECT id FROM students LIMIT 1').get() as { id: string }
-    await garden.db.prepare('UPDATE students SET archived_at = ? WHERE id = ?').run(Date.now(), row.id)
+    await garden.setStudentArchived(teacher, row.id, true)
     const result = await (await read(`classes/${first}`)).json()
     expect(result).toMatchObject({ archiveSupported: true, classroom: { active_students: 1, archived_students: 1 } })
     expect((await (await read('classes')).json()).classes.find((c: { id: string }) => c.id === first)).toMatchObject(result.classroom)
@@ -124,7 +123,7 @@ describe('global read-only admin', () => {
       }
       const g = new Garden(remote)
       expect((await g.adminClasses(admin, {})).total).toBe(2)
-      await remote.exec('ALTER TABLE students ADD COLUMN archived_at INTEGER')
+      expect((await g.adminClasses(admin, {})).archiveSupported).toBe(true)
       await remote.prepare('UPDATE students SET archived_at = 1 WHERE class_id = ?').run(first)
       expect(await g.adminClass(admin, first)).toMatchObject({ archiveSupported: true, classroom: { active_students: 0, archived_students: 2 } })
     } finally { remote.close() }
