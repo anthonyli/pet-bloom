@@ -1,4 +1,5 @@
 'use client'
+import { AdminLink } from '@/components/admin-classes'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Archive, PawPrint, Palette, ArrowDownAZ, Hash, Star, TrendingUp, MoreHorizontal, Settings2, Globe2, LogOut, Plus, Search, Trophy, ShoppingBag, History, ListChecks, SlidersHorizontal, BookOpen, Users, Pencil, RefreshCw, Award, Check, X, LoaderCircle, CircleCheck, CircleAlert, Undo2, Upload, Sparkles, School, UserPlus } from 'lucide-react'
@@ -61,7 +62,7 @@ export function Workspace({ locale }: { locale: Locale }) {
   const [interactionScope, setInteractionScope] = useState(client.scope)
   useEffect(() => {
     setInteractionScope(client.scope)
-    setModal(null); setEditing(undefined); setAdopting(null); setEvaluating([])
+    setModal(value => value === 'settings' ? value : null); setEditing(undefined); setAdopting(null); setEvaluating([])
     setBadgeStudentId(null); setBadgesOpen(false); setBatch(false); setSelected(new Set()); setQuery('')
     setDressingStudentId(null); setDressingOpen(false); setDressingBackgroundId(undefined); setShopContext(null); setShopOpen(false); backgroundTrigger.current = null
     badgeButtons.current.clear()
@@ -97,7 +98,7 @@ export function Workspace({ locale }: { locale: Locale }) {
     <header className="sticky top-0 z-30 border-b border-line bg-white">
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4 lg:px-9">
         <div className="flex min-w-0 items-center gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-white"><PawPrint size={23} /></span><div className="shrink-0"><span className="hidden text-base font-bold leading-tight sm:block">{t('萌芽', 'PetBloom')}</span><span className="block text-base font-bold sm:hidden">{t('萌芽', 'PetBloom')}</span><span className="mt-1 hidden text-[11px] text-muted sm:block">{t('让每一份成长，都悄悄发芽。', 'Let every bit of growth quietly bloom.')}</span></div><span className="mx-2 hidden h-7 w-px bg-line sm:block" /><Select aria-label={t('切换班级', 'Switch class')} value={client.classId} disabled={client.busy || !client.state.classes.length} placeholder={t('还没有班级', 'No classes yet')} icon={School} className="ml-2 hidden w-52 border-transparent bg-[#f5f3fa] font-medium sm:flex" onValueChange={value => { setSelected(new Set()); setBatch(false); client.selectClass(value) }} options={client.state.classes.map(item => ({ value: item.id, label: item.name }))} /><Button variant="ghost" aria-label={t('新建班级', 'New class')} className="hidden size-9 p-0 sm:inline-flex" onClick={() => setModal('newClass')}><Plus size={19} /></Button><Button variant="ghost" disabled={client.busy} className="hidden px-3 sm:inline-flex" onClick={() => setModal('join')}><UserPlus size={17} />{t('加入班级', 'Join class')}</Button></div>
-        <div className="flex items-center gap-1"><Button variant="ghost" className="size-9 p-0 xl:w-auto xl:px-4" onClick={() => setModal('settings')} aria-label={t('设置与数据', 'Settings & data')}><Settings2 size={17} /><span className="hidden xl:inline">{t('设置与数据', 'Settings & data')}</span></Button><Link href={locale === 'zh' ? '/en' : '/zh'} className="button button-ghost min-h-9 gap-1 px-2 sm:gap-2 sm:px-3" aria-label={t('切换为英文', 'Switch to Chinese')}><Globe2 size={17} className="hidden sm:block" /><span>{locale === 'zh' ? 'EN' : '中文'}</span></Link><span className="mx-1 hidden h-6 w-px bg-line sm:block" /><span className="hidden max-w-32 truncate px-2 text-sm text-muted md:block">{client.state.user.display_name}</span><Button variant="ghost" className="size-9 p-0" disabled={client.busy} aria-label={t('退出登录', 'Sign out')} onClick={async () => { if (await client.run(() => api('auth/logout', 'POST', {}))) { close(); setSelected(new Set()); setBatch(false) } }}><LogOut size={17} /></Button></div>
+        <div className="flex items-center gap-1"><AdminLink key={client.state.user.id} locale={locale} /><Button variant="ghost" className="size-9 p-0 xl:w-auto xl:px-4" onClick={() => setModal('settings')} aria-label={t('设置与数据', 'Settings & data')}><Settings2 size={17} /><span className="hidden xl:inline">{t('设置与数据', 'Settings & data')}</span></Button><Link href={locale === 'zh' ? '/en' : '/zh'} className="button button-ghost min-h-9 gap-1 px-2 sm:gap-2 sm:px-3" aria-label={t('切换为英文', 'Switch to Chinese')}><Globe2 size={17} className="hidden sm:block" /><span>{locale === 'zh' ? 'EN' : '中文'}</span></Link><span className="mx-1 hidden h-6 w-px bg-line sm:block" /><span className="hidden max-w-32 truncate px-2 text-sm text-muted md:block">{client.state.user.display_name}</span><Button variant="ghost" className="size-9 p-0" disabled={client.busy} aria-label={t('退出登录', 'Sign out')} onClick={async () => { if (await client.run(() => api('auth/logout', 'POST', {}))) { close(); setSelected(new Set()); setBatch(false) } }}><LogOut size={17} /></Button></div>
       </div>
       <div className="flex gap-2 px-5 pb-3 sm:hidden"><Select className="min-w-0 flex-1" aria-label={t('切换班级', 'Switch class')} disabled={client.busy || !client.state.classes.length} value={client.classId} placeholder={t('还没有班级', 'No classes yet')} icon={School} onValueChange={value => { setSelected(new Set()); setBatch(false); client.selectClass(value) }} options={client.state.classes.map(item => ({ value: item.id, label: item.name }))} /><Button aria-label={t('新建班级', 'New class')} onClick={() => setModal('newClass')} className="shrink-0 px-3"><Plus size={18} /></Button><Button disabled={client.busy} onClick={() => setModal('join')} className="shrink-0 px-3"><UserPlus size={16} /><span>{t('加入', 'Join')}</span></Button></div>
     </header>
@@ -171,7 +172,6 @@ export function Workspace({ locale }: { locale: Locale }) {
     {modal === 'archived' && <ArchivedStudentsDialog client={client} locale={locale} onClose={close} />}
     {(modal === 'student' || modal === 'import') && <StudentDialog client={client} locale={locale} student={editing} importing={modal === 'import'} onClose={close} />}
     {modal === 'rules' && <RulesDialog client={client} locale={locale} onClose={close} />}
-    {modal === 'settings' && <SettingsDialog client={client} locale={locale} onClose={close} />}
     {modal === 'history' && <HistoryDialog client={client} locale={locale} onClose={close} />}
     {modal === 'ranking' && <RankingDialog client={client} locale={locale} onClose={close} />}
     {modal === 'shop' && <ShopDialog client={client} locale={locale} open={shopOpen} initialStudentId={shopContext?.studentId} initialTab={shopContext?.tab} onClose={close} onDress={(studentId, backgroundId) => showDressing(studentId, undefined, backgroundId)} />}
@@ -181,6 +181,8 @@ export function Workspace({ locale }: { locale: Locale }) {
     {badgeStudent && <BadgeDialog open={badgesOpen} student={badgeStudent} badges={client.state.badges} locale={locale} onClose={() => { setBadgesOpen(false); setBadgeStudentId(null) }} />}
     {!!client.celebrations.length && <LevelUpCelebration events={client.celebrations} locale={locale} onClose={() => client.setCelebrations([])} />}
     </Fragment>}
+    {/* Account settings must keep the import receipt when the first class is loaded. */}
+    {modal === 'settings' && <SettingsDialog key={client.state.user.id} client={client} locale={locale} onClose={close} />}
     {notice}
   </div></TooltipProvider>
 }

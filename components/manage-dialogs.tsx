@@ -1,6 +1,6 @@
 'use client'
 import { useRef, useState } from 'react'
-import { Archive, Trash2, Plus, Download, Database, ShieldCheck, Settings2, School, UserRound, Upload, Save, Check, X, Sparkles, BookOpen, HandHeart, HeartPulse, Shapes } from 'lucide-react'
+import { Archive, Trash2, Plus, Download, Database, ShieldCheck, Settings2, School, UserRound, Upload, Save, Check, X, Sparkles, BookOpen, HandHeart, HeartPulse, Shapes, RefreshCw } from 'lucide-react'
 import { Button, Checkbox, Dialog, Field, FileInput, Input, Select, Textarea } from '@/components/ui'
 import { parseStudentList } from '@/lib/student-import'
 import { MAX_BACKUP_MB, MAX_BACKUP_BYTES } from '@/lib/shop'
@@ -65,27 +65,56 @@ export function SettingsDialog({ client, locale, onClose }: { client: GardenClie
   const profileButton = useRef<HTMLButtonElement>(null)
   const [editingProfile, setEditingProfile] = useState(false), [restoreError, setRestoreError] = useState('')
   const [importResult, setImportResult] = useState<{ imported: number; classIds: string[] } | null>(null), [importSelected, setImportSelected] = useState('')
+  const [recovery, setRecovery] = useState<'saved' | 'unknown' | null>(null)
+  const restoreLock = useRef(false)
   const { user, classes } = client.state!
   const ownedClasses = classes.filter(classroom => classroom.role === 'owner')
+  async function importBackup() {
+    if (client.busy || restoreLock.current || restore === null) return
+    setRestoreError('')
+    let imported = 0, saved = false
+    const ok = await client.run(async () => {
+      restoreLock.current = true
+      try {
+        const result = await api<{ imported: number; classIds: string[] }>('restore', 'POST', restore)
+        if (!result || !Number.isSafeInteger(result.imported) || result.imported < 0 || !Array.isArray(result.classIds) || result.classIds.length !== result.imported || result.classIds.some(id => typeof id !== 'string' || !id)) throw new ApiError('networkError', 0)
+        // The write is committed. Preserve its receipt before run() attempts the GET.
+        saved = true; imported = result.imported
+        setRestore(null); setImportResult(result); setImportSelected(result.classIds[0] || ''); setRecovery('saved')
+      } catch (error) {
+        if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
+          restoreLock.current = false
+          setRestoreError(errorMessage(error.code, locale))
+        } else {
+          // A lost response or server failure cannot prove that no copies were created.
+          setRestore(null); setRecovery('unknown')
+        }
+        throw error
+      }
+    })
+    if (ok && saved) {
+      setRecovery(null)
+      client.setNotice({ text: t(`已导入 ${imported} 个新班级副本，现有数据未被覆盖。`, `${imported} new class ${imported === 1 ? 'copy' : 'copies'} imported. Existing data is unchanged.`), error: false })
+    }
+  }
+  async function reloadImport() {
+    if (!await client.run(async () => {})) return
+    if (recovery === 'unknown') {
+      client.setNotice({ text: t('已加载最新班级。请通过班级切换列表核对是否已创建副本，确认未导入后再选择文件。', 'The latest classes are loaded. Check the class switcher for imported copies. Choose the file again only after confirming it was not imported.'), error: false })
+      onClose()
+    } else setRecovery(null)
+  }
   return <Dialog open onClose={() => { if (!client.busy) onClose() }} icon={Settings2} title={t('设置与数据', 'Settings & data')} className="flex max-h-[90dvh] flex-col overflow-hidden">
     <div className="min-h-0 flex-1 space-y-7 overflow-y-auto overscroll-contain px-1 pb-2"><section><div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h3 className="flex items-center gap-2 font-semibold"><UserRound size={18} />{t('我的教师资料', 'My teacher profile')}</h3><Button ref={profileButton} variant="ghost" disabled={client.busy} onClick={() => setEditingProfile(value => !value)}>{editingProfile ? t('收起编辑', 'Close editor') : t('编辑资料', 'Edit profile')}</Button></div>{editingProfile ? <TeacherProfileForm client={client} locale={locale} onSaved={() => { setEditingProfile(false); requestAnimationFrame(() => profileButton.current?.focus()) }} /> : <><p className="break-words font-medium">{user.display_name}</p><p className="mt-2 break-words text-sm leading-relaxed text-muted">{user.subject} · {teachingRoleName(user.teaching_role, locale)}</p><p className="mt-2 break-words text-xs text-muted">{t('用户名：', 'Username: ')}{user.username}</p></>}<p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-muted"><ShieldCheck size={16} className="shrink-0" />{t('只有班级成员可以访问共享数据。每班的规则、成长和商店独立，修改资料不改变历史署名。', 'Only class members can access shared data. Rules, growth settings and rewards are separate for each class. Profile edits do not change historical names.')}</p></section>
       <section className="border-t border-line pt-6"><h3 className="mb-3 flex items-center gap-2 font-semibold"><Database size={18} />{t('备份与导入', 'Backup & import')}</h3><p className="mb-4 text-sm leading-relaxed text-muted">{process.env.NEXT_PUBLIC_DESKTOP === 'true' ? t('数据保存在这台电脑的 SQLite 数据库中，不会自动同步。请定期导出备份。备份包含本人负责的班级及个人初始模板，不包含仅共管班级、账号密码、成员权限或邀请码。', 'Data is stored in SQLite on this computer and does not sync automatically. Export backups regularly. Backups include your owned classes and initial template, but exclude co-admin-only classes, account credentials, membership permissions and invitation codes.') : t('数据保存在服务器 SQLite 中。备份只包含你当前负责的班级及各班的学生、独立规则、成长设置、历史、徽章、商品和兑换，并可含个人初始模板；不包含仅共管班级、账号密码、成员权限或邀请码。', 'Data is stored in server-side SQLite. Backups include only classes you own, with their students, class-specific rules, growth settings, history, badges, rewards and redemptions, and may include your initial template. Co-admin-only classes, account credentials, membership permissions and invitation codes are excluded.')}</p><div className="flex flex-wrap gap-3"><Button busy={client.busy} disabled={!ownedClasses.length} onClick={() => client.run(async () => {
         const data = await api('backup'); const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = `pet-garden-${new Date().toISOString().slice(0, 10)}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000)
-      }, process.env.NEXT_PUBLIC_DESKTOP === 'true' ? undefined : t('本人负责班级的备份已导出。', 'Backup of your owned classes exported.'))}><Download size={16} />{t('导出负责班级', 'Export owned classes')}</Button><FileInput label={t('选择备份文件', 'Choose backup')} accept="application/json,.json" disabled={client.busy} onChange={async event => { const file = event.target.files?.[0]; event.target.value = ''; if (!file) return; setRestoreError(''); setImportResult(null); setRestore(null); try { if (file.size > MAX_BACKUP_BYTES) throw new ApiError('backupTooLarge'); const parsed: unknown = JSON.parse(await file.text()); if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new ApiError('invalidBackup'); setRestore(parsed); setFilename(file.name) } catch (error) { const failure = error instanceof ApiError ? error : new ApiError('invalidBackup'); setRestoreError(errorMessage(failure.code, locale)); client.report(failure) } }} /></div>
+      }, process.env.NEXT_PUBLIC_DESKTOP === 'true' ? undefined : t('本人负责班级的备份已导出。', 'Backup of your owned classes exported.'))}><Download size={16} />{t('导出负责班级', 'Export owned classes')}</Button><FileInput label={t('选择备份文件', 'Choose backup')} accept="application/json,.json" disabled={client.busy || recovery !== null} onChange={async event => { const file = event.target.files?.[0]; event.target.value = ''; if (!file || client.busy || recovery) return; restoreLock.current = false; setRestoreError(''); setImportResult(null); setRestore(null); try { if (file.size > MAX_BACKUP_BYTES) throw new ApiError('backupTooLarge'); const parsed: unknown = JSON.parse(await file.text()); if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new ApiError('invalidBackup'); setRestore(parsed); setFilename(file.name) } catch (error) { const failure = error instanceof ApiError ? error : new ApiError('invalidBackup'); setRestoreError(errorMessage(failure.code, locale)); client.report(failure) } }} /></div>
       {!ownedClasses.length && <p className="mt-3 text-xs leading-relaxed text-muted">{t('你目前没有负责的班级，无法导出共管班级。可向该班负责人索取备份。', 'You do not own any classes, so co-managed classes cannot be exported. Ask the class owner for a backup.')}</p>}
       <p className="mt-3 text-xs leading-relaxed text-muted">{t(`导入文件最大 ${MAX_BACKUP_MB} MB。导入将创建新班级副本，不会覆盖现有班级、共管数据或你的个人初始模板，也不会恢复其他教师权限。`, `Import files can be up to ${MAX_BACKUP_MB} MB. Import creates new class copies without replacing existing classes, co-managed data or your initial template. Other teachers’ access is not restored.`)}</p>
-      {restore !== null && <div className="mt-4 rounded-xl border border-[#ded4f6] bg-[#f8f5ff] p-4"><p className="mb-3 break-words text-sm leading-relaxed">{filename}<br />{t('确认导入为新的班级副本？你将成为副本负责人，原有班级保持不变；如需共同管理，请重新邀请教师。', 'Import as new class copies? You will own the copies. Existing classes stay unchanged; invite teachers again if you want to share the copies.')}</p><div className="flex flex-wrap gap-2"><Button variant="primary" busy={client.busy} onClick={async () => {
-        let result: { imported: number; classIds: string[] } | null = null
-        setRestoreError('')
-        const ok = await client.run(async () => { try { result = await api<{ imported: number; classIds: string[] }>('restore', 'POST', restore) } catch (error) { setRestoreError(errorMessage(error instanceof ApiError ? error.code : 'serverError', locale)); throw error } })
-        if (ok && result) {
-          const imported = result as { imported: number; classIds: string[] }
-          setRestore(null); setImportResult(imported); setImportSelected(imported.classIds[0] || '')
-          client.setNotice({ text: t(`已导入 ${imported.imported} 个新班级副本，现有数据未被覆盖。`, `${imported.imported} new class ${imported.imported === 1 ? 'copy' : 'copies'} imported. Existing data is unchanged.`), error: false })
-        }
-      }}><Check size={16} />{t('确认导入新副本', 'Import new copies')}</Button><Button variant="ghost" disabled={client.busy} onClick={() => setRestore(null)}><X size={16} />{t('取消', 'Cancel')}</Button></div></div>}
+      {restore !== null && <div className="mt-4 rounded-xl border border-[#ded4f6] bg-[#f8f5ff] p-4"><p className="mb-3 break-words text-sm leading-relaxed">{filename}<br />{t('确认导入为新的班级副本？你将成为副本负责人，原有班级保持不变；如需共同管理，请重新邀请教师。', 'Import as new class copies? You will own the copies. Existing classes stay unchanged; invite teachers again if you want to share the copies.')}</p><div className="flex flex-wrap gap-2"><Button variant="primary" busy={client.busy} onClick={importBackup}><Check size={16} />{t('确认导入新副本', 'Import new copies')}</Button><Button variant="ghost" disabled={client.busy} onClick={() => setRestore(null)}><X size={16} />{t('取消', 'Cancel')}</Button></div></div>}
       {restoreError && <p role="alert" className="mt-3 text-sm leading-relaxed text-danger">{restoreError}</p>}
-      {importResult && <div className="mt-4 space-y-3 rounded-xl bg-[#f4f0ff] p-4"><p role="status" className="text-sm leading-relaxed">{t(`已创建 ${importResult.imported} 个班级副本。请选择要进入的班级。`, `${importResult.imported} class copies created. Choose a class to open.`)}</p>{importResult.classIds.length > 0 && <><Select aria-label={t('导入的新班级', 'Imported class')} value={importSelected} disabled={client.busy} onValueChange={setImportSelected} options={classes.filter(classroom => importResult.classIds.includes(classroom.id)).map(classroom => ({ value: classroom.id, label: classroom.name }))} /><Button variant="primary" disabled={client.busy || !importSelected} onClick={async () => { await client.selectClass(importSelected); onClose() }}>{t('进入新班级', 'Open imported class')}</Button></>}</div>}
+      {recovery && <div role="alert" className="mt-4 space-y-3 rounded-xl border border-line bg-[#f5f2ff] p-4"><p className="text-sm leading-relaxed">{recovery === 'saved' ? t('导入已成功，副本编号已保留。最新班级数据尚未加载，请重新加载，不要重复导入。', 'Import succeeded and the copy IDs are kept. The latest class data has not loaded. Reload without importing again.') : t('暂时无法确认导入结果，班级副本可能已创建。已暂停导入，请重新加载并核对班级列表，避免重复创建副本。', 'The import result is unknown; class copies may already exist. Import is paused. Reload and check the class list to avoid creating duplicates.')}</p><Button busy={client.busy} onClick={reloadImport}><RefreshCw size={16} aria-hidden="true" />{t('重新加载班级', 'Reload classes')}</Button></div>}
+      {importResult && <div className="mt-4 space-y-3 rounded-xl bg-[#f4f0ff] p-4"><p role="status" className="text-sm leading-relaxed">{t(`已创建 ${importResult.imported} 个班级副本。`, `${importResult.imported} class ${importResult.imported === 1 ? 'copy' : 'copies'} created.`)}</p>{!recovery && importResult.classIds.length > 0 && <><Select aria-label={t('导入的新班级', 'Imported class')} value={importSelected} disabled={client.busy} onValueChange={setImportSelected} options={classes.filter(classroom => importResult.classIds.includes(classroom.id)).map(classroom => ({ value: classroom.id, label: classroom.name }))} /><Button variant="primary" disabled={client.busy || !importSelected} onClick={async () => { if (await client.run(async () => {}, undefined, importSelected)) onClose() }}>{t('进入新班级', 'Open imported class')}</Button></>}</div>}
       </section>
       <section className="border-t border-line pt-6"><h3 className="mb-2 font-semibold">{t('想先体验一下？', 'Want to explore first?')}</h3><p className="mb-4 text-sm leading-relaxed text-muted">{t('创建一个标记为演示的班级，包含 6 名学生和成长记录，不修改其他班级。', 'Create a clearly labeled demo class with six students and sample growth records. Your other classes stay unchanged.')}</p><Button busy={client.busy} onClick={async () => { let id = ''; const ok = await client.run(async () => { id = (await api('demo', 'POST', { locale })).id || '' }, t('演示班级已准备好。', 'Your demo class is ready.'), () => id); if (ok) onClose() }}><Sparkles size={16} />{t('创建演示班级', 'Create demo class')}</Button></section>
       <p className="border-t border-line pt-4 text-xs leading-relaxed text-muted">{t('公开部署或再分发前请确认宠物图像的资源授权。', 'Confirm pet artwork licensing before public deployment or redistribution.')}</p>

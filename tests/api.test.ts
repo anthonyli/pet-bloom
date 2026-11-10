@@ -3,6 +3,8 @@ import { api as clientApi } from '../components/use-garden'
 import { NextRequest } from 'next/server'
 import { GET, POST, PATCH, DELETE } from '../app/api/[...path]/route'
 import { database } from '../lib/server/db'
+import { Garden } from '../lib/server/garden'
+import { errorMessage } from '../lib/i18n'
 import sharp from 'sharp'
 import { MAX_ITEM_IMAGE_BYTES } from '../lib/shop'
 import type { Snapshot } from '../lib/types'
@@ -50,6 +52,25 @@ afterEach(() => {
   delete process.env.DATABASE_PATH
 })
 describe('真实 Route Handler 请求契约', () => {
+  it('超限备份返回 413 和可翻译的错误，客户端不会进入下载成功分支', async () => {
+    const snapshot = await scoringSnapshot()
+    const garden = new Garden(database())
+    const rule = { classId, name: { zh: '边界规则', en: 'Boundary rule' }, points: 1, category: 'other' }
+    for (let count = snapshot.rules.length; count < 2000; count++) await garden.addRule(snapshot.user.id, rule)
+    expect((await request('backup')).status).toBe(200)
+    expect((await request('rules', 'POST', rule)).status).toBe(200)
+    const response = await request('backup')
+    expect(response.status).toBe(413)
+    expect(await response.clone().json()).toEqual({ error: 'backupTooLarge' })
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(response)
+    const download = vi.fn()
+    await expect(clientApi('backup').then(download)).rejects.toMatchObject({ code: 'backupTooLarge', status: 413 })
+    expect(download).not.toHaveBeenCalled()
+    expect(errorMessage('backupTooLarge', 'zh')).toContain('记录数量超过可恢复上限')
+    expect(errorMessage('backupTooLarge', 'en')).toContain('record limits for restoring')
+    fetchMock.mockRestore()
+    expect((await request('backup', 'GET', undefined, otherCookie)).status).toBe(200)
+  })
   it.each(['teacher@example.com', 'teacher+class@example.com'])('邮箱用户名 %s 可以注册、登录，不能重复注册', async username => {
     const password = 'Email-password-123'
     const registered = await request('auth/register', 'POST', { username: `  ${username}  `, password }, '')

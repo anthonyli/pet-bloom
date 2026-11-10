@@ -40,6 +40,65 @@ beforeEach(async () => {
 afterEach(() => { vi.restoreAllMocks(); garden.db.close() })
 
 describe('服务端节日临时背景权限', () => {
+  it('Goose Bay 回拨后可重新选择万圣节，旧选择不复活且不改永久账本', async () => {
+    await settings(classId, value => { value.hunger.timeZone = 'America/Goose_Bay' })
+    await garden.evaluate(owner, { studentIds: [studentId], custom: { points: 40 } })
+    await own('garden')
+    await garden.setBackground(owner, studentId, { backgroundId: 'garden' })
+    const beforeLedger = await ledger()
+    const first = Date.parse('2009-11-01T03:00:00Z'), rollback = first + 60000, second = first + 3600000
+    time(first - 1)
+    await garden.setBackground(owner, studentId, { backgroundId: 'halloween' })
+    expect((await student()).festival_background_expires_at).toBe(first)
+    for (const now of [first, first + 1, rollback - 1]) {
+      time(now)
+      await expect(garden.setBackground(owner, studentId, { backgroundId: 'halloween' })).rejects.toThrow('backgroundNotOwned')
+      expect((await student()).festival_background_id).toBeNull()
+    }
+    time(rollback)
+    expect((await student()).festival_background_id).toBeNull()
+    for (const now of [rollback, rollback + 1, second - 1]) {
+      time(now)
+      await garden.setBackground(owner, studentId, { backgroundId: 'halloween' })
+      expect((await student()).festival_background_expires_at).toBe(second)
+    }
+    for (const now of [second, second + 1]) {
+      time(now)
+      await expect(garden.setBackground(owner, studentId, { backgroundId: 'halloween' })).rejects.toThrow('backgroundNotOwned')
+      expect(await student()).toMatchObject({ background_id: 'garden', owned_background_ids: ['garden'], spent_badges: 1, festival_background_id: null })
+    }
+    expect(await ledger()).toEqual(beforeLedger)
+  })
+
+  it('Havana 缺失午夜按真实日界授权，保留已兑换背景与徽章账本', async () => {
+    await settings(classId, value => { value.hunger.timeZone = 'America/Havana' })
+    await garden.evaluate(owner, { studentIds: [studentId], custom: { points: 40 } })
+    await own('garden')
+    await garden.setBackground(owner, studentId, { backgroundId: 'garden' })
+    const beforeLedger = await ledger()
+    const start = Date.parse('2026-03-08T05:00:00Z'), end = Date.parse('2026-03-09T04:00:00Z')
+    const permanent = { background_id: 'garden', owned_background_ids: ['garden'], spent_badges: 1 }
+    for (const now of [Date.parse('2026-03-08T04:30:00Z'), start - 1]) {
+      time(now)
+      await expect(garden.setBackground(owner, studentId, { backgroundId: 'womens-day' })).rejects.toThrow('backgroundNotOwned')
+      expect(await student()).toMatchObject({ ...permanent, festival_background_id: null })
+      expect((await state()).festival_backgrounds.valid_until).toBe(start)
+    }
+    for (const now of [start, start + 1, end - 1]) {
+      time(now)
+      await expect(garden.setBackground(colleague, studentId, { backgroundId: 'womens-day' })).rejects.toThrow('notFound')
+      await garden.setBackground(owner, studentId, { backgroundId: 'womens-day' })
+      expect(await student()).toMatchObject({ ...permanent, festival_background_id: 'womens-day', festival_background_expires_at: end })
+    }
+    for (const now of [end, end + 1]) {
+      time(now)
+      await expect(garden.setBackground(owner, studentId, { backgroundId: 'womens-day' })).rejects.toThrow('backgroundNotOwned')
+      expect(await student()).toMatchObject({ ...permanent, festival_background_id: null, festival_background_expires_at: null })
+      await garden.setBackground(owner, studentId, { backgroundId: 'garden' })
+    }
+    expect(await ledger()).toEqual(beforeLedger)
+  })
+
   it('学校节日零徽章免费使用，不扣徽章、不改商品、不写兑换也不变成永久持有', async () => {
     const before = await ledger()
     expect((await state()).festival_backgrounds).toMatchObject({ server_now: holiday, valid_until: holidayEnd, time_zone: 'Asia/Shanghai', backgrounds: expect.arrayContaining([{ background_id: 'national-day', expires_at: holidayEnd }]) })

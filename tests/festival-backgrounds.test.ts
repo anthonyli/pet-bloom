@@ -113,10 +113,58 @@ describe('服务端节日免费日历', () => {
     }
     expect(ids('2026-12-12T16:00:00Z')).not.toContain('hanukkah')
   })
+  it.each([
+    ['2026-03-08T04:30:00Z', false, '2026-03-08T05:00:00Z'],
+    ['2026-03-08T04:59:59.999Z', false, '2026-03-08T05:00:00Z'],
+    ['2026-03-08T05:00:00Z', true, '2026-03-09T04:00:00Z'],
+    ['2026-03-08T05:00:00.001Z', true, '2026-03-09T04:00:00Z'],
+    ['2026-03-09T03:59:59.999Z', true, '2026-03-09T04:00:00Z'],
+    ['2026-03-09T04:00:00Z', false, '2026-03-10T04:00:00Z'],
+    ['2026-03-09T04:00:00.001Z', false, '2026-03-10T04:00:00Z']
+  ] as const)('Havana 缺失午夜的妇女节开放与有效期：%s', (date, available, until) => {
+    const result = getFestivalBackgrounds(time(date), 'America/Havana')
+    const offer = result.backgrounds.find(row => row.background_id === 'womens-day')
+    expect(Boolean(offer)).toBe(available)
+    if (available) expect(offer?.expires_at).toBe(time('2026-03-09T04:00:00Z'))
+    expect(result.valid_until).toBe(time(until))
+    expect(result.valid_until).toBeGreaterThan(result.server_now)
+  })
+  it.each([
+    ['America/Havana', '2026-11-01T04:00:00Z', '2026-11-02T05:00:00Z'],
+    ['America/Santiago', '2026-09-06T04:00:00Z', '2026-09-07T03:00:00Z'],
+    ['Africa/Cairo', '2026-04-23T22:00:00Z', '2026-04-24T21:00:00Z'],
+    ['Pacific/Apia', '2011-12-30T10:00:00Z', '2011-12-31T10:00:00Z']
+  ])('%s 跳变前后1毫秒均有未来的日历有效期', (zone, date, nextDate) => {
+    const boundary = time(date)
+    for (const offset of [-1, 0, 1]) {
+      const result = getFestivalBackgrounds(boundary + offset, zone)
+      expect(result.valid_until).toBe(offset < 0 ? boundary : time(nextDate))
+      expect(result.valid_until).toBeGreaterThan(result.server_now)
+    }
+  })
   it('跨年仍保留上一年开始的光明节窗口', () => {
     const offer = offers(atNoon('2025-01-01')).find(offer => offer.background_id === 'hanukkah')
     expect(offer?.expires_at).toBe(time('2025-01-02T16:00:00Z'))
     expect(ids(atNoon('2025-01-03'))).not.toContain('hanukkah')
+  })
+  it.each([
+    ['2009-11-01T02:59:59.999Z', true, '2009-11-01T03:00:00Z'],
+    ['2009-11-01T03:00:00Z', false, '2009-11-01T03:01:00Z'],
+    ['2009-11-01T03:00:00.001Z', false, '2009-11-01T03:01:00Z'],
+    ['2009-11-01T03:00:59.999Z', false, '2009-11-01T03:01:00Z'],
+    ['2009-11-01T03:01:00Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T03:01:00.001Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T03:30:00Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T03:59:59.999Z', true, '2009-11-01T04:00:00Z'],
+    ['2009-11-01T04:00:00Z', false, '2009-11-02T04:00:00Z'],
+    ['2009-11-01T04:00:00.001Z', false, '2009-11-02T04:00:00Z']
+  ] as const)('Goose Bay 万圣节在回拨后按当地日期重新开放：%s', (date, available, until) => {
+    const result = getFestivalBackgrounds(time(date), 'America/Goose_Bay')
+    const offer = result.backgrounds.find(row => row.background_id === 'halloween')
+    expect(Boolean(offer)).toBe(available)
+    if (available) expect(offer?.expires_at).toBe(time(until))
+    expect(result.valid_until).toBe(time(until))
+    expect(result.valid_until).toBeGreaterThan(result.server_now)
   })
   it('共享时区工具保持当地日期与午夜一致', () => {
     expect(zonedDateParts(time('2026-10-31T16:00:00Z'), 'Asia/Shanghai')).toMatchObject({ date: '2026-11-01', hour: 0 })

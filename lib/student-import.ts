@@ -3,7 +3,8 @@ export interface ImportRow { name: string; studentNo: string; ambiguous: boolean
 // 先处理显式分隔符；没有列分隔符时只把末尾含数字的标记当作学号
 export function parseStudentList(value: string): ImportRow[] {
   return value.split(/\r?\n/).filter(line => line.trim()).map(raw => {
-    const line = raw.trim()
+    // Tab 是列分隔符，不能在识别列之前修剪掉。
+    const line = raw.includes('\t') ? raw : raw.trim()
     if (/[,，;；\t]/.test(line)) {
       const columns: string[] = []; let part = '', quoted = false
       for (let index = 0; index < line.length; index++) {
