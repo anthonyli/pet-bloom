@@ -1,37 +1,35 @@
-# 全局班级只读总览 / Global class overview
+# 全局班级管理 / Global class administration
 
-`/zh/admin`、`/en/admin` 展示当前应用数据库中的全部班级，支持服务端分页、班级名称搜索和概要详情。字段来自现有模型：名称、负责人称呼和学科、创建时间、在班人数、归档人数及班级教师数。没有班级归档状态，界面不虚构状态。详情不返回学生姓名、评价、宠物档案、账号登录名、口令或会话。
+`/zh/admin`、`/en/admin` 展示当前应用数据库中的全部班级，支持分页、名称搜索、概要详情及进入班级。每个班级 ID 只展示一条，关联教师集中显示在同一条记录中；同名但 ID 不同的班级仍是独立班级。概要不包含学生档案或账号凭据。
 
-The overview covers only the database selected by this application, using the existing SQLite or Turso connection. It does not discover other databases or installations. Summaries contain class and owner information and aggregate counts; they do not expose student records or credentials.
+The overview covers the current application database. Each class ID appears once with all associated teachers, regardless of the number of memberships. Distinct classes with identical names remain separate. The entry link opens that class in the ordinary workspace and survives a page reload.
 
 ## 管理员配置 / Admin configuration
 
-仅服务端环境变量 `PET_GARDEN_ADMIN_USER_IDS` 接受现有用户的完整 UUID，以逗号分隔。默认空集合；任一非空条目不是有效 UUID 时整体拒绝。逐次请求先验证未过期的 session，再验证用户存在及其 UUID 属于白名单。显示名或用户名为 `admin`、教学身份、班级共同管理员、客户端 role / userId 参数均不能获得全局权限。
+服务端环境变量 `PET_GARDEN_ADMIN_USER_IDS` 接受已批准用户的完整 UUID，以逗号分隔。空配置或任意无效条目均拒绝全局访问。每次请求重新验证会话、用户和白名单。用户名为 `admin`、教学身份、班级共同管理员及客户端传入的 role / userId 均不授予全局权限。工作台的“全部班级”入口仅对白名单管理员显示，服务端独立校验权限。
 
-Set `PET_GARDEN_ADMIN_USER_IDS` in the server environment to a comma-separated list of explicitly approved existing user UUIDs. Empty or malformed configuration denies access. The list must never use a `NEXT_PUBLIC_` prefix. Restart/redeploy the service after changing its environment. Removing an ID denies subsequent requests; already displayed data is cleared on an authorization failure. Global access grants no additional ordinary class read/write permissions.
+Set `PET_GARDEN_ADMIN_USER_IDS` to explicitly approved existing user UUIDs. Never use a `NEXT_PUBLIC_` prefix or infer authorization from display names. Restart/redeploy after changing the environment. Removing an ID removes global access on subsequent requests; any existing class membership still grants its normal permissions.
 
-**生产管理员 UUID 尚待成员指定。** 本 PR 不指定真实账号、不修改生产配置、不执行迁移或部署。配置示例为空。上线时由应用负责人核实已批准用户的 UUID，并按已有发布流程配置；不要凭显示名猜测身份。
+## 班级权限 / Class permissions
 
-**Production admin identities are still to be designated by the owner.** This change supplies implementation and an empty example only. It grants no real account access and performs no production migration or deployment.
+全局管理员可进入任意班级，管理学生、宠物、评分及撤回、兑换及撤回、规则、成长设置、商店、教师邀请、成员移除、负责人转让、班级删除和备份。原有事务、归档、宠物周期及余额校验继续生效。操作使用管理员自己的身份记录历史署名；进入班级不会自动加入成员或改变负责人。
 
-## API 与归档兼容 / API and archive compatibility
+Global admins receive owner-level class capabilities through the `global_admin` role. Existing owners remain owners; co-admins keep their existing restrictions. Global access is checked on the server for every class operation. Export includes all classes and the admin's own initial template, excluding other teachers' personal templates, credentials, memberships and invitation codes. Import still creates new class copies.
 
-- `GET /api/admin/access`：已登录用户自身是否拥有全局只读访问权；不返回配置名单。
-- `GET /api/admin/classes?page=1&pageSize=20&search=…`：总数和当前页，默认每页 20，最大 100；page 为 1–1,000,000 整数，search 最多 80 字符。按创建时间降序、ID 升序稳定排序；搜索为字面包含匹配，`%`、`_` 不作为通配符。
-- `GET /api/admin/classes/:id`：重新校验权限后返回必要概要，缺失班级返回 404。
-- 未登录／过期会话返回 401，无全局权限返回 403。该命名空间仅导出 GET，Next.js 自动处理 HEAD；写方法返回 405。成功与失败响应均 `Cache-Control: no-store`、`Vary: Cookie`。
+## API 与列表 / API and listing
 
-All admin reads are independently authorized; hiding the workspace link is only a convenience. The existing catch-all authentication and write routes remain unchanged, including the separate ABCD-11 login rate-limit work. There is no student login role in the current model; unauthenticated student-side requests receive 401, and any ordinary account receives 403.
+- `GET /api/admin/access`：当前登录用户是否拥有全局权限，不返回白名单。
+- `GET /api/admin/classes?page=1&pageSize=20&search=…`：总数及当前页；每页默认 20、最大 100，page 范围 1–1,000,000，search 最多 80 字符；按创建时间降序、ID 升序排列，搜索为字面包含匹配。
+- `GET /api/admin/classes/:id`：班级概要、关联教师及聚合人数，缺失班级返回 404。
+- `/api/admin/*` 仅提供读取；实际管理沿用现有业务接口。未登录／过期会话返回 401，无全局权限访问总览返回 403；响应禁用缓存。
 
-ABCD-14 / PR #3 拥有 schema v9 的 `students.archived_at` 迁移，本 PR 不复制或依赖该迁移。领域查询通过当前连接的表元数据检测字段：字段不存在时全员在班、归档 0，并提示尚未启用归档；存在时按 NULL / 非 NULL 分别统计。使用受限概要投影，不复用包含学生档案及可写资源的 snapshot。不提供历史学生档案入口；历史仍在原有班级权限下由归档功能查看。
-
-Before ABCD-14 lands, all students count as active. Once its additive field exists, counts distinguish active and archived students automatically. Tests cover both schema shapes and local SQLite/libSQL. No migration is added here.
+Class summaries count active and archived students separately when `students.archived_at` exists, and retain compatibility with older schemas. Teachers are attached after class pagination, so shared memberships cannot duplicate rows or inflate totals. This change requires no database migration.
 
 ## 验收 / Verification
 
 1. `pnpm typecheck`、`pnpm test`、`BUILD_DIR=.next-build pnpm build`。
-2. `pnpm test:admin`：启动并最终关闭隔离生产服务及 Chrome。默认 Chrome 路径为 macOS Google Chrome；其他环境设 `CHROME_PATH`。测试数据、截图、服务日志和 `results.json` 写入忽略的 `data/admin-evidence-*`，不使用已有数据库或真实账号。
-3. 浏览器从工作台“全部班级”进入，核对两位测试教师共 23 班的两页覆盖，搜索班级并查看概要；Escape 关闭后焦点回到原行。核对空结果、加载、列表／详情失败与重试。
-4. 中英文及 390px 手机布局检查；未登录、过期 session、普通教师、名为 admin 的共同管理员、伪造权限参数、直接替换 classId 均被拒绝；全局管理员不能改写其他教师班级。
+2. `pnpm test:admin` 使用隔离 SQLite、生产服务和 Chrome；截图与结果写入忽略的 `data/admin-evidence-*`。默认 macOS Chrome，其他环境可设置 `CHROME_PATH`。
+3. 核对中英文、390px 手机布局、23 班分页、搜索、同班多教师、进入及刷新班级、管理控件、错误重试、失效会话和普通教师隐藏入口。
+4. 单元及真实 Route Handler 测试覆盖管理员操作、历史署名、撤销授权、成员权限降级、普通教师越权、同名独立班级及本地 libSQL。
 
-`tests/admin-classes.test.ts` exercises real Route Handlers and database methods, including local libSQL (not cloud Turso). The browser script exercises actual HTTP and Chrome with synthetic users, and injects only explicit network delay/500 responses to verify recovery. Its archive counts use a local fixture matching ABCD-14's column contract; this is not a claim that ABCD-14's archive UI or production Turso was exercised.
+Browser tests use synthetic users and data. Production release follows `pnpm deploy:vercel`; these isolated tests do not mutate production classes.

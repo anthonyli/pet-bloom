@@ -13,7 +13,7 @@ export async function api<T = { success: boolean; id?: string }>(path: string, m
   if (!response.ok) throw new ApiError(body.error || 'serverError', response.status)
   return body as T
 }
-export function useGarden(locale: Locale) {
+export function useGarden(locale: Locale, initialClassId = '') {
   const [state, setState] = useState<Snapshot | null>(null)
   const [ready, setReady] = useState(false)
   const [refreshFailed, setRefreshFailed] = useState(false)
@@ -67,7 +67,7 @@ export function useGarden(locale: Locale) {
       else { setRefreshFailed(true); throw error }
     } finally { if (number === requestNumber.current) setReady(true) }
   }, [clearFeedback, locale, expireBackgrounds, serverTime])
-  useEffect(() => { refresh().catch(report) }, [refresh, report])
+  useEffect(() => { refresh(initialClassId).catch(report) }, [refresh, report, initialClassId])
   useEffect(() => {
     if (!state) return
     const update = () => { expireBackgrounds(); if (!pending.current && !document.hidden) refresh().catch(report) }

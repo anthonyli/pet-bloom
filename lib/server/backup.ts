@@ -1,3 +1,4 @@
+import { isGlobalAdmin } from './admin-access'
 import type { Statement } from './database-adapter'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
@@ -454,22 +455,23 @@ export async function exportBackup(garden: Garden, owner: string) {
   const db = garden.db
   return await db.transaction(async () => {
     await garden.requireProfile(owner)
+    const globalAdmin = isGlobalAdmin(owner) ? 1 : 0
     const resources = async (table: string, columns: string, order = 'r.rowid') => (await db.prepare(`
       SELECT ${columns} FROM ${table} r LEFT JOIN classes c ON c.id = r.class_id
-      WHERE (r.class_id IS NULL AND r.owner_id = ?) OR c.owner_id = ?
+      WHERE (r.class_id IS NULL AND r.owner_id = ?) OR c.owner_id = ? OR (? = 1 AND c.id IS NOT NULL)
       ORDER BY CASE WHEN r.class_id IS NULL THEN 0 ELSE 1 END, c.rowid, ${order}
-    `).all(owner, owner))
+    `).all(owner, owner, globalAdmin))
     const data: ArchiveBackup = {
       version: 8, exportedAt: new Date().toISOString(),
       settings: (await resources('settings_versions', 'r.id, r.class_id, r.version, r.value, r.created_at', 'r.version') as { id: string; class_id: string | null; version: number; value: string; created_at: number }[]).map(row => ({ ...row, value: JSON.parse(row.value) })),
       rules: await resources('rules', 'r.id, r.class_id, r.name, r.points, r.category, r.custom') as ScopedBackup['rules'],
       items: await resources('items', 'r.id, r.class_id, r.name, r.cost, r.active, r.description, r.category, r.icon, r.image, r.image_key, r.image_bytes, r.stock, r.background_id') as BackgroundBackup['items'],
-      classes: await db.prepare('SELECT id, name, created_at FROM classes WHERE owner_id = ? ORDER BY rowid').all(owner) as ScopedBackup['classes'],
-      students: await db.prepare('SELECT s.id, s.class_id, s.name, s.student_no, s.points, s.pet_id, s.pet_exp, s.generation, s.spent_badges, s.created_at, s.background_id, s.archived_at FROM students s JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY s.rowid').all(owner) as ArchiveBackup['students'],
-      evaluations: await db.prepare('SELECT e.id, e.batch_id, e.student_id, e.points, e.reason, e.category, e.generation, e.created_at, e.undone, e.actor_name, e.actor_subject, e.undone_by_name, e.undone_by_subject FROM evaluations e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY e.rowid').all(owner) as ScopedBackup['evaluations'],
-      badges: await db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY b.rowid').all(owner) as ScopedBackup['badges'],
-      redemptions: await db.prepare('SELECT r.id, r.student_id, r.item_id, r.item_name, r.cost, r.created_at, r.undone, r.stock_deducted, r.actor_name, r.actor_subject, r.undone_by_name, r.undone_by_subject, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY r.rowid').all(owner) as BackgroundBackup['redemptions'],
-      events: await db.prepare('SELECT e.* FROM growth_events e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE c.owner_id = ? ORDER BY e.seq').all(owner) as ScopedBackup['events']
+      classes: await db.prepare('SELECT id, name, created_at FROM classes WHERE owner_id = ? OR ? = 1 ORDER BY rowid').all(owner, globalAdmin) as ScopedBackup['classes'],
+      students: await db.prepare('SELECT s.id, s.class_id, s.name, s.student_no, s.points, s.pet_id, s.pet_exp, s.generation, s.spent_badges, s.created_at, s.background_id, s.archived_at FROM students s JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY s.rowid').all(owner, globalAdmin) as ArchiveBackup['students'],
+      evaluations: await db.prepare('SELECT e.id, e.batch_id, e.student_id, e.points, e.reason, e.category, e.generation, e.created_at, e.undone, e.actor_name, e.actor_subject, e.undone_by_name, e.undone_by_subject FROM evaluations e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY e.rowid').all(owner, globalAdmin) as ScopedBackup['evaluations'],
+      badges: await db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY b.rowid').all(owner, globalAdmin) as ScopedBackup['badges'],
+      redemptions: await db.prepare('SELECT r.id, r.student_id, r.item_id, r.item_name, r.cost, r.created_at, r.undone, r.stock_deducted, r.actor_name, r.actor_subject, r.undone_by_name, r.undone_by_subject, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY r.rowid').all(owner, globalAdmin) as BackgroundBackup['redemptions'],
+      events: await db.prepare('SELECT e.* FROM growth_events e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY e.seq').all(owner, globalAdmin) as ScopedBackup['events']
     }
     if (exceedsScopedRecordLimits(data) || !archiveSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
     return data

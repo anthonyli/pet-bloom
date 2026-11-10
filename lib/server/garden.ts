@@ -18,6 +18,7 @@ import { normalizeItemImage } from './item-images'
 import { DomainError } from './errors'
 import { credentials, credentialError } from '../credentials'
 import { isGlobalAdmin } from './admin-access'
+import { hasClassOwnerAccess } from '../class-access'
 import type { AdminClassPage, AdminClassDetail, AdminClassSummary } from '../admin-types'
 export { credentials } from '../credentials'
 
@@ -60,6 +61,18 @@ export class Garden {
       FROM classes c JOIN users u ON u.id = c.owner_id`
     return { sql, archiveSupported }
   }
+  private async attachAdminTeachers(classes: AdminClassSummary[]) {
+    if (!classes.length) return
+    // Fetch members after paginating classes: a shared class occupies exactly one row.
+    const rows = await this.db.prepare(`SELECT m.class_id, u.id AS user_id, u.display_name, u.subject,
+      CASE WHEN c.owner_id = u.id THEN 'owner' ELSE 'admin' END AS role
+      FROM class_members m JOIN users u ON u.id = m.user_id JOIN classes c ON c.id = m.class_id
+      WHERE m.class_id IN (${classes.map(() => '?').join(',')})
+      ORDER BY c.owner_id = u.id DESC, m.joined_at, u.id`).all(...classes.map(row => row.id)) as (AdminClassSummary['teachers'][number] & { class_id: string })[]
+    const byClass = new Map(classes.map(row => [row.id, row]))
+    for (const row of classes) row.teachers = []
+    for (const { class_id, ...teacher } of rows) byClass.get(class_id)!.teachers.push(teacher)
+  }
   async adminClasses(actor: string, input: unknown): Promise<AdminClassPage> {
     await this.requireGlobalAdmin(actor)
     const { page, pageSize, search } = z.object({
@@ -73,6 +86,7 @@ export class Garden {
     const where = " WHERE c.name LIKE ? ESCAPE '\\'"
     const { total } = await this.db.prepare(`SELECT COUNT(*) AS total FROM classes c${where}`).get(pattern) as { total: number }
     const classes = await this.db.prepare(`${sql}${where} ORDER BY c.created_at DESC, c.id ASC LIMIT ? OFFSET ?`).all(pattern, pageSize, (page - 1) * pageSize) as AdminClassSummary[]
+    await this.attachAdminTeachers(classes)
     return { classes, total, page, pageSize, archiveSupported }
   }
   async adminClass(actor: string, id: string): Promise<AdminClassDetail> {
@@ -80,6 +94,7 @@ export class Garden {
     const { sql, archiveSupported } = await this.adminClassProjection()
     const classroom = await this.db.prepare(`${sql} WHERE c.id = ?`).get(id) as AdminClassSummary | undefined
     if (!classroom) throw new DomainError('notFound', 404)
+    await this.attachAdminTeachers([classroom])
     return { classroom, archiveSupported }
   }
   private async latestSettings(owner: string, classId?: string): Promise<SettingsVersion> {
@@ -184,9 +199,10 @@ export class Garden {
   async logout(token: string) { await this.db.prepare('DELETE FROM sessions WHERE token = ?').run(hash(token)) }
   async classroom(actor: string, id: string, ownerOnly = false): Promise<Classroom> {
     await this.requireProfile(actor)
-    const value = await this.db.prepare("SELECT c.*, CASE WHEN c.owner_id = ? THEN 'owner' ELSE 'admin' END AS role FROM classes c JOIN class_members m ON m.class_id = c.id WHERE c.id = ? AND m.user_id = ?").get(actor, id, actor) as Classroom | undefined
+    const globalAdmin = isGlobalAdmin(actor) ? 1 : 0
+    const value = await this.db.prepare("SELECT c.*, CASE WHEN c.owner_id = ? THEN 'owner' WHEN ? = 1 THEN 'global_admin' ELSE 'admin' END AS role FROM classes c WHERE c.id = ? AND (? = 1 OR EXISTS (SELECT 1 FROM class_members m WHERE m.class_id = c.id AND m.user_id = ?))").get(actor, globalAdmin, id, globalAdmin, actor) as Classroom | undefined
     if (!value) throw new DomainError('notFound', 404)
-    if (ownerOnly && value.role !== 'owner') throw new DomainError('forbidden', 403)
+    if (ownerOnly && !hasClassOwnerAccess(value)) throw new DomainError('forbidden', 403)
     return value
   }
   async student(actor: string, id: string): Promise<Student> {
@@ -408,7 +424,7 @@ export class Garden {
       const students = await Promise.all(records.map(async record => (await this.student(actor, record.student_id))))
       if (new Set(students.map(student => student.class_id)).size !== 1) throw new DomainError('invalidInput')
       const classId = students[0].class_id, classroom = await this.classroom(actor, classId)
-      if (classroom.role !== 'owner' && records.some(record => record.actor_user_id !== actor)) throw new DomainError('operationNotOwned', 403)
+      if (!hasClassOwnerAccess(classroom) && records.some(record => record.actor_user_id !== actor)) throw new DomainError('operationNotOwned', 403)
       for (let i = 0; i < records.length; i++) if (students[i].generation !== records[i].generation) throw new DomainError('previousPetCycle', 409)
       const settings = await this.settings(actor, classId)
       for (const record of records) {
@@ -524,7 +540,7 @@ export class Garden {
       const row = await this.db.prepare('SELECT * FROM redemptions WHERE id = ? AND undone = 0').get(id) as { student_id: string; item_id: string | null; cost: number; stock_deducted: number; actor_user_id: string | null; background_id: string | null } | undefined
       if (!row) throw new DomainError('notFound', 404)
       const student = await this.student(actor, row.student_id), classroom = await this.classroom(actor, student.class_id)
-      if (classroom.role !== 'owner' && row.actor_user_id !== actor) throw new DomainError('operationNotOwned', 403)
+      if (!hasClassOwnerAccess(classroom) && row.actor_user_id !== actor) throw new DomainError('operationNotOwned', 403)
       if (row.stock_deducted && row.item_id) {
         const item = await this.db.prepare('SELECT stock FROM items WHERE id = ? AND class_id = ?').get(row.item_id, student.class_id) as { stock: number } | undefined
         if (!item) throw new DomainError('notFound', 404)
@@ -540,7 +556,8 @@ export class Garden {
     return await this.db.transaction(async () => {
       const timestamp = now()
       const user = await this.user(actor)
-      const classes = user.profile_complete ? await this.db.prepare("SELECT c.*, CASE WHEN c.owner_id = ? THEN 'owner' ELSE 'admin' END AS role FROM classes c JOIN class_members m ON m.class_id = c.id WHERE m.user_id = ? ORDER BY c.created_at, c.id").all(actor, actor) as Classroom[] : []
+      const globalAdmin = isGlobalAdmin(actor) ? 1 : 0
+      const classes = user.profile_complete ? await this.db.prepare("SELECT c.*, CASE WHEN c.owner_id = ? THEN 'owner' WHEN ? = 1 THEN 'global_admin' ELSE 'admin' END AS role FROM classes c WHERE ? = 1 OR EXISTS (SELECT 1 FROM class_members m WHERE m.class_id = c.id AND m.user_id = ?) ORDER BY c.created_at, c.id").all(actor, globalAdmin, globalAdmin, actor) as Classroom[] : []
       const selected = user.profile_complete ? classId || classes[0]?.id : undefined
       const classroom = selected ? (await this.classroom(actor, selected)) : undefined
       const settings = await this.latestSettings(actor, selected)
@@ -566,10 +583,10 @@ export class Garden {
         student.status = petStatus(student.pet_id, student.points, student.pet_exp, (await this.growthHistory(student.id, student.generation)).lastFedAt, settings.value, timestamp)
       }
       const rules = selected ? (await this.db.prepare('SELECT id, name, points, category, custom FROM rules WHERE class_id = ? ORDER BY rowid').all(selected) as (Omit<Rule, 'name'> & { name: string })[]).map(rule => ({ ...rule, name: JSON.parse(rule.name) })) : []
-      const records = selected ? (await this.db.prepare('SELECT e.*, s.name AS student_name FROM evaluations e JOIN students s ON s.id = e.student_id WHERE s.class_id = ? ORDER BY e.rowid DESC LIMIT 200').all(selected) as (Omit<Evaluation, 'reason'> & { reason: string })[]).map(record => ({ ...record, reason: JSON.parse(record.reason), can_undo: !record.undone && (classroom!.role === 'owner' || record.actor_user_id === actor) })) : []
+      const records = selected ? (await this.db.prepare('SELECT e.*, s.name AS student_name FROM evaluations e JOIN students s ON s.id = e.student_id WHERE s.class_id = ? ORDER BY e.rowid DESC LIMIT 200').all(selected) as (Omit<Evaluation, 'reason'> & { reason: string })[]).map(record => ({ ...record, reason: JSON.parse(record.reason), can_undo: !record.undone && (hasClassOwnerAccess(classroom) || record.actor_user_id === actor) })) : []
       const items = selected ? (await this.db.prepare('SELECT id, name, cost, active, description, category, icon, image_key, stock, background_id FROM items WHERE class_id = ? AND active = 1 ORDER BY rowid').all(selected) as (Omit<ShopItem, 'name' | 'description' | 'image'> & { name: string; description: string; image_key: string | null })[]).map(({ image_key, ...item }) => ({ ...item, name: JSON.parse(item.name), description: JSON.parse(item.description), image: image_key ? `/api/items/${item.id}/image?v=${image_key}` : null })) : []
       const badges = selected ? await this.db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id WHERE s.class_id = ? AND b.active = 1 ORDER BY b.earned_at DESC, b.level DESC').all(selected) as Badge[] : []
-      const redemptions = selected ? (await this.db.prepare('SELECT r.*, s.name AS student_name FROM redemptions r JOIN students s ON s.id = r.student_id WHERE s.class_id = ? ORDER BY r.rowid DESC LIMIT 200').all(selected) as (Omit<Redemption, 'item_name'> & { item_name: string })[]).map(item => ({ ...item, item_name: JSON.parse(item.item_name), can_undo: !item.undone && (classroom!.role === 'owner' || item.actor_user_id === actor) })) : []
+      const redemptions = selected ? (await this.db.prepare('SELECT r.*, s.name AS student_name FROM redemptions r JOIN students s ON s.id = r.student_id WHERE s.class_id = ? ORDER BY r.rowid DESC LIMIT 200').all(selected) as (Omit<Redemption, 'item_name'> & { item_name: string })[]).map(item => ({ ...item, item_name: JSON.parse(item.item_name), can_undo: !item.undone && (hasClassOwnerAccess(classroom) || item.actor_user_id === actor) })) : []
       return { user, settings, classes, students: students.filter(student => student.archived_at === null), archived_students: students.filter(student => student.archived_at !== null), badges, rules, records, items, redemptions, festival_backgrounds }
     }).deferred()
   }
