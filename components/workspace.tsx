@@ -61,7 +61,7 @@ export function Workspace({ locale }: { locale: Locale }) {
   const [interactionScope, setInteractionScope] = useState(client.scope)
   useEffect(() => {
     setInteractionScope(client.scope)
-    setModal(null); setEditing(undefined); setAdopting(null); setEvaluating([])
+    setModal(value => value === 'settings' ? value : null); setEditing(undefined); setAdopting(null); setEvaluating([])
     setBadgeStudentId(null); setBadgesOpen(false); setBatch(false); setSelected(new Set()); setQuery('')
     setDressingStudentId(null); setDressingOpen(false); setDressingBackgroundId(undefined); setShopContext(null); setShopOpen(false); backgroundTrigger.current = null
     badgeButtons.current.clear()
@@ -168,7 +168,6 @@ export function Workspace({ locale }: { locale: Locale }) {
     {modal === 'manageClass' && classroom && <ClassDialog client={client} locale={locale} classroom={classroom} onClose={close} />}
     {(modal === 'student' || modal === 'import') && <StudentDialog client={client} locale={locale} student={editing} importing={modal === 'import'} onClose={close} />}
     {modal === 'rules' && <RulesDialog client={client} locale={locale} onClose={close} />}
-    {modal === 'settings' && <SettingsDialog client={client} locale={locale} onClose={close} />}
     {modal === 'history' && <HistoryDialog client={client} locale={locale} onClose={close} />}
     {modal === 'ranking' && <RankingDialog client={client} locale={locale} onClose={close} />}
     {modal === 'shop' && <ShopDialog client={client} locale={locale} open={shopOpen} initialStudentId={shopContext?.studentId} initialTab={shopContext?.tab} onClose={close} onDress={(studentId, backgroundId) => showDressing(studentId, undefined, backgroundId)} />}
@@ -178,6 +177,8 @@ export function Workspace({ locale }: { locale: Locale }) {
     {badgeStudent && <BadgeDialog open={badgesOpen} student={badgeStudent} badges={client.state.badges} locale={locale} onClose={() => { setBadgesOpen(false); setBadgeStudentId(null) }} />}
     {!!client.celebrations.length && <LevelUpCelebration events={client.celebrations} locale={locale} onClose={() => client.setCelebrations([])} />}
     </Fragment>}
+    {/* Account settings must keep the import receipt when the first class is loaded. */}
+    {modal === 'settings' && <SettingsDialog key={client.state.user.id} client={client} locale={locale} onClose={close} />}
     {notice}
   </div></TooltipProvider>
 }
