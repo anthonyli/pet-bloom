@@ -1,5 +1,9 @@
 # 宠物图片来源
 
+本项目代码采用 Apache-2.0，但此许可不补授第三方图片的权利。中英文使用范围、AI 素材与署名说明见 [ASSETS.md](../../ASSETS.md)。
+
+The code license does not grant missing rights to third-party artwork. See [ASSETS.md](../../ASSETS.md) for bilingual licensing scope, AI provenance and reuse notes.
+
 原有宠物图片为第三方导入素材，新增生肖素材的生成记录见下文。
 
 47 种宠物共 376 张原始 WebP，未生成或重绘。每只宠物的 8 张阶段图都通过内容哈希去重检查。每张图片的本地路径和 SHA-256 见 image-manifest.csv，逐张解码结果见 verification-report.json。下载不代表获得再分发或商用授权，公开部署前请确认授权。
