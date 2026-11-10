@@ -14,7 +14,7 @@ export interface Pet {
 }
 export interface Rule { id: string; name: Localized; points: number; category: Category; custom?: boolean }
 export type TeachingRole = 'homeroom' | 'subject' | 'other'
-export interface Classroom { id: string; name: string; created_at: number; owner_id: string; role: 'owner' | 'admin' }
+export interface Classroom { id: string; name: string; created_at: number; owner_id: string; role: 'owner' | 'admin' | 'global_admin' }
 export interface ClassTeacher { user_id: string; display_name: string; subject: string; teaching_role: TeachingRole | null; role: 'owner' | 'admin'; joined_at: number }
 export interface ClassTeachers { teachers: ClassTeacher[]; invitation: { created_at: number; expires_at: number } | null }
 export interface InvitationPreview { id: string; name: string; owner_name: string; already_member: boolean; expires_at: number }

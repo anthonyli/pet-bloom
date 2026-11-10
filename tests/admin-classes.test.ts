@@ -8,6 +8,7 @@ import { database } from '../lib/server/db'
 import { Garden } from '../lib/server/garden'
 import { ApplicationDatabase } from '../lib/server/database-adapter'
 import { isGlobalAdmin } from '../lib/server/admin-access'
+import { exportBackup } from '../lib/server/backup'
 
 let garden: Garden, admin: string, teacher: string, coadmin: string, adminCookie: string, teacherCookie: string, coadminCookie: string
 let first: string, second: string
@@ -37,7 +38,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('global read-only admin', () => {
+describe('global class admin', () => {
   it('defaults off, fails closed on malformed configuration, and never matches a substring', async () => {
     for (const value of ['', 'admin', `${admin},invalid`, `${admin}0`]) {
       vi.stubEnv('PET_GARDEN_ADMIN_USER_IDS', value)
@@ -66,10 +67,65 @@ describe('global read-only admin', () => {
     expect(response.headers.get('Cache-Control')).toBe('no-store')
     expect(response.headers.get('Vary')).toBe('Cookie')
     expect(result.classroom).toMatchObject({ name: 'Alpha 100%_班', owner_id: teacher, active_students: 2, archived_students: 0, teacher_count: 2 })
-    expect(Object.keys(result.classroom).sort()).toEqual(['id', 'name', 'owner_id', 'owner_name', 'owner_subject', 'created_at', 'active_students', 'archived_students', 'teacher_count'].sort())
+    expect(Object.keys(result.classroom).sort()).toEqual(['id', 'name', 'owner_id', 'owner_name', 'owner_subject', 'created_at', 'active_students', 'archived_students', 'teacher_count', 'teachers'].sort())
     expect(JSON.stringify(result)).not.toContain('PRIVATE')
     expect(result.archiveSupported).toBe(true)
     expect((await read('classes/missing')).status).toBe(404)
+  })
+  it('groups all teachers in one row per class ID, preserving distinct same-name classes and pagination', async () => {
+    await garden.renameClass(coadmin, second, { name: 'Alpha 100%_班' })
+    // The global admin may also already be a member: neither list may duplicate that class.
+    await garden.joinClass(admin, await garden.createInvitation(teacher, first))
+    const list = await garden.adminClasses(admin, { pageSize: 1 })
+    const next = await garden.adminClasses(admin, { pageSize: 1, page: 2 })
+    expect(list.total).toBe(2)
+    expect(new Set([...list.classes, ...next.classes].map(row => row.id)).size).toBe(2)
+    const shared = (await garden.adminClass(admin, first)).classroom
+    expect(shared.teachers.map(row => row.user_id)).toEqual(expect.arrayContaining([teacher, coadmin, admin]))
+    expect(shared.teachers).toHaveLength(3)
+    expect(shared.teachers[0]).toMatchObject({ user_id: teacher, role: 'owner' })
+    expect((await garden.snapshot(admin, first)).classes.filter(row => row.id === first)).toHaveLength(1)
+  })
+  it('supports class operations, undo, teacher management and backup with the real admin as actor', async () => {
+    const [student] = await garden.addStudents(admin, { classId: first, students: [{ name: 'Admin student' }] })
+    await garden.updateStudent(admin, student, { name: 'Updated student' })
+    await garden.adopt(admin, student, { petId: 'panda' })
+    await garden.addRule(admin, { classId: first, name: { zh: '管理员规则', en: 'Admin rule' }, points: 3, category: 'other' })
+    const settings = await garden.settings(admin, first)
+    await garden.saveSettings(admin, { classId: first, version: settings.version, value: settings.value })
+    const otherScore = await garden.evaluate(teacher, { studentIds: [student], custom: { points: 100 } })
+    const ownScore = await garden.evaluate(admin, { studentIds: [student], custom: { points: 5 } })
+    let state = await garden.snapshot(admin, first)
+    expect(state.records.find(row => row.batch_id === ownScore.batchId)).toMatchObject({ actor_user_id: admin, can_undo: true })
+    expect(state.records.find(row => row.batch_id === otherScore.batchId)?.can_undo).toBe(true)
+    const { id: itemId } = await garden.addItem(admin, { classId: first, name: { zh: '奖品', en: 'Prize' }, cost: 1 })
+    await garden.updateItem(admin, itemId, { name: { zh: '新奖品', en: 'New prize' }, cost: 1 })
+    await garden.redeem(teacher, { studentId: student, itemId })
+    state = await garden.snapshot(admin, first)
+    expect(state.redemptions[0].can_undo).toBe(true)
+    await garden.undoRedemption(admin, state.redemptions[0].id)
+    await garden.undo(admin, otherScore.batchId)
+    expect((await garden.snapshot(admin, first)).records.find(row => row.batch_id === otherScore.batchId)).toMatchObject({ undone: 1, undone_by_user_id: admin })
+    await garden.setStudentArchived(admin, student, true)
+    await garden.setStudentArchived(admin, student, false)
+    const teachersBefore = await garden.classTeachers(admin, first)
+    expect(teachersBefore.teachers).toHaveLength(2)
+    const backup = await exportBackup(garden, admin)
+    expect(new Set(backup.classes.map(row => row.id))).toEqual(new Set([first, second]))
+    expect(backup.settings.filter(row => row.class_id === null)).toHaveLength(1)
+    expect((await exportBackup(garden, teacher)).classes.map(row => row.id)).toEqual([first])
+    await expect(garden.removeTeacher(admin, first, teacher)).rejects.toMatchObject({ code: 'cannotRemoveOwner' })
+    await garden.transferClass(admin, first, { userId: coadmin })
+    await garden.removeTeacher(admin, first, teacher)
+    expect((await garden.classroom(admin, first)).owner_id).toBe(coadmin)
+    await garden.deleteClass(admin, second)
+    await expect(garden.classroom(admin, second)).rejects.toMatchObject({ status: 404 })
+    expect(await garden.db.prepare('SELECT * FROM class_members WHERE user_id = ?').all(admin)).toEqual([])
+    vi.stubEnv('PET_GARDEN_ADMIN_USER_IDS', '')
+    for (const action of [() => garden.evaluate(admin, { studentIds: [student], custom: { points: 1 } }), () => garden.deleteClass(admin, first), () => garden.transferClass(admin, first, { userId: teacher }), () => garden.classTeachers(admin, first)]) {
+      await expect(action()).rejects.toMatchObject({ status: 404 })
+    }
+    expect((await exportBackup(garden, admin)).classes).toEqual([])
   })
   it('uses the migrated archived_at column and the student archive operation', async () => {
     const row = await garden.db.prepare('SELECT id FROM students LIMIT 1').get() as { id: string }
@@ -101,14 +157,31 @@ describe('global read-only admin', () => {
     expect((await read('classes')).status).toBe(403)
     expect((await read(`classes/${first}`)).status).toBe(403)
   })
-  it('does not give global admins ordinary class read/write access', async () => {
+  it('restores only existing co-admin permissions after global access is revoked', async () => {
+    await garden.joinClass(admin, await garden.createInvitation(teacher, first))
+    expect((await garden.classroom(admin, first, true)).role).toBe('global_admin')
+    vi.stubEnv('PET_GARDEN_ADMIN_USER_IDS', '')
+    expect((await garden.classroom(admin, first)).role).toBe('admin')
+    await garden.renameClass(admin, first, { name: 'Co-managed class' })
+    await expect(garden.deleteClass(admin, first)).rejects.toMatchObject({ status: 403 })
+    expect((await exportBackup(garden, admin)).classes).toEqual([])
+    const denied = await ordinaryGET(new NextRequest(`http://localhost/api/state?classId=${second}&role=global_admin`, { headers: { Cookie: teacherCookie } }), { params: Promise.resolve({ path: ['state'] }) })
+    expect(denied.status).toBe(404)
+  })
+  it('lets global admins enter and edit classes without changing membership or ownership', async () => {
     const response = await PATCH(new NextRequest(`http://localhost/api/classes/${first}`, {
-      method: 'PATCH', headers: { Cookie: adminCookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Not allowed' })
+      method: 'PATCH', headers: { Cookie: adminCookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Admin renamed' })
     }), { params: Promise.resolve({ path: ['classes', first] }) })
-    expect(response.status).toBe(404)
+    expect(response.status).toBe(200)
     const snapshot = await ordinaryGET(new NextRequest(`http://localhost/api/state?classId=${first}`, { headers: { Cookie: adminCookie } }), { params: Promise.resolve({ path: ['state'] }) })
-    expect(snapshot.status).toBe(404)
+    expect(snapshot.status).toBe(200)
+    expect((await snapshot.json()).classes.find((c: { id: string }) => c.id === first)).toMatchObject({ role: 'global_admin', owner_id: teacher, name: 'Admin renamed' })
+    expect(await garden.db.prepare('SELECT * FROM class_members WHERE user_id = ?').all(admin)).toEqual([])
     expect((await garden.snapshot(teacher, first)).classes.map(c => c.id)).toEqual([first])
+    expect(new Set((await garden.snapshot(admin)).classes.map(c => c.id))).toEqual(new Set([first, second]))
+    vi.stubEnv('PET_GARDEN_ADMIN_USER_IDS', '')
+    await expect(garden.renameClass(admin, first, { name: 'Denied' })).rejects.toMatchObject({ status: 404 })
+    await expect(garden.snapshot(admin, first)).rejects.toMatchObject({ status: 404 })
     expect((await garden.snapshot(admin)).classes).toEqual([])
   })
   it('supports the libSQL driver for schema detection and aggregate queries', async () => {
@@ -123,6 +196,9 @@ describe('global read-only admin', () => {
       }
       const g = new Garden(remote)
       expect((await g.adminClasses(admin, {})).total).toBe(2)
+      expect((await g.adminClass(admin, first)).classroom.teachers).toHaveLength(2)
+      expect(await g.classroom(admin, first, true)).toMatchObject({ role: 'global_admin', owner_id: teacher })
+      await g.renameClass(admin, first, { name: 'LibSQL admin edit' })
       expect((await g.adminClasses(admin, {})).archiveSupported).toBe(true)
       await remote.prepare('UPDATE students SET archived_at = 1 WHERE class_id = ?').run(first)
       expect(await g.adminClass(admin, first)).toMatchObject({ archiveSupported: true, classroom: { active_students: 0, archived_students: 2 } })
