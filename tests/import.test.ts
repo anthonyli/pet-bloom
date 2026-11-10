@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { parseStudentList } from '../lib/student-import'
 describe('中英文学生导入', () => {
+  it('保留首尾 Tab 的空列并拒绝无姓名或多余列', () => {
+    for (const input of ['\t001', ' \t001', '\tAlice\t001', 'Alice\t001\t']) {
+      expect(parseStudentList(input)[0].invalid, input).toBe(true)
+    }
+    for (const name of ['Mary Jane', 'Alice 01']) {
+      expect(parseStudentList(`${name}\t`)[0]).toEqual({ name, studentNo: '', ambiguous: false, invalid: false })
+    }
+  })
   it('逗号分隔时保留英文姓名内部空格', () => {
     expect(parseStudentList('Mary Jane, 01')).toEqual([{ name: 'Mary Jane', studentNo: '01', ambiguous: false, invalid: false }])
   })
