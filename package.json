@@ -12,7 +12,7 @@
     "build": "next build && node scripts/prepare-standalone.mjs",
     "start": "node scripts/start.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "node scripts/test.mjs",
     "test:restore": "node scripts/test-restore.mjs",
     "test:archive": "node scripts/test-student-archive.mjs",
     "test:watch": "vitest",

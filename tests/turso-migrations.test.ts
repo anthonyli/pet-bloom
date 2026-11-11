@@ -16,23 +16,17 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 const folders: string[] = []
 const clients: Client[] = []
 afterEach(async () => {
-  // Finalize native statements before closing libSQL connections on Windows.
-  // Failed statements can otherwise make sqlite3_close leave a busy handle behind.
-  if (process.platform === 'win32') {
-    await new Promise(resolve => setImmediate(resolve))
-    global.gc?.()
-    await new Promise(resolve => setImmediate(resolve))
-  }
   for (const client of clients.splice(0)) client.close()
-  if (process.platform === 'win32') {
-    global.gc?.()
-    await new Promise(resolve => setImmediate(resolve))
+  const directories = folders.splice(0)
+  if (process.platform === 'win32' && process.env.PET_BLOOM_MIGRATION_TEST_TEMP) {
+    // scripts/test.mjs removes these after the native libSQL worker exits.
+    return
   }
-  for (const directory of folders.splice(0)) await rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
+  for (const directory of directories) await rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
 })
 
 async function fixture(statements?: string[]) {
-  const directory = await mkdtemp(path.join(tmpdir(), 'pet-bloom-migration-'))
+  const directory = await mkdtemp(path.join(process.env.PET_BLOOM_MIGRATION_TEST_TEMP || tmpdir(), 'pet-bloom-migration-'))
   folders.push(directory)
   const migrationDirectory = path.join(directory, 'migrations')
   await mkdir(migrationDirectory)
