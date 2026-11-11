@@ -16,9 +16,18 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 const folders: string[] = []
 const clients: Client[] = []
 afterEach(async () => {
+  // Finalize native statements before closing libSQL connections on Windows.
+  // Failed statements can otherwise make sqlite3_close leave a busy handle behind.
+  if (process.platform === 'win32') {
+    await new Promise(resolve => setImmediate(resolve))
+    global.gc?.()
+    await new Promise(resolve => setImmediate(resolve))
+  }
   for (const client of clients.splice(0)) client.close()
-  // libSQL statement finalizers can retain file handles after close on Windows.
-  if (process.platform === 'win32') global.gc?.()
+  if (process.platform === 'win32') {
+    global.gc?.()
+    await new Promise(resolve => setImmediate(resolve))
+  }
   for (const directory of folders.splice(0)) await rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
 })
 
