@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: '正式签名并发布到当前仓库 / Sign and publish to this repository'
+        description: '发布到当前仓库 / Publish to this repository'
+        type: boolean
+        default: false
+      allow_unsigned_windows:
+        description: '允许未签名 Windows 包（未知发布者）/ Allow unsigned Windows installer'
         type: boolean
         default: false
 
@@ -71,9 +75,9 @@ jobs:
         run: pnpm ${{ matrix.command }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-      - name: 生成正式签名安装包
+      - name: 生成正式安装包
         if: inputs.publish
-        run: pnpm ${{ matrix.command }} --release
+        run: pnpm ${{ matrix.command }} --release ${{ matrix.target == 'win-x64' && inputs.allow_unsigned_windows && '--allow-unsigned-windows' || '' }}
         env:
           CSC_LINK: ${{ secrets[matrix.certificate] }}
           CSC_KEY_PASSWORD: ${{ secrets[matrix.password] }}
@@ -148,6 +152,8 @@ jobs:
           RELEASE_REPOSITORY: ${{ github.repository }}
           VERSION: ${{ needs.prepare.outputs.version }}
           RELEASE_COMMIT: ${{ github.sha }}
+          UNSIGNED_WINDOWS: ${{ inputs.allow_unsigned_windows && !secrets.WIN_CSC_LINK }}
+          SIGNED_MAC: ${{ !!secrets.MAC_CSC_LINK }}
         run: |
           set -euo pipefail
           test -n "$GH_TOKEN"
@@ -156,8 +162,20 @@ jobs:
             printf '%s\n' '该版本已存在，拒绝覆盖 / Release already exists; refusing to overwrite.' >&2
             exit 1
           fi
+          cat > release-notes.md <<'NOTES'
+          Windows x64、Mac Apple Silicon 与 Intel 安装包及更新清单。升级保留本机数据；建议先导出 JSON 备份。
+          发布与自动更新现统一使用本仓库。旧更新源的用户需手动安装一次此版本。
+
+          Installers and update manifests for Windows x64, Mac Apple Silicon and Intel. Upgrades preserve local data; export a JSON backup first.
+          Releases and automatic updates now use this repository. Users of the former update source need to install this version manually once.
+          NOTES
+          if [ "$UNSIGNED_WINDOWS" = "true" ]; then
+            printf '\n%s\n' 'Windows 安装包未签名，安装时可能显示未知发布者。/ The Windows installer is unsigned and may show an unknown publisher warning.' >> release-notes.md
+          fi
+          if [ "$SIGNED_MAC" != "true" ]; then
+            printf '\n%s\n' 'Mac 使用 ad-hoc 签名，未经过 Apple 公证，可能需要系统安全确认。/ Mac builds use ad-hoc signing without Apple notarization and may require system security confirmation.' >> release-notes.md
+          fi
           gh release create "$tag" --repo "$RELEASE_REPOSITORY" --target "$RELEASE_COMMIT" --draft \
-            --title "PetBloom · 萌芽 $VERSION" \
-            --notes $'Windows x64、Mac Apple Silicon 与 Intel 安装包及更新清单。升级保留本机数据；建议先导出 JSON 备份。\n\nInstallers and update manifests for Windows x64, Mac Apple Silicon and Intel. Upgrades preserve local data; export a JSON backup first.'
+            --title "PetBloom · 萌芽 $VERSION" --notes-file release-notes.md
           gh release upload "$tag" release-assets/* --repo "$RELEASE_REPOSITORY"
           gh release edit "$tag" --repo "$RELEASE_REPOSITORY" --draft=false --latest

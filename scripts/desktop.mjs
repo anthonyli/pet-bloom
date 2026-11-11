@@ -22,15 +22,16 @@ const platform = args.includes('--win') ? 'win32' : args.includes('--mac') ? 'da
 const architectures = args.includes('--all-arch') ? ['arm64', 'x64'] : [args.includes('--x64') ? 'x64' : args.includes('--arm64') ? 'arm64' : process.arch]
 const supported = platform === 'darwin' ? ['arm64', 'x64'] : platform === 'win32' ? ['x64'] : []
 const crossWindows = process.platform === 'darwin' && platform === 'win32' && !development && !release
+const unsignedWindows = platform === 'win32' && args.includes('--allow-unsigned-windows') && !process.env.CSC_LINK
 const signedMac = platform === 'darwin' && Boolean(process.env.CSC_LINK)
 if ((platform !== process.platform && !crossWindows) || architectures.some(arch => !supported.includes(arch))) {
   throw new Error('Mac 安装包需要 macOS；Windows 正式版和开发模式需要 Windows，macOS 可交叉构建 Windows x64 预览包。/ Mac installers require macOS. Windows release and development builds require Windows; macOS can cross-build Windows x64 previews.')
 }
 
 if (release) {
-  const required = platform === 'darwin' ? (signedMac ? ['APPLE_ID', 'APPLE_APP_SPECIFIC_PASSWORD', 'APPLE_TEAM_ID'] : []) : ['CSC_LINK']
+  const required = platform === 'darwin' ? (signedMac ? ['APPLE_ID', 'APPLE_APP_SPECIFIC_PASSWORD', 'APPLE_TEAM_ID'] : []) : (unsignedWindows ? [] : ['CSC_LINK'])
   if (development || args.includes('--dir') || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(metadata.version) || required.some(name => !process.env[name])) {
-    throw new Error('正式构建需要稳定版本；Windows 需要代码签名，Mac 若使用开发者证书则还需公证凭据，不能使用 --dev/--dir。/ Release builds require a stable version; Windows requires code signing, and Mac builds using a developer certificate also require notarization credentials. --dev/--dir are not allowed.')
+    throw new Error('正式构建需要稳定版本；Windows 需要代码签名或显式 --allow-unsigned-windows，Mac 若使用开发者证书则还需公证凭据，不能使用 --dev/--dir。/ Release builds require a stable version; Windows requires code signing or explicit --allow-unsigned-windows, and Mac builds using a developer certificate also require notarization credentials. --dev/--dir are not allowed.')
   }
 }
 
@@ -112,7 +113,7 @@ for (const arch of architectures) {
     config: {
       appId: 'app.petbloom.desktop', productName: 'PetBloom', electronVersion,
       publish: { provider: 'github', owner: 'anthonyli', repo: 'pet-bloom', private: false, releaseType: 'release' },
-      forceCodeSigning: release && (platform === 'win32' || signedMac),
+      forceCodeSigning: release && ((platform === 'win32' && !unsignedWindows) || signedMac),
       directories: { app: appDirectory, output, buildResources: resources },
       asar: false, npmRebuild: false,
       files: ['desktop/*.cjs', 'desktop/icon.png', 'package.json'],

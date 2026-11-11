@@ -19,7 +19,7 @@
 - 数据目录：Mac 为 `~/Library/Application Support/PetBloom/`；Windows 为 `%APPDATA%/PetBloom/`。菜单「文件 → 打开数据文件夹」可定位数据库、`desktop.json` 和启动日志 `desktop.log`。升级及正常卸载均保留数据；请定期在应用内导出 JSON 备份。
 - 桌面服务仅监听 `127.0.0.1`，仅接受当前桌面窗口持有的随机令牌；渲染页面没有 Node.js 权限。退出应用时关闭本地服务。端口会保存在本机配置中；被占用时自动换用可用端口（界面偏好可能重置，数据库与账号不丢失）。
 - **本地离线版不自动同步**：网页账号和服务器数据不会自动出现在桌面版。可通过现有 JSON 备份导入为班级副本；邀请码只适用于同一个数据库，不能跨电脑共享班级。
-- 本地构建始终不上传安装包。公开分发前须确认宠物素材的再分发授权；Mac 可选 Apple 开发者签名与公证，Windows 正式构建仍需签名。签名凭据只放在构建环境，不写入仓库。
+- 本地构建始终不上传安装包。公开分发前须确认宠物素材的再分发授权；Mac 可选 Apple 开发者签名与公证，Windows 正式构建默认要求签名。签名凭据只放在构建环境，不写入仓库。
 
 ### 桌面检查更新与发布
 
@@ -32,10 +32,12 @@
    - `MAC_CSC_LINK`、`MAC_CSC_KEY_PASSWORD`：可选，Developer ID Application 证书（含私钥的 Base64 P12）及其密码；不配置时使用无需苹果账号的 ad-hoc 本地签名，不作为开发者身份认证。
    - `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`：仅使用上述 Apple 证书正式分发时必需的公证凭据。
    - `WIN_CSC_LINK`、`WIN_CSC_KEY_PASSWORD`：Windows 代码签名证书（含私钥的 Base64 P12/PFX）及其密码。需要硬件或云端签名的证书应先调整签名集成，不能直接假设可导出 PFX。
-3. 提升 `package.json.version`（当前 `0.0.2`，下次例如 `0.0.3`），使用稳定的三段版本号，不复用已发布版本。手动从默认分支运行 workflow，勾选 `publish`；Windows 签名、可选的 Mac 开发者签名及公证、三个目标构建及回归、资产哈希校验全部成功后，流程在当前仓库以本次构建提交创建 draft Release，完整上传后才公开并设为 Latest。已有同版本 Release 不覆盖；失败留下的 draft 需人工检查处理。
+3. 提升 `package.json.version`（当前 `0.0.2`，下次例如 `0.0.3`），使用稳定的三段版本号，不复用已发布版本。手动从默认分支运行 workflow，勾选 `publish`；Windows 签名（或显式允许未签名）、可选的 Mac 开发者签名及公证、三个目标构建及回归、资产哈希校验全部成功后，流程在当前仓库以本次构建提交创建 draft Release，完整上传后才公开并设为 Latest。已有同版本 Release 不覆盖；失败留下的 draft 需人工检查处理。
 4. Mac 同时发布两种架构的 DMG **和 ZIP**，以及合并后的 `latest-mac.yml`；Windows 发布 EXE、`latest.yml`，并带上生成的 `.blockmap`。ZIP 是 Mac 自动更新必需资产，不能只上传 DMG，也不能让两个架构各自覆盖 `latest-mac.yml`。
 
-本地正式构建追加 `--release`；Windows 必须配置代码签名，Mac 不要求 Apple 证书。若选择 Mac 开发者签名，则通过 `CSC_LINK`、`CSC_KEY_PASSWORD` 传入证书并配置上述 Apple 公证凭据。分别下载的三个 Actions Artifacts 保持 `PetBloom-mac-arm64/`、`PetBloom-mac-x64/`、`PetBloom-win-x64/` 目录，可用 `pnpm desktop:release:prepare <输入目录> <空输出目录> <版本号>` 仅在本地汇总和校验，不会上传。
+无 Windows 证书时，经发布者确认可在 workflow 勾选 `allow_unsigned_windows`，发布说明会标明未签名和未知发布者提示；该选项默认关闭。
+
+本地正式构建追加 `--release`；Windows 默认必须配置代码签名，确认发布未签名包时再追加 `--allow-unsigned-windows`；Mac 不要求 Apple 证书。若选择 Mac 开发者签名，则通过 `CSC_LINK`、`CSC_KEY_PASSWORD` 传入证书并配置上述 Apple 公证凭据。分别下载的三个 Actions Artifacts 保持 `PetBloom-mac-arm64/`、`PetBloom-mac-x64/`、`PetBloom-win-x64/` 目录，可用 `pnpm desktop:release:prepare <输入目录> <空输出目录> <版本号>` 仅在本地汇总和校验，不会上传。
 
 **Mac 自更新不要求 Apple 开发者账号，但不保证所有版本只授权一次。** 安装目录权限和 Gatekeeper 可能要求用户确认；需要授权时只提权执行文件操作，不以管理员身份启动新版，也不安装常驻高权限服务；受保护目录的旧版清理或失败恢复可能再次请求授权。从 DMG 或 App Translocation 路径运行时，应先把应用移入 Applications。此前使用 Squirrel 或旧仓库更新源的版本需先从本仓库 Releases 手动覆盖安装一次新版，之后使用本仓库检查更新。检查和准备详情见 `desktop.log`，覆盖安装及回滚失败记录于数据目录的 `update.log`，保留旧版备份供恢复；需要在 Windows、Intel Mac、Apple Silicon 上做实际跨版本升级、系统授权与数据保留验收。GitHub 网络不可用时可继续离线使用，稍后重试。
 
@@ -61,10 +63,12 @@ For official releases:
    - `MAC_CSC_LINK` / `MAC_CSC_KEY_PASSWORD`: optional Base64 P12 containing a Developer ID Application certificate and private key, plus its password. Without them, builds use local ad-hoc signing, requiring no Apple account and providing no developer identity authentication.
    - `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID`: notarization credentials, required only when distributing with that Apple developer certificate.
    - `WIN_CSC_LINK` / `WIN_CSC_KEY_PASSWORD`: Base64 P12/PFX code-signing certificate and private key, plus its password. Hardware-backed or cloud signing requires a separate signing integration; do not assume the key is exportable.
-3. Increase the stable three-part `package.json.version` (currently `0.0.2`; for example, use `0.0.3` next). Never reuse a published version. Run the workflow from the default branch with `publish` checked. Windows signing, optional Mac developer signing and notarization, all builds, regression tests and hash validation must pass. The final job creates a draft Release in the current repository targeting the build commit, uploads all assets, then publishes it as Latest. Existing releases are not overwritten; inspect failed drafts manually.
+3. Increase the stable three-part `package.json.version` (currently `0.0.2`; for example, use `0.0.3` next). Never reuse a published version. Run the workflow from the default branch with `publish` checked. Windows signing (or explicit permission for an unsigned build), optional Mac developer signing and notarization, all builds, regression tests and hash validation must pass. The final job creates a draft Release in the current repository targeting the build commit, uploads all assets, then publishes it as Latest. Existing releases are not overwritten; inspect failed drafts manually.
 4. Include both Mac DMGs **and ZIPs**, merged `latest-mac.yml`, the Windows EXE and `latest.yml`, plus generated `.blockmap` files. Mac updating requires ZIPs, and separate architecture manifests must not overwrite each other.
 
-Local builds never upload. Add `--release` for a stable release build: Windows requires `CSC_LINK` and `CSC_KEY_PASSWORD`; Mac does not require an Apple certificate. If a Mac developer certificate is supplied, Apple notarization credentials are also required. To collect downloaded artifacts locally, preserve the `PetBloom-mac-arm64/`, `PetBloom-mac-x64/` and `PetBloom-win-x64/` folders and run `pnpm desktop:release:prepare <input-directory> <empty-output-directory> <version>`.
+Without a Windows certificate, the publisher can explicitly enable `allow_unsigned_windows` in the workflow. It defaults to false; release notes disclose unsigned builds and the unknown publisher warning.
+
+Local builds never upload. Add `--release` for a stable release build: Windows requires `CSC_LINK` and `CSC_KEY_PASSWORD` by default, or explicit `--allow-unsigned-windows` to publish unsigned; Mac does not require an Apple certificate. If a Mac developer certificate is supplied, Apple notarization credentials are also required. To collect downloaded artifacts locally, preserve the `PetBloom-mac-arm64/`, `PetBloom-mac-x64/` and `PetBloom-win-x64/` folders and run `pnpm desktop:release:prepare <input-directory> <empty-output-directory> <version>`.
 
 **Mac self-updates do not require an Apple developer account, but cannot promise one-time-only authorization.** Directory permissions or Gatekeeper may require confirmation for subsequent versions; cleanup or recovery in protected directories may request authorization again. No persistent privileged service is installed and no security checks are disabled. Move the app to Applications before updating if it is running from a DMG or App Translocation. Versions using Squirrel or the former repository update source need one manual installation from this repository’s Releases before they can check for updates here. Check and preparation details are recorded in `desktop.log`; replacement and recovery failures are recorded in `update.log` in the data directory, with old files retained for recovery. Complete real cross-version upgrade, administrator authorization and data-retention testing on all three targets. GitHub connectivity failures leave the offline app usable. Confirm pet artwork redistribution permission before publishing, and keep signing credentials outside the repository.
 
