@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { mkdtempSync, rmSync } from 'node:fs'
+import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { createClient } from '@libsql/client'
@@ -31,7 +32,7 @@ for (const driver of ['sqlite', 'libsql'] as const) describe(`student archive ($
     await garden.redeem(owner, { studentId, itemId: item.id })
     await garden.setBackground(owner, studentId, { backgroundId: 'garden' })
   })
-  afterEach(() => { garden.db.close(); rmSync(directory, { recursive: true, force: true }) })
+  afterEach(async () => { garden.db.close(); await rm(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }) })
   const rows = async () => Object.fromEntries(await Promise.all(['students', 'evaluations', 'growth_events', 'badges', 'redemptions'].map(async table => [table, await garden.db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()])))
 
   it('archives → excludes from roster → preserves profile and history → restores the same identity, idempotently', async () => {

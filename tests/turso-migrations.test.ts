@@ -17,7 +17,7 @@ const folders: string[] = []
 const clients: Client[] = []
 afterEach(async () => {
   for (const client of clients.splice(0)) client.close()
-  for (const directory of folders.splice(0)) await rm(directory, { recursive: true, force: true })
+  for (const directory of folders.splice(0)) await rm(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 })
 })
 
 async function fixture(statements?: string[]) {

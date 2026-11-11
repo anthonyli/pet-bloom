@@ -9,6 +9,9 @@ import sharp from 'sharp'
 import { parse, stringify } from 'yaml'
 import { mergeMacUpdateInfo } from './desktop-release.mjs'
 
+// Actions supplies missing secrets as empty strings; builder treats an empty certificate path as the app directory.
+if (!process.env.CSC_LINK) delete process.env.CSC_LINK
+
 const root = fileURLToPath(new URL('..', import.meta.url))
 const require = createRequire(import.meta.url)
 const metadata = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'))

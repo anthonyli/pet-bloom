@@ -193,7 +193,7 @@ export async function createVerifiedBackup({ directory, exportDatabase, state, s
   const metadata = { source, createdAt: new Date().toISOString(), schemaVersion: state.version, pending: state.pending.map(item => item.version), sha256: digest.digest('hex'), tables }
   await writeFile(path.join(folder, 'manifest.json'), JSON.stringify(metadata, null, 2) + '\n', { mode: 0o600, flag: 'wx' })
   for (const filename of [snapshot, path.join(folder, 'manifest.json')]) {
-    const handle = await open(filename, 'r')
+    const handle = await open(filename, 'r+')
     try { await handle.sync() } finally { await handle.close() }
   }
   return { filename: snapshot, ...metadata }
