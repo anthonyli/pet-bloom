@@ -234,7 +234,7 @@ try {
   assert.equal((await fetch(`${firstOrigin}/api/health`)).status, 403)
   assert.equal((await fetch(`${firstOrigin}/_next/static/does-not-exist.js`)).status, 403)
   await page.getByRole('button', { name: '创建账号', exact: true }).click()
-  await page.getByLabel('用户名', { exact: true }).fill(`desktop-${randomBytes(5).toString('hex')}`)
+  await page.getByLabel('用户名或邮箱', { exact: true }).fill(`desktop-${randomBytes(5).toString('hex')}`)
   await page.getByLabel('密码', { exact: true }).fill(randomBytes(20).toString('hex'))
   await page.getByRole('button', { name: '创建教师账号', exact: true }).click()
   await page.getByLabel('教师称呼', { exact: true }).fill('桌面验证老师')
