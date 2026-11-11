@@ -294,6 +294,12 @@ try {
   assert.equal(backup.classes.length, 1)
   assert.equal(await download(page, 'cancelled'), 'cancelled')
 
+  // Native download completion can precede React clearing the busy state.
+  // setInputFiles does not wait for the input to become enabled.
+  await page.waitForFunction(() => {
+    const input = document.querySelector('input[type="file"]')
+    return input && !input.disabled
+  })
   await page.locator('input[type="file"]').setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('not-json') })
   await page.getByRole('alert').first().waitFor()
   await page.locator('input[type="file"]').setInputFiles(backupPath)
@@ -335,6 +341,8 @@ try {
   if (app) {
     const page = app.windows()[0]
     await page?.screenshot({ path: path.join(directory, 'failure.png'), timeout: 5000 }).catch(() => {})
+    console.error('Smoke page state:', await page?.locator('body').innerText({ timeout: 5000 }).catch(() => 'unavailable'))
+    console.error('Renderer errors:', errors)
     console.error(await app.evaluate(({ app, BrowserWindow }) => ({
       name: app.getName(), windows: BrowserWindow.getAllWindows().map(window => ({
         title: window.getTitle(), visible: window.isVisible(), minimized: window.isMinimized(), focused: window.isFocused(), url: window.webContents.getURL(), destroyed: window.webContents.isDestroyed()

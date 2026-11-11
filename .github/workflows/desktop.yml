@@ -87,6 +87,15 @@ jobs:
       - name: 验证桌面窗口、备份与持久化
         if: matrix.executable != ''
         run: pnpm desktop:test "${{ matrix.executable }}"
+      - name: 保存桌面验证失败截图
+        if: failure() && matrix.executable != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-failure-${{ matrix.target }}
+          path: .desktop/smoke-*/failure.png
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
       - name: 保存安装包与更新清单
         uses: actions/upload-artifact@v4
         with:
