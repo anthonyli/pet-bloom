@@ -32,7 +32,12 @@ for (const driver of ['sqlite', 'libsql'] as const) describe(`student archive ($
     await garden.redeem(owner, { studentId, itemId: item.id })
     await garden.setBackground(owner, studentId, { backgroundId: 'garden' })
   })
-  afterEach(async () => { garden.db.close(); await rm(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }) })
+  afterEach(async () => {
+    garden.db.close()
+    // Release native libSQL statement finalizers before Windows unlinks the database.
+    if (process.platform === 'win32') global.gc?.()
+    await rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
+  })
   const rows = async () => Object.fromEntries(await Promise.all(['students', 'evaluations', 'growth_events', 'badges', 'redemptions'].map(async table => [table, await garden.db.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()])))
 
   it('archives → excludes from roster → preserves profile and history → restores the same identity, idempotently', async () => {

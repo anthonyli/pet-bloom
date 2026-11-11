@@ -17,7 +17,9 @@ const folders: string[] = []
 const clients: Client[] = []
 afterEach(async () => {
   for (const client of clients.splice(0)) client.close()
-  for (const directory of folders.splice(0)) await rm(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 })
+  // libSQL statement finalizers can retain file handles after close on Windows.
+  if (process.platform === 'win32') global.gc?.()
+  for (const directory of folders.splice(0)) await rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
 })
 
 async function fixture(statements?: string[]) {
@@ -103,7 +105,7 @@ describe('Turso migrations preserve existing data', () => {
       expect(restored.prepare('SELECT seq FROM growth_events').safeIntegers().pluck().get()).toBe(9007199254740993n)
       expect((restored.pragma('table_info(students)') as { name: string }[]).some(row => row.name === 'note')).toBe(false)
     } finally { restored.close() }
-    expect((await stat(result.backup)).mode & 0o777).toBe(0o600)
+    if (process.platform !== 'win32') expect((await stat(result.backup)).mode & 0o777).toBe(0o600)
     const manifest = JSON.parse(await readFile(path.join(path.dirname(result.backup), 'manifest.json'), 'utf8'))
     expect(manifest.tables.find((table: { name: string }) => table.name === 'users').count).toBe(1)
     expect(manifest.sha256).toMatch(/^[a-f0-9]{64}$/)
