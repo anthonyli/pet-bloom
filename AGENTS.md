@@ -12,6 +12,7 @@
 - 批量评分、撤回、徽章兑换、备份恢复必须在数据库事务中执行。
 - 默认规则每位教师注册时初始化，不使用全局共享可变规则。
 - 不提交数据库、会话、测试账号密码或环境密钥。
+- 桌面安装包统一发布到当前仓库 anthonyli/pet-bloom 的 Releases，自动更新源与下载入口保持一致；不再使用独立的 class-pet 发布仓库。
 - 云端表结构变更追加到 migrations/turso，已执行的文件不可修改；同步 schema-version.json 与本地 SQLite 迁移。生产通过 pnpm deploy:vercel 先构建、备份及迁移，再切换域名，不得跳过备份或用旧快照自动覆盖生产数据。
 - 宠物图片来源记录见 public/pets/SOURCES.md，新增图片必须保留来源。
 

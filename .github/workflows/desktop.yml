@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: '正式签名并发布到公开更新仓库 / Sign and publish to the public update repository'
+        description: '正式签名并发布到当前仓库 / Sign and publish to this repository'
         type: boolean
         default: false
 
@@ -129,9 +129,11 @@ jobs:
           retention-days: 14
 
   release:
-    name: 发布到 anthonyli/class-pet
+    name: 发布到当前仓库 Releases
     if: inputs.publish
     needs: prepare
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -142,9 +144,10 @@ jobs:
       - name: 完整上传后发布正式 Release
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          RELEASE_REPOSITORY: anthonyli/class-pet
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
           VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_COMMIT: ${{ github.sha }}
         run: |
           set -euo pipefail
           test -n "$GH_TOKEN"
@@ -153,7 +156,7 @@ jobs:
             printf '%s\n' '该版本已存在，拒绝覆盖 / Release already exists; refusing to overwrite.' >&2
             exit 1
           fi
-          gh release create "$tag" --repo "$RELEASE_REPOSITORY" --draft \
+          gh release create "$tag" --repo "$RELEASE_REPOSITORY" --target "$RELEASE_COMMIT" --draft \
             --title "PetBloom · 萌芽 $VERSION" \
             --notes $'Windows x64、Mac Apple Silicon 与 Intel 安装包及更新清单。升级保留本机数据；建议先导出 JSON 备份。\n\nInstallers and update manifests for Windows x64, Mac Apple Silicon and Intel. Upgrades preserve local data; export a JSON backup first.'
           gh release upload "$tag" release-assets/* --repo "$RELEASE_REPOSITORY"

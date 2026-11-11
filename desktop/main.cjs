@@ -165,7 +165,7 @@ function configureMenu() {
     { label: t('文件', 'File'), submenu: [
       { id: 'check-for-updates', label: t('检查更新…', 'Check for updates…'), click: () => { void updates.check() } },
       { label: t('下载最新安装包', 'Download latest installer'), click: async () => {
-        try { await shell.openExternal('https://github.com/anthonyli/class-pet/releases/latest') }
+        try { await shell.openExternal('https://github.com/anthonyli/pet-bloom/releases/latest') }
         catch (error) { dialog.showErrorBox(t('无法打开下载页面', 'Could not open download page'), error.message) }
       } },
       { type: 'separator' },

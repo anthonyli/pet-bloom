@@ -336,7 +336,7 @@ describe('Mac 更新客户端', () => {
       expect(options.sha512).toBe(hash)
       await writeFile(destination, archive)
     }) }
-    await updater.doDownloadUpdate({ updateInfoAndProvider: { info: { version: '0.0.2' }, provider: { resolveFiles: () => [{ url: new URL(`https://github.com/anthonyli/class-pet/releases/download/v0.0.2/${name}`), info: { url: name, sha512: hash, size: archive.length } }] } }, requestHeaders: {} })
+    await updater.doDownloadUpdate({ updateInfoAndProvider: { info: { version: '0.0.2' }, provider: { resolveFiles: () => [{ url: new URL(`https://github.com/anthonyli/pet-bloom/releases/download/v0.0.2/${name}`), info: { url: name, sha512: hash, size: archive.length } }] } }, requestHeaders: {} })
     expect(updater.httpExecutor.download).toHaveBeenCalledTimes(1)
     expect(downloaded).toHaveBeenCalledTimes(1)
     expect(updater.downloaded).toMatchObject({ sha512: hash, version: '0.0.2' })
@@ -344,7 +344,7 @@ describe('Mac 更新客户端', () => {
     await expect(updater.quitAndInstall()).rejects.toThrow(/not prepared/)
   })
 
-  it.each(['http://github.com/anthonyli/class-pet/releases/download/v0.0.2/', 'https://example.com/anthonyli/class-pet/releases/download/v0.0.2/', 'https://github.com/other/repo/releases/download/v0.0.2/'])('拒绝非固定来源：%s', async prefix => {
+  it.each(['http://github.com/anthonyli/pet-bloom/releases/download/v0.0.2/', 'https://example.com/anthonyli/pet-bloom/releases/download/v0.0.2/', 'https://github.com/other/repo/releases/download/v0.0.2/'])('拒绝非固定来源：%s', async prefix => {
     const updater = new MacUpdater(undefined, { version: '0.0.1', name: 'PetBloom' })
     const name = `PetBloom-0.0.2-mac-${process.arch}.zip`
     await expect(updater.doDownloadUpdate({ updateInfoAndProvider: { info: { version: '0.0.2' }, provider: { resolveFiles: () => [{ url: new URL(`${prefix}${name}`), info: { url: name, sha512: Buffer.alloc(64).toString('base64') } }] } } })).rejects.toThrow(/trusted/)

@@ -108,7 +108,7 @@ async function checkUpdateMenu(page) {
       const config = parse(await readFile(path.join(safety.resources, 'app-update.yml'), 'utf8'))
       assert.equal(config.provider, 'github')
       assert.equal(config.owner, 'anthonyli')
-      assert.equal(config.repo, 'class-pet')
+      assert.equal(config.repo, 'pet-bloom')
       assert.equal(config.private, false)
       assert.equal(config.token, undefined)
     }

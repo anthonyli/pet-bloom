@@ -4,9 +4,9 @@
 
 | 平台 | 构建命令 | 产物（`dist/`） |
 | --- | --- | --- |
-| Mac Apple Silicon（M 系列） | `pnpm desktop:build:mac:arm64` | `PetBloom-0.0.1-mac-arm64.dmg`、`.zip` |
-| Mac Intel | `pnpm desktop:build:mac:x64` | `PetBloom-0.0.1-mac-x64.dmg`、`.zip` |
-| Windows x64 | `pnpm desktop:build:win` | `PetBloom-0.0.1-win-x64.exe` |
+| Mac Apple Silicon（M 系列） | `pnpm desktop:build:mac:arm64` | `PetBloom-0.0.2-mac-arm64.dmg`、`.zip` |
+| Mac Intel | `pnpm desktop:build:mac:x64` | `PetBloom-0.0.2-mac-x64.dmg`、`.zip` |
+| Windows x64 | `pnpm desktop:build:win` | `PetBloom-0.0.2-win-x64.exe` |
 
 在 macOS 上运行 `pnpm desktop:build:mac` 可依次构建两种芯片。Windows 正式版在 Windows x64 构建；需要 Node.js 22.13+、pnpm 11、Python 3 和 Visual Studio Build Tools 的「使用 C++ 的桌面开发」工作负载。macOS 也可运行 `pnpm desktop:build:win` 交叉构建未签名的 Windows x64 预览包：使用 SQLite 自带的 Windows Node-API 模块，不跨系统运行 node-gyp；正式签名构建、Windows 开发模式及真实窗口回归仍须在 Windows 执行，不能把交叉打包成功当作实机验收通过。Mac 需要 Xcode Command Line Tools。先运行 `pnpm install --frozen-lockfile`；构建会下载 Electron 与原生依赖，需要网络。`pnpm desktop:dev` 可在当前系统打开桌面应用。桌面构建使用独立 `.next-desktop/` 和 `.desktop/`，不会覆盖 `.next/` 或改写 Web 环境的 SQLite 二进制。若有应用正从旧输出目录运行，可设置 `DESKTOP_OUTPUT_DIR` 在其他目录构建，避免覆盖正在使用的程序。
 
@@ -23,22 +23,21 @@
 
 ### 桌面检查更新与发布
 
-更新源固定为公开仓库 [anthonyli/class-pet 的 Releases](https://github.com/anthonyli/class-pet/releases)，源码见本仓库。安装版启动十秒后后台检查，也可选择「文件 → 检查更新」。发现新版本先询问是否下载，菜单与 Dock/任务栏显示进度；下载完成后再次询问是否重启安装。「稍后」不会在普通退出时自动安装，可再次检查继续。离线检查失败不打扰日常使用，手动检查会提示重试；也可通过「文件 → 下载最新安装包」覆盖安装。Mac 使用独立更新辅助程序，不依赖 Squirrel 或 Apple 开发者证书：验证 ZIP 的 SHA-512、应用标识、版本和芯片后，停止本地服务、退出旧版后先保存 SQLite 与 WAL 的一致性冷快照，再在同一安装目录暂存并替换；只有新版窗口和本地服务准备就绪才清理旧版与快照，启动失败则尝试恢复原版及其数据库。权限不足时通过系统对话框请求管理员授权，Gatekeeper 安全确认正常保留，不移除 quarantine、不关闭安全检查。Windows 保留原有 NSIS 更新方式。账号与班级数据保留，升级前仍建议导出备份。
+安装包与更新源统一使用本仓库 [anthonyli/pet-bloom 的 Releases](https://github.com/anthonyli/pet-bloom/releases)，源码与安装包在同一项目维护。安装版启动十秒后后台检查，也可选择「文件 → 检查更新」。发现新版本先询问是否下载，菜单与 Dock/任务栏显示进度；下载完成后再次询问是否重启安装。「稍后」不会在普通退出时自动安装，可再次检查继续。离线检查失败不打扰日常使用，手动检查会提示重试；也可通过「文件 → 下载最新安装包」覆盖安装。Mac 使用独立更新辅助程序，不依赖 Squirrel 或 Apple 开发者证书：验证 ZIP 的 SHA-512、应用标识、版本和芯片后，停止本地服务、退出旧版后先保存 SQLite 与 WAL 的一致性冷快照，再在同一安装目录暂存并替换；只有新版窗口和本地服务准备就绪才清理旧版与快照，启动失败则尝试恢复原版及其数据库。权限不足时通过系统对话框请求管理员授权，Gatekeeper 安全确认正常保留，不移除 quarantine、不关闭安全检查。Windows 保留原有 NSIS 更新方式。账号与班级数据保留，升级前仍建议导出备份。
 
 正式发布准备：
 
-1. 公开更新仓库须已初始化至少一个提交，只存分发资产，不上传源码、数据库或测试资料。
-2. 在**源码仓库**的 Actions Secrets 配置：
-   - `RELEASE_TOKEN`：fine-grained GitHub Token，仅允许 `anthonyli/class-pet` 的 **Contents: Read and write**，只供发布任务使用，绝不进入安装包。
+1. 直接使用当前仓库 `anthonyli/pet-bloom` 的 Releases 发布安装包及更新清单；仓库须保持公开以便客户端匿名检查和下载更新。不得上传数据库或测试资料。
+2. 发布使用 GitHub Actions 内置 `GITHUB_TOKEN`，仅发布任务授予 `contents: write`，无需额外的跨仓库 Token。在**当前仓库**的 Actions Secrets 配置签名凭据：
    - `MAC_CSC_LINK`、`MAC_CSC_KEY_PASSWORD`：可选，Developer ID Application 证书（含私钥的 Base64 P12）及其密码；不配置时使用无需苹果账号的 ad-hoc 本地签名，不作为开发者身份认证。
    - `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`：仅使用上述 Apple 证书正式分发时必需的公证凭据。
    - `WIN_CSC_LINK`、`WIN_CSC_KEY_PASSWORD`：Windows 代码签名证书（含私钥的 Base64 P12/PFX）及其密码。需要硬件或云端签名的证书应先调整签名集成，不能直接假设可导出 PFX。
-3. 提升 `package.json.version`（当前 `0.0.1`，下次例如 `0.0.2`），使用稳定的三段版本号，不复用已发布版本。手动从默认分支运行 workflow，勾选 `publish`；Windows 签名、可选的 Mac 开发者签名及公证、三个目标构建及回归、资产哈希校验全部成功后，流程在公开仓库创建 draft Release，完整上传后才公开并设为 Latest。已有同版本 Release 不覆盖；失败留下的 draft 需人工检查处理。
+3. 提升 `package.json.version`（当前 `0.0.2`，下次例如 `0.0.3`），使用稳定的三段版本号，不复用已发布版本。手动从默认分支运行 workflow，勾选 `publish`；Windows 签名、可选的 Mac 开发者签名及公证、三个目标构建及回归、资产哈希校验全部成功后，流程在当前仓库以本次构建提交创建 draft Release，完整上传后才公开并设为 Latest。已有同版本 Release 不覆盖；失败留下的 draft 需人工检查处理。
 4. Mac 同时发布两种架构的 DMG **和 ZIP**，以及合并后的 `latest-mac.yml`；Windows 发布 EXE、`latest.yml`，并带上生成的 `.blockmap`。ZIP 是 Mac 自动更新必需资产，不能只上传 DMG，也不能让两个架构各自覆盖 `latest-mac.yml`。
 
 本地正式构建追加 `--release`；Windows 必须配置代码签名，Mac 不要求 Apple 证书。若选择 Mac 开发者签名，则通过 `CSC_LINK`、`CSC_KEY_PASSWORD` 传入证书并配置上述 Apple 公证凭据。分别下载的三个 Actions Artifacts 保持 `PetBloom-mac-arm64/`、`PetBloom-mac-x64/`、`PetBloom-win-x64/` 目录，可用 `pnpm desktop:release:prepare <输入目录> <空输出目录> <版本号>` 仅在本地汇总和校验，不会上传。
 
-**Mac 自更新不要求 Apple 开发者账号，但不保证所有版本只授权一次。** 安装目录权限和 Gatekeeper 可能要求用户确认；需要授权时只提权执行文件操作，不以管理员身份启动新版，也不安装常驻高权限服务；受保护目录的旧版清理或失败恢复可能再次请求授权。从 DMG 或 App Translocation 路径运行时，应先把应用移入 Applications。此前使用 Squirrel 的旧预览版需先手动覆盖安装一次新版更新器。检查和准备详情见 `desktop.log`，覆盖安装及回滚失败记录于数据目录的 `update.log`，保留旧版备份供恢复；需要在 Windows、Intel Mac、Apple Silicon 上做实际跨版本升级、系统授权与数据保留验收。GitHub 网络不可用时可继续离线使用，稍后重试。
+**Mac 自更新不要求 Apple 开发者账号，但不保证所有版本只授权一次。** 安装目录权限和 Gatekeeper 可能要求用户确认；需要授权时只提权执行文件操作，不以管理员身份启动新版，也不安装常驻高权限服务；受保护目录的旧版清理或失败恢复可能再次请求授权。从 DMG 或 App Translocation 路径运行时，应先把应用移入 Applications。此前使用 Squirrel 或旧仓库更新源的版本需先从本仓库 Releases 手动覆盖安装一次新版，之后使用本仓库检查更新。检查和准备详情见 `desktop.log`，覆盖安装及回滚失败记录于数据目录的 `update.log`，保留旧版备份供恢复；需要在 Windows、Intel Mac、Apple Silicon 上做实际跨版本升级、系统授权与数据保留验收。GitHub 网络不可用时可继续离线使用，稍后重试。
 
 
 ---
@@ -53,20 +52,19 @@ After these changes reach the default branch, run **Actions → 桌面安装包 
 
 ### Desktop updates and releases
 
-The public update source is [anthonyli/class-pet Releases](https://github.com/anthonyli/class-pet/releases); the source code is available in this repository. Installed builds check quietly ten seconds after startup; **File → Check for updates** also checks manually. A new version requires confirmation before downloading, displays menu and Dock/taskbar progress, and requires a second confirmation before restarting to install. **Later** prevents installation on normal quit; check again to continue. Offline checks never block existing features. Manual failures offer retry or **File → Download latest installer**. Mac uses an independent installer rather than Squirrel and does not require an Apple developer certificate: it verifies the ZIP’s SHA-512, bundle identity, version and architecture, stops the local service, quits, stages beside the installed app and replaces it. The previous app and a cold SQLite/WAL snapshot remain until the new local service and window are ready; failed startup attempts restore the app and database snapshot. Permission failures request administrator authorization through macOS, only for filesystem operations, never to run downloaded code as root. Gatekeeper and quarantine remain enabled. Windows keeps NSIS updating. Export a backup before upgrading.
+Installers and updates are published in this repository at [anthonyli/pet-bloom Releases](https://github.com/anthonyli/pet-bloom/releases); source code and release assets are maintained in the same project. Installed builds check quietly ten seconds after startup; **File → Check for updates** also checks manually. A new version requires confirmation before downloading, displays menu and Dock/taskbar progress, and requires a second confirmation before restarting to install. **Later** prevents installation on normal quit; check again to continue. Offline checks never block existing features. Manual failures offer retry or **File → Download latest installer**. Mac uses an independent installer rather than Squirrel and does not require an Apple developer certificate: it verifies the ZIP’s SHA-512, bundle identity, version and architecture, stops the local service, quits, stages beside the installed app and replaces it. The previous app and a cold SQLite/WAL snapshot remain until the new local service and window are ready; failed startup attempts restore the app and database snapshot. Permission failures request administrator authorization through macOS, only for filesystem operations, never to run downloaded code as root. Gatekeeper and quarantine remain enabled. Windows keeps NSIS updating. Export a backup before upgrading.
 
 For official releases:
 
-1. Initialize the public repository with at least one commit. It hosts release assets only, not private source, databases or test profiles.
-2. Configure these Actions Secrets in the **source repository**:
-   - `RELEASE_TOKEN`: a fine-grained token restricted to **Contents: Read and write** for `anthonyli/class-pet`, available only to the publishing job and never bundled in the client.
+1. Publish installers and update manifests directly to `anthonyli/pet-bloom` Releases. Keep the repository public so clients can check and download updates anonymously. Never upload databases or test profiles.
+2. Publishing uses the built-in GitHub Actions `GITHUB_TOKEN`, with `contents: write` granted only to the release job; no cross-repository token is needed. Configure signing credentials in the **current repository** Actions Secrets:
    - `MAC_CSC_LINK` / `MAC_CSC_KEY_PASSWORD`: optional Base64 P12 containing a Developer ID Application certificate and private key, plus its password. Without them, builds use local ad-hoc signing, requiring no Apple account and providing no developer identity authentication.
    - `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID`: notarization credentials, required only when distributing with that Apple developer certificate.
    - `WIN_CSC_LINK` / `WIN_CSC_KEY_PASSWORD`: Base64 P12/PFX code-signing certificate and private key, plus its password. Hardware-backed or cloud signing requires a separate signing integration; do not assume the key is exportable.
-3. Increase the stable three-part `package.json.version` (currently `0.0.1`; for example, use `0.0.2` next). Never reuse a published version. Run the workflow from the default branch with `publish` checked. Windows signing, optional Mac developer signing and notarization, all builds, regression tests and hash validation must pass. The final job creates a draft Release, uploads all assets, then publishes it as Latest. Existing releases are not overwritten; inspect failed drafts manually.
+3. Increase the stable three-part `package.json.version` (currently `0.0.2`; for example, use `0.0.3` next). Never reuse a published version. Run the workflow from the default branch with `publish` checked. Windows signing, optional Mac developer signing and notarization, all builds, regression tests and hash validation must pass. The final job creates a draft Release in the current repository targeting the build commit, uploads all assets, then publishes it as Latest. Existing releases are not overwritten; inspect failed drafts manually.
 4. Include both Mac DMGs **and ZIPs**, merged `latest-mac.yml`, the Windows EXE and `latest.yml`, plus generated `.blockmap` files. Mac updating requires ZIPs, and separate architecture manifests must not overwrite each other.
 
 Local builds never upload. Add `--release` for a stable release build: Windows requires `CSC_LINK` and `CSC_KEY_PASSWORD`; Mac does not require an Apple certificate. If a Mac developer certificate is supplied, Apple notarization credentials are also required. To collect downloaded artifacts locally, preserve the `PetBloom-mac-arm64/`, `PetBloom-mac-x64/` and `PetBloom-win-x64/` folders and run `pnpm desktop:release:prepare <input-directory> <empty-output-directory> <version>`.
 
-**Mac self-updates do not require an Apple developer account, but cannot promise one-time-only authorization.** Directory permissions or Gatekeeper may require confirmation for subsequent versions; cleanup or recovery in protected directories may request authorization again. No persistent privileged service is installed and no security checks are disabled. Move the app to Applications before updating if it is running from a DMG or App Translocation. Old Squirrel-based previews need one manual installation of this updater first. Check and preparation details are recorded in `desktop.log`; replacement and recovery failures are recorded in `update.log` in the data directory, with old files retained for recovery. Complete real cross-version upgrade, administrator authorization and data-retention testing on all three targets. GitHub connectivity failures leave the offline app usable. Confirm pet artwork redistribution permission before publishing, and keep signing credentials outside the repository.
+**Mac self-updates do not require an Apple developer account, but cannot promise one-time-only authorization.** Directory permissions or Gatekeeper may require confirmation for subsequent versions; cleanup or recovery in protected directories may request authorization again. No persistent privileged service is installed and no security checks are disabled. Move the app to Applications before updating if it is running from a DMG or App Translocation. Versions using Squirrel or the former repository update source need one manual installation from this repository’s Releases before they can check for updates here. Check and preparation details are recorded in `desktop.log`; replacement and recovery failures are recorded in `update.log` in the data directory, with old files retained for recovery. Complete real cross-version upgrade, administrator authorization and data-retention testing on all three targets. GitHub connectivity failures leave the offline app usable. Confirm pet artwork redistribution permission before publishing, and keep signing credentials outside the repository.
 

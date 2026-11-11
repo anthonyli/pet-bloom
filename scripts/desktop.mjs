@@ -111,7 +111,7 @@ for (const arch of architectures) {
     publish: 'never',
     config: {
       appId: 'app.petbloom.desktop', productName: 'PetBloom', electronVersion,
-      publish: { provider: 'github', owner: 'anthonyli', repo: 'class-pet', private: false, releaseType: 'release' },
+      publish: { provider: 'github', owner: 'anthonyli', repo: 'pet-bloom', private: false, releaseType: 'release' },
       forceCodeSigning: release && (platform === 'win32' || signedMac),
       directories: { app: appDirectory, output, buildResources: resources },
       asar: false, npmRebuild: false,

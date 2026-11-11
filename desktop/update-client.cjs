@@ -7,7 +7,7 @@ class MacUpdater extends AppUpdater {
     const { info, provider } = options.updateInfoAndProvider
     const name = `PetBloom-${info.version}-mac-${process.arch}.zip`
     const file = provider.resolveFiles(info).find(file => file.info.url === name)
-    if (!file || file.url.protocol !== 'https:' || file.url.hostname !== 'github.com' || !file.url.pathname.startsWith('/anthonyli/class-pet/releases/download/') || !/^[A-Za-z0-9+/]{86}==$/.test(file.info.sha512)) throw new Error('缺少可信的 Mac 更新包 / A trusted Mac update package is required')
+    if (!file || file.url.protocol !== 'https:' || file.url.hostname !== 'github.com' || !file.url.pathname.startsWith('/anthonyli/pet-bloom/releases/download/') || !/^[A-Za-z0-9+/]{86}==$/.test(file.info.sha512)) throw new Error('缺少可信的 Mac 更新包 / A trusted Mac update package is required')
     return this.executeDownload({
       fileExtension: 'zip', fileInfo: file, downloadUpdateOptions: { ...options, disableDifferentialDownload: true },
       task: (destination, downloadOptions) => this.httpExecutor.download(file.url, destination, downloadOptions),
