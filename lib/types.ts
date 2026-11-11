@@ -1,3 +1,4 @@
+import type { StudentArchiveReason } from './data/student-archive'
 import type { ShopCategory, ShopIconId } from './shop'
 import type { SettingsVersion } from './garden-settings'
 import type { PetStatus } from './pet-status'
@@ -20,7 +21,7 @@ export interface ClassTeachers { teachers: ClassTeacher[]; invitation: { created
 export interface InvitationPreview { id: string; name: string; owner_name: string; already_member: boolean; expires_at: number }
 export interface OperationActor { actor_user_id: string | null; actor_name: string; actor_subject: string; undone_by_user_id: string | null; undone_by_name: string; undone_by_subject: string; can_undo: boolean }
 export interface Student {
-  id: string; class_id: string; name: string; student_no: string; archived_at: number | null;
+  id: string; class_id: string; name: string; student_no: string; archived_at: number | null; archive_reason: StudentArchiveReason | null; archive_note: string | null;
   points: number; pet_id: string | null; pet_exp: number; generation: number;
   badge_count: number; spent_badges: number; status?: PetStatus;
   background_id: string | null; owned_background_ids: string[];

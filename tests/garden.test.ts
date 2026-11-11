@@ -391,7 +391,7 @@ describe('商店、备份与级联删除', () => {
     const reason = points > 0 ? '大额进步奖励' : '大额扣分说明'
     const batch = await garden.evaluate(owner, { studentIds: [studentId], custom: { points, reason } })
     const original = await garden.snapshot(owner, classId), backup = await exportBackup(garden, owner), version = await garden.db.pragma('user_version', { simple: true })
-    expect(backup.version).toBe(8)
+    expect(backup.version).toBe(9)
     expect(backup.evaluations).toMatchObject([{ points, reason: JSON.stringify({ zh: reason, en: reason }), actor_name: '甲老师', actor_subject: '语文' }])
     const restored = await restoreBackup(garden, owner, JSON.parse(JSON.stringify(backup)))
     expect(restored.classIds).toHaveLength(1)

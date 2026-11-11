@@ -55,12 +55,16 @@ try {
     const screenshot = label => page.screenshot({ path: path.join(directory, `${locale}-${label}.png`), fullPage: false })
     async function openArchive() {
       if (page.viewportSize().width < 640) await page.locator('summary').filter({ hasText: t('班级工具', 'Class tools') }).click()
-      await button(t('已归档学生', 'Archived students')).click()
+      await button(t('归档', 'Archive')).click()
     }
     await page.goto(`${origin}/${locale}`)
     await button(t(`${name} 的更多操作`, `More actions for ${name}`)).click()
     await button(t('编辑学生', 'Edit student')).click()
     await button(t('归档学生', 'Archive student')).click()
+    await page.getByLabel(t('归档原因（选填）', 'Archive reason (optional)'), { exact: true }).click()
+    await page.getByRole('option', { name: t('转学', 'Transfer'), exact: true }).click()
+    const archiveNote = t('随家人搬迁，转入其他学校', 'Transferred to another school after moving')
+    await page.getByLabel(t('归档说明（选填）', 'Archive note (optional)'), { exact: true }).fill(archiveNote)
     await screenshot('confirm-archive')
     // Commit succeeds but the browser loses its response. Retrying must preserve identity and time.
     let archivePosts = 0
@@ -90,6 +94,8 @@ try {
     await dialog().getByRole('alert').waitFor()
     await button(t('重试', 'Retry')).click()
     await page.getByText(t('归档前的成长记录', 'Growth before archiving'), { exact: true }).waitFor()
+    await page.getByText(archiveNote, { exact: true }).waitFor()
+    await page.getByText(t('转学', 'Transfer'), { exact: true }).waitFor()
     await screenshot('archive-profile')
     await page.setViewportSize({ width: 390, height: 844 })
     await screenshot('archive-mobile')

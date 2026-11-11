@@ -63,7 +63,7 @@ async function versionFour(source?: Backup) {
   return {
     ...source,
     version: 4 as const,
-    students: source.students.map(({ background_id, archived_at, ...row }) => row),
+    students: source.students.map(({ background_id, archived_at, archive_reason, archive_note, ...row }) => row),
     items: source.items.filter(row => row.background_id === null).map(({ background_id, ...row }) => row),
     redemptions: source.redemptions.map(({ background_id, ...row }) => row)
   }
@@ -72,19 +72,19 @@ async function versionFour(source?: Backup) {
 async function versionFive(source?: Backup) {
   source ??= await exportBackup(garden, owner)
   const originalIds = new Set<string>(versionFiveBackgroundIds)
-  return { ...source, version: 5 as const, students: source.students.map(({ archived_at, ...row }) => row), items: source.items.filter(row => row.background_id === null || originalIds.has(row.background_id)) }
+  return { ...source, version: 5 as const, students: source.students.map(({ archived_at, archive_reason, archive_note, ...row }) => row), items: source.items.filter(row => row.background_id === null || originalIds.has(row.background_id)) }
 }
 async function versionSix(source?: Backup) {
   source ??= await exportBackup(garden, owner)
   const frozenIds = new Set<string>([...versionFiveBackgroundIds, ...holidayBackgroundIds])
-  return { ...source, version: 6 as const, students: source.students.map(({ archived_at, ...row }) => row), items: source.items.filter(row => row.background_id === null || frozenIds.has(row.background_id)) }
+  return { ...source, version: 6 as const, students: source.students.map(({ archived_at, archive_reason, archive_note, ...row }) => row), items: source.items.filter(row => row.background_id === null || frozenIds.has(row.background_id)) }
 }
 async function backgroundBackup(version: 5 | 6 | 7) {
   return version === 5 ? (await versionFive()) : version === 6 ? (await versionSix()) : (await versionSeven())
 }
 async function versionSeven() {
   const source = await exportBackup(garden, owner)
-  return { ...source, version: 7 as const, students: source.students.map(({ archived_at, ...row }) => row) }
+  return { ...source, version: 7 as const, students: source.students.map(({ archived_at, archive_reason, archive_note, ...row }) => row) }
 }
 async function expectImportedBackgroundDefaults(classId: string) {
   const rows = (await garden.snapshot(importer, classId)).items.filter(row => row.background_id !== null)
@@ -154,7 +154,7 @@ describe('协作备份 v7 的负责人边界与非破坏导入', () => {
     await score(colleague, first.id, first.studentId, 3)
     await settings(owner, first.id, value => { value.sickness = true })
     const before = await exportBackup(garden, owner)
-    expect(before.version).toBe(8)
+    expect(before.version).toBe(9)
     expect(before.classes.map(row => row.id)).toEqual([first.id, second.id])
     expect(before.settings.filter(row => row.class_id === first.id).map(row => row.version)).toEqual([0, 1])
     expect(before.settings.filter(row => row.class_id === second.id).map(row => row.version)).toEqual([0])
@@ -425,9 +425,9 @@ describe('背景v5/v6/v7快照与旧版升级备份', () => {
     await garden.setBackground(owner, first.studentId, { backgroundId: 'national-day' })
     await garden.setBackground(importer, existing.studentId, { backgroundId: 'national-day' })
     const original = await garden.snapshot(owner, first.id), originalExisting = await garden.snapshot(importer, existing.id), source = await exportBackup(garden, owner)
-    expect(source.version).toBe(8)
+    expect(source.version).toBe(9)
     expect(source.students[0].background_id).toBe('garden')
-    expect(Object.keys(source.students[0]).sort()).toEqual(['id', 'class_id', 'name', 'student_no', 'points', 'pet_id', 'pet_exp', 'generation', 'spent_badges', 'created_at', 'background_id', 'archived_at'].sort())
+    expect(Object.keys(source.students[0]).sort()).toEqual(['id', 'class_id', 'name', 'student_no', 'points', 'pet_id', 'pet_exp', 'generation', 'spent_badges', 'created_at', 'background_id', 'archived_at', 'archive_reason', 'archive_note'].sort())
     expect(JSON.stringify(source)).not.toContain('festival_background')
     expect(source.redemptions.map(row => row.background_id)).toEqual(['garden'])
     const result = await restoreBackup(garden, importer, JSON.parse(JSON.stringify(source)))
@@ -537,7 +537,7 @@ describe('背景v5/v6/v7快照与旧版升级备份', () => {
     expect(state.records[0]).toMatchObject({ points, actor_user_id: null, actor_name: '原负责人' })
     expect(await garden.snapshot(owner, first.id)).toEqual(original)
     expect(await templates(importer)).toEqual(beforeTemplates)
-    expect((await exportBackup(garden, importer)).version).toBe(8)
+    expect((await exportBackup(garden, importer)).version).toBe(9)
   })
 
   it('真实v4普通商品退款记录保留null背景及署名，补新商品而不改变原班', async () => {
@@ -577,7 +577,7 @@ describe('背景v5/v6/v7快照与旧版升级备份', () => {
     expect(copy.items.filter(row => row.background_id !== null)).toHaveLength(39)
     expect(copy.items.some(row => row.background_id === 'starlight' || row.background_id === 'beach')).toBe(false)
     const firstExport = await exportBackup(garden, importer), copiedProducts = firstExport.items.filter(row => row.class_id === copiedClassId && row.background_id !== null)
-    expect(firstExport.version).toBe(8)
+    expect(firstExport.version).toBe(9)
     expect(copiedProducts).toHaveLength(40)
     expect(copiedProducts.find(row => row.background_id === 'beach')).toMatchObject({ active: 0, cost: 4 })
     expect(copiedProducts.find(row => row.background_id === 'garden')).toMatchObject({ active: 1, cost: 2 })
@@ -620,7 +620,7 @@ describe('背景v5/v6/v7快照与旧版升级备份', () => {
     expect(copy.students[0]).toMatchObject({ background_id: ownedId, owned_background_ids: [ownedId], spent_badges: 2 })
     expect(copy.students[0].id).not.toBe(first.studentId)
     const exported = await exportBackup(garden, importer)
-    expect(exported.version).toBe(8)
+    expect(exported.version).toBe(9)
     const products = exported.items.filter(row => row.class_id === copyId && row.background_id !== null), kept = source.items.filter(row => row.class_id === first.id && row.background_id !== null)
     const values = (rows: typeof products) => rows.map(({ background_id, cost, active, stock }) => ({ background_id, cost, active, stock })).sort((a, b) => a.background_id!.localeCompare(b.background_id!))
     expect(products).toHaveLength(kept.length + 9)
@@ -636,7 +636,7 @@ describe('背景v5/v6/v7快照与旧版升级备份', () => {
     await garden.updateItem(importer, removed.id, { cost: 9 })
     await garden.deleteItem(importer, removed.id)
     const secondSource = await exportBackup(garden, importer), expected = secondSource.items.filter(row => row.class_id === copyId && row.background_id !== null), beforeSecond = await garden.snapshot(importer, copyId)
-    expect(secondSource.version).toBe(8)
+    expect(secondSource.version).toBe(9)
     const second = await restoreBackup(garden, importer, secondSource), secondId = second.classIds[secondSource.classes.findIndex(row => row.id === copyId)]
     const final = await exportBackup(garden, importer), secondCopy = await garden.snapshot(importer, secondId)
     expect(values(final.items.filter(row => row.class_id === secondId && row.background_id !== null))).toEqual(values(expected))

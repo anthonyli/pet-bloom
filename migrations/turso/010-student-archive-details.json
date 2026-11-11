@@ -1,0 +1,9 @@
+{
+  "version": 10,
+  "name": "student-archive-details",
+  "kind": "expand",
+  "statements": [
+    "ALTER TABLE students ADD COLUMN archive_reason TEXT",
+    "ALTER TABLE students ADD COLUMN archive_note TEXT"
+  ]
+}

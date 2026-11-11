@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Archive, ArrowLeft, RotateCcw, Search } from 'lucide-react'
 import { Button, Dialog, Input } from '@/components/ui'
+import { studentArchiveReasons } from '@/lib/data/student-archive'
 import { errorMessage, growth, petById, petImage, translator } from '@/lib/i18n'
 import type { Locale, StudentHistory, StudentHistoryEntry } from '@/lib/types'
 import { api, ApiError, type GardenClient } from './use-garden'
@@ -32,13 +33,17 @@ export function ArchivedStudentsDialog({ client, locale, onClose }: { client: Ga
   }, [selected, offset, retry, locale])
   useEffect(() => { heading.current?.focus() }, [selected, student?.id])
   function back() { setSelected(null); setEntries([]); setOffset(0); setConfirm(false); setError('') }
-  return <Dialog open wide icon={Archive} onClose={() => { if (!client.busy) onClose() }} title={t('已归档学生', 'Archived students')} description={t('转学或离班的学生保留在这里，不计入在班人数，也不参与日常评价和兑换。恢复后继续使用原有档案。', 'Students who transfer or leave are kept here, excluded from active counts, evaluations and redemptions. Restoring keeps their existing profile.')}>
+  return <Dialog open wide icon={Archive} onClose={() => { if (!client.busy) onClose() }} title={t('归档', 'Archive')} description={t('转学或离班的学生保留在这里，不计入在班人数，也不参与日常评价和兑换。恢复后继续使用原有档案。', 'Students who transfer or leave are kept here, excluded from active counts, evaluations and redemptions. Restoring keeps their existing profile.')}>
     {selected && !student ? <div className="space-y-4"><p role="status">{t('该学生已恢复，或已不在当前班级的归档名单中。', 'This student has been restored or is no longer in this class’s archive.')}</p><Button onClick={back}>{t('返回归档名单', 'Back to archive')}</Button></div> : student ? <div className="space-y-5">
       <Button variant="ghost" onClick={back} disabled={client.busy}><ArrowLeft size={16} />{t('返回归档名单', 'Back to archive')}</Button>
       <div className="flex items-center gap-4">
         {student.pet_id && <img src={petImage(student.pet_id, growth(student.pet_exp, client.state!.settings.value.growth).level)} alt={petById(student.pet_id)?.name[locale] || ''} className="size-20 shrink-0 object-contain" />}
         <div className="min-w-0"><h3 ref={heading} tabIndex={-1} className="break-words text-lg font-semibold">{student.name}</h3><p className="mt-1 break-words text-sm text-muted">{t('学号', 'Student number')}: {student.student_no || '—'}</p><p className="mt-1 text-sm text-muted">{t('归档于', 'Archived on')} {formatDate(student.archived_at!)}</p></div>
       </div>
+      <dl className="space-y-3 text-sm">
+        <div><dt className="font-medium">{t('归档原因', 'Archive reason')}</dt><dd className="mt-1 text-muted">{student.archive_reason ? studentArchiveReasons[student.archive_reason][locale] : t('未填写', 'Not provided')}</dd></div>
+        <div><dt className="font-medium">{t('归档说明', 'Archive note')}</dt><dd className="mt-1 whitespace-pre-wrap break-words text-muted">{student.archive_note || t('未填写', 'Not provided')}</dd></div>
+      </dl>
       <p className="text-sm leading-relaxed">{t(`累计积分 ${student.points} · 宠物成长 ${student.pet_exp} · 累计徽章 ${student.badge_count} · 可用徽章 ${student.badge_count - student.spent_badges}`, `Total points ${student.points} · Pet growth ${student.pet_exp} · Earned badges ${student.badge_count} · Available badges ${student.badge_count - student.spent_badges}`)}</p>
       <div className="space-y-3 border-y border-line py-4">
         {confirm && client.notice?.error && <p role="alert" className="text-sm text-danger">{client.notice.text}</p>}

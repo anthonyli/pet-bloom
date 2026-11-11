@@ -111,7 +111,7 @@ async function handler(request: NextRequest, context: { params: Promise<{ path: 
     } else if (method === 'DELETE' && parts[0] === 'classes' && parts.length === 2) {
       await garden.deleteClass(actor, parts[1])
     } else if (method === 'POST' && parts[0] === 'students' && ['archive', 'restore'].includes(parts[2]) && parts.length === 3) {
-      await garden.setStudentArchived(actor, parts[1], parts[2] === 'archive')
+      await garden.setStudentArchived(actor, parts[1], parts[2] === 'archive', parts[2] === 'archive' ? await body(request) : {})
     } else if (method === 'GET' && parts[0] === 'students' && parts[2] === 'history' && parts.length === 3) {
       result = await garden.studentHistory(actor, parts[1], Number(request.nextUrl.searchParams.get('offset') || 0))
     } else if (method === 'POST' && path === 'students') {

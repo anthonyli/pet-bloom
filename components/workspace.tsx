@@ -114,7 +114,7 @@ export function Workspace({ locale, initialClassId = '' }: { locale: Locale; ini
           { key: 'ranking', icon: Trophy, label: t('荣誉榜', 'Honor roll') },
           { key: 'shop', icon: ShoppingBag, label: t('小商店', 'Reward shop') },
           { key: 'history', icon: History, label: t('评价记录', 'History') },
-          { key: 'archived', icon: Archive, label: t('已归档学生', 'Archived students') },
+          { key: 'archived', icon: Archive, label: t('归档', 'Archive') },
           { key: 'rules', icon: SlidersHorizontal, label: t('规则', 'Rules') },
           { key: 'catalog', icon: BookOpen, label: t('图鉴', 'Collection') },
           { key: 'teachers', icon: UserPlus, label: t('邀请教师', 'Invite teachers') }
@@ -123,7 +123,7 @@ export function Workspace({ locale, initialClassId = '' }: { locale: Locale; ini
           { key: 'ranking', label: t('荣誉榜', 'Honor roll'), icon: Trophy },
           { key: 'shop', label: t('小商店', 'Reward shop'), icon: ShoppingBag },
           { key: 'history', label: t('评价记录', 'History'), icon: History },
-          { key: 'archived', label: t('已归档学生', 'Archived students'), icon: Archive },
+          { key: 'archived', label: t('归档', 'Archive'), icon: Archive },
           { key: 'rules', label: t('规则', 'Rules'), icon: SlidersHorizontal },
           { key: 'catalog', label: t('图鉴', 'Collection'), icon: BookOpen },
           { key: 'teachers', label: t('邀请教师', 'Invite teachers'), icon: UserPlus }

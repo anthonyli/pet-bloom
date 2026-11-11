@@ -2,6 +2,7 @@ import { isGlobalAdmin } from './admin-access'
 import type { Statement } from './database-adapter'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
+import { studentArchiveReasonIds, MAX_ARCHIVE_NOTE_LENGTH } from '../data/student-archive'
 import type { Garden } from './garden'
 import { DomainError } from './errors'
 import pets from '../data/pets.json'
@@ -95,6 +96,14 @@ const archiveSchema = festivalSchema.extend({
   students: z.array(festivalSchema.shape.students.element.extend({ archived_at: positive.nullable() })).max(10000)
 })
 type ArchiveBackup = z.infer<typeof archiveSchema>
+const archiveDetailsSchema = archiveSchema.extend({
+  version: z.literal(9),
+  students: z.array(archiveSchema.shape.students.element.extend({
+    archive_reason: z.enum(studentArchiveReasonIds).nullable(),
+    archive_note: z.string().max(MAX_ARCHIVE_NOTE_LENGTH).nullable()
+  }).refine(row => row.archived_at !== null || (row.archive_reason === null && row.archive_note === null))).max(10000)
+})
+type ArchiveDetailsBackup = z.infer<typeof archiveDetailsSchema>
 
 function upgradeBackgrounds(data: ScopedBackup): BackgroundBackup {
   return {
@@ -293,7 +302,7 @@ function validateCurrent(data: CurrentBackup) {
   for (const row of data.redemptions) if (row.stock_deducted && (!row.item_id || !itemIds.has(row.item_id))) fail()
 }
 
-function validateIds(data: CurrentBackup | ScopedBackup | BackgroundBackup | ArchiveBackup) {
+function validateIds(data: CurrentBackup | ScopedBackup | BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup) {
   for (const kind of rowKinds) {
     const ids = new Set<string>()
     for (const row of data[kind]) {
@@ -352,7 +361,7 @@ function exceedsScopedRecordLimits(data: Pick<ScopedBackup, 'rules' | 'settings'
   return false
 }
 
-function validateScoped(data: ScopedBackup | BackgroundBackup | ArchiveBackup) {
+function validateScoped(data: ScopedBackup | BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup) {
   validateIds(data)
   const fail = () => { throw new DomainError('invalidBackup') }
   if (exceedsScopedRecordLimits(data)) fail()
@@ -405,7 +414,7 @@ function validateScoped(data: ScopedBackup | BackgroundBackup | ArchiveBackup) {
   }
 }
 
-function validateBackgrounds(data: BackgroundBackup | ArchiveBackup) {
+function validateBackgrounds(data: BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup) {
   const fail = () => { throw new DomainError('invalidBackup') }
   const items = new Map(data.items.map(row => [row.id, row]))
   const scoped = new Map<string | null, Set<string>>()
@@ -461,19 +470,19 @@ export async function exportBackup(garden: Garden, owner: string) {
       WHERE (r.class_id IS NULL AND r.owner_id = ?) OR c.owner_id = ? OR (? = 1 AND c.id IS NOT NULL)
       ORDER BY CASE WHEN r.class_id IS NULL THEN 0 ELSE 1 END, c.rowid, ${order}
     `).all(owner, owner, globalAdmin))
-    const data: ArchiveBackup = {
-      version: 8, exportedAt: new Date().toISOString(),
+    const data: ArchiveDetailsBackup = {
+      version: 9, exportedAt: new Date().toISOString(),
       settings: (await resources('settings_versions', 'r.id, r.class_id, r.version, r.value, r.created_at', 'r.version') as { id: string; class_id: string | null; version: number; value: string; created_at: number }[]).map(row => ({ ...row, value: JSON.parse(row.value) })),
       rules: await resources('rules', 'r.id, r.class_id, r.name, r.points, r.category, r.custom') as ScopedBackup['rules'],
       items: await resources('items', 'r.id, r.class_id, r.name, r.cost, r.active, r.description, r.category, r.icon, r.image, r.image_key, r.image_bytes, r.stock, r.background_id') as BackgroundBackup['items'],
       classes: await db.prepare('SELECT id, name, created_at FROM classes WHERE owner_id = ? OR ? = 1 ORDER BY rowid').all(owner, globalAdmin) as ScopedBackup['classes'],
-      students: await db.prepare('SELECT s.id, s.class_id, s.name, s.student_no, s.points, s.pet_id, s.pet_exp, s.generation, s.spent_badges, s.created_at, s.background_id, s.archived_at FROM students s JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY s.rowid').all(owner, globalAdmin) as ArchiveBackup['students'],
+      students: await db.prepare('SELECT s.id, s.class_id, s.name, s.student_no, s.points, s.pet_id, s.pet_exp, s.generation, s.spent_badges, s.created_at, s.background_id, s.archived_at, s.archive_reason, s.archive_note FROM students s JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY s.rowid').all(owner, globalAdmin) as ArchiveDetailsBackup['students'],
       evaluations: await db.prepare('SELECT e.id, e.batch_id, e.student_id, e.points, e.reason, e.category, e.generation, e.created_at, e.undone, e.actor_name, e.actor_subject, e.undone_by_name, e.undone_by_subject FROM evaluations e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY e.rowid').all(owner, globalAdmin) as ScopedBackup['evaluations'],
       badges: await db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY b.rowid').all(owner, globalAdmin) as ScopedBackup['badges'],
       redemptions: await db.prepare('SELECT r.id, r.student_id, r.item_id, r.item_name, r.cost, r.created_at, r.undone, r.stock_deducted, r.actor_name, r.actor_subject, r.undone_by_name, r.undone_by_subject, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY r.rowid').all(owner, globalAdmin) as BackgroundBackup['redemptions'],
       events: await db.prepare('SELECT e.* FROM growth_events e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY e.seq').all(owner, globalAdmin) as ScopedBackup['events']
     }
-    if (exceedsScopedRecordLimits(data) || !archiveSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
+    if (exceedsScopedRecordLimits(data) || !archiveDetailsSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
     return data
   }).deferred()
 }
@@ -484,9 +493,13 @@ export async function restoreBackup(garden: Garden, owner: string, input: unknow
   try { serialized = JSON.stringify(input) } catch { throw new DomainError('invalidBackup') }
   if (serialized === undefined) throw new DomainError('invalidBackup')
   if (Buffer.byteLength(serialized) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
-  const version = z.object({ version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]) }).parse(input).version
-  let data: BackgroundBackup | ArchiveBackup
-  if (version === 8) {
+  const version = z.object({ version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9)]) }).parse(input).version
+  let data: BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup
+  if (version === 9) {
+    const parsed = archiveDetailsSchema.safeParse(input)
+    if (!parsed.success) throw new DomainError('invalidBackup')
+    data = parsed.data
+  } else if (version === 8) {
     const parsed = archiveSchema.safeParse(input)
     if (!parsed.success) throw new DomainError('invalidBackup')
     data = parsed.data
@@ -541,7 +554,7 @@ export async function restoreBackup(garden: Garden, owner: string, input: unknow
       statements.push({ sql: 'INSERT INTO class_members (class_id, user_id, joined_at) VALUES (?, ?, ?)', args: [classId, owner, Date.now()] })
     }
     for (const row of data.settings) if (row.class_id !== null) statements.push({ sql: 'INSERT INTO settings_versions (id, owner_id, class_id, version, value, created_at) VALUES (?, ?, ?, ?, ?, ?)', args: [ref('settings', row.id), owner, ref('classes', row.class_id), row.version, JSON.stringify(row.value), row.created_at] })
-    for (const row of data.students) statements.push({ sql: 'INSERT INTO students (id, class_id, name, student_no, points, pet_id, pet_exp, generation, spent_badges, created_at, background_id, archived_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', args: [ref('students', row.id), ref('classes', row.class_id), row.name, row.student_no, row.points, row.pet_id, row.pet_exp, row.generation, row.spent_badges, row.created_at, row.background_id, 'archived_at' in row ? row.archived_at : null] })
+    for (const row of data.students) statements.push({ sql: 'INSERT INTO students (id, class_id, name, student_no, points, pet_id, pet_exp, generation, spent_badges, created_at, background_id, archived_at, archive_reason, archive_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', args: [ref('students', row.id), ref('classes', row.class_id), row.name, row.student_no, row.points, row.pet_id, row.pet_exp, row.generation, row.spent_badges, row.created_at, row.background_id, 'archived_at' in row ? row.archived_at : null, 'archive_reason' in row ? row.archive_reason : null, 'archive_note' in row ? row.archive_note : null] })
     for (const row of data.rules) if (row.class_id !== null) statements.push({ sql: 'INSERT INTO rules (id, owner_id, class_id, name, points, category, custom) VALUES (?, ?, ?, ?, ?, ?, ?)', args: [ref('rules', row.id), owner, ref('classes', row.class_id), row.name, row.points, row.category, row.custom] })
     for (const row of data.evaluations) statements.push({ sql: 'INSERT INTO evaluations (id, batch_id, student_id, points, reason, category, generation, created_at, undone, actor_user_id, actor_name, actor_subject, undone_by_user_id, undone_by_name, undone_by_subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL, ?, ?)', args: [ref('evaluations', row.id), ref('batch', row.batch_id), ref('students', row.student_id), row.points, row.reason, row.category, row.generation, row.created_at, row.undone, row.actor_name, row.actor_subject, row.undone_by_name, row.undone_by_subject] })
     for (const row of data.events) statements.push({ sql: 'INSERT INTO growth_events (id, student_id, generation, kind, settings_id, evaluation_id, pet_id, initial_undone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', args: [ref('events', row.id), ref('students', row.student_id), row.generation, row.kind, ref('settings', row.settings_id), row.evaluation_id ? ref('evaluations', row.evaluation_id) : null, row.pet_id, row.initial_undone, row.created_at] })

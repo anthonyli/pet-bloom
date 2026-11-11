@@ -3,6 +3,7 @@ import { randomBytes, randomUUID, scryptSync, timingSafeEqual, createHash } from
 import type Database from 'better-sqlite3'
 import { adaptDatabase, type ApplicationDatabase } from './database-adapter'
 import { z } from 'zod'
+import { studentArchiveReasonIds, MAX_ARCHIVE_NOTE_LENGTH } from '../data/student-archive'
 import petsData from '../data/pets.json'
 import rulesData from '../data/rules.json'
 import type { User, Student, Classroom, Rule, Evaluation, ShopItem, Redemption, Snapshot, Badge, TeachingRole, ClassTeachers, InvitationPreview, StudentHistory, StudentHistoryEntry } from '../types'
@@ -216,13 +217,20 @@ export class Garden {
     if (student.archived_at !== null) throw new DomainError('studentArchived', 409)
     return student
   }
-  async setStudentArchived(actor: string, id: string, archived: boolean) {
+  async setStudentArchived(actor: string, id: string, archived: boolean, input: unknown = {}) {
     return await this.db.transaction(async () => {
       await this.student(actor, id)
-      // Retrying an archive preserves the original time; restoring never creates a row.
-      await this.db.prepare(archived
-        ? 'UPDATE students SET archived_at = COALESCE(archived_at, ?) WHERE id = ?'
-        : 'UPDATE students SET archived_at = ? WHERE id = ?').run(archived ? now() : null, id)
+      if (archived) {
+        const details = z.object({
+          reason: z.enum(studentArchiveReasonIds).nullable().optional(),
+          note: z.string().trim().max(MAX_ARCHIVE_NOTE_LENGTH).optional()
+        }).parse(input)
+        // A lost response may trigger a retry: preserve the first archive and its details.
+        await this.db.prepare('UPDATE students SET archived_at = ?, archive_reason = ?, archive_note = ? WHERE id = ? AND archived_at IS NULL')
+          .run(now(), details.reason ?? null, details.note || null, id)
+      } else {
+        await this.db.prepare('UPDATE students SET archived_at = NULL, archive_reason = NULL, archive_note = NULL WHERE id = ?').run(id)
+      }
     }).immediate()
   }
   async studentHistory(actor: string, id: string, offset = 0): Promise<StudentHistory> {
