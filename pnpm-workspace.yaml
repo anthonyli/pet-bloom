@@ -3,6 +3,7 @@ allowBuilds:
   electron: true
   electron-winstaller: false
   esbuild: true
+  koffi: true
   sharp: true
 # 打包器使用的缓存 API 仅由新版下载器提供。
 overrides:

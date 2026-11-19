@@ -72,7 +72,7 @@ export function commandFailureCategory(stderr) {
   if (/ENOTFOUND|ETIMEDOUT|ECONNRESET|fetch failed/i.test(stderr)) return 'network connection'
   return 'check authentication, network, or the Vercel dashboard'
 }
-const cli = args => run('pnpm', ['--reporter=silent', 'dlx', target.cli, ...args, '--scope', target.scope], { capture: true })
+const cli = args => run('pnpm', ['exec', 'vercel', ...args, '--scope', target.scope], { capture: true })
 const json = async promise => {
   const output = await promise
   try { return JSON.parse(output) } catch { throw new ReleaseError('CLI 响应不是有效 JSON / Invalid CLI JSON response') }
