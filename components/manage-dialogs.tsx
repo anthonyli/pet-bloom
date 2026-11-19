@@ -10,6 +10,7 @@ import { translator, categories, categoryName, localizedUserText, errorMessage }
 import type { Locale, Student, Classroom } from '@/lib/types'
 import { api, ApiError, type GardenClient } from './use-garden'
 import { GardenSettingsForm } from './garden-settings-form'
+import { ClassGroupsPanel } from './class-groups'
 import { TeacherProfileForm, teachingRoleName } from './teacher-profile'
 
 export function ClassDialog({ client, locale, classroom, onClose }: { client: GardenClient; locale: Locale; classroom?: Classroom; onClose: () => void }) {
@@ -19,6 +20,7 @@ export function ClassDialog({ client, locale, classroom, onClose }: { client: Ga
       <Field label={t('班级名称', 'Class name')} id="class-name"><Input id="class-name" value={name} onChange={event => setName(event.target.value)} required maxLength={80} autoFocus placeholder={t('例如：三年级一班', 'For example: Class 3A')} /></Field>
       <Button type="submit" variant="primary" busy={client.busy} className="w-full"><Save size={16} />{t('保存班级', 'Save class')}</Button>
     </form>
+    {classroom && <ClassGroupsPanel client={client} locale={locale} classId={classroom.id} />}
     {hasClassOwnerAccess(classroom) && classroom && <div className="mt-7 border-t border-line pt-5">{confirmDelete && <p className="mb-3 text-sm leading-relaxed text-danger">{t('将永久删除此班级的学生、评价、徽章和兑换记录。此操作无法撤销。', 'This permanently deletes the class, students, evaluations, badges and redemptions. This cannot be undone.')}</p>}<Button variant="danger" busy={client.busy} onClick={async () => { if (!confirmDelete) return setConfirmDelete(true); if (await client.run(() => api(`classes/${classroom.id}`, 'DELETE'), t('班级已删除。', 'Class deleted.'), '')) onClose() }}><Trash2 size={16} />{confirmDelete ? t('确认永久删除', 'Confirm permanent deletion') : t('删除这个班级', 'Delete this class')}</Button></div>}
   </Dialog>
 }

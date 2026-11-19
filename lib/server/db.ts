@@ -261,7 +261,7 @@ function migrateVersionNine(db: Database.Database) {
   }).immediate()
 }
 
-function migrateDatabase(db: Database.Database) {
+function migrateVersionTen(db: Database.Database) {
   const version = db.pragma('user_version', { simple: true }) as number
   if (version > 10) throw new Error('数据库版本高于当前应用版本')
   if (version === 10) return
@@ -272,6 +272,27 @@ function migrateDatabase(db: Database.Database) {
     db.exec('ALTER TABLE students ADD COLUMN archive_reason TEXT')
     db.exec('ALTER TABLE students ADD COLUMN archive_note TEXT')
     db.pragma('user_version = 10')
+  }).immediate()
+}
+
+const classGroupStatements = [
+  'CREATE TABLE class_groups (id TEXT PRIMARY KEY, class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE, name TEXT NOT NULL, created_at INTEGER NOT NULL)',
+  'CREATE INDEX class_groups_class ON class_groups(class_id)',
+  'CREATE UNIQUE INDEX class_groups_class_name ON class_groups(class_id, name)',
+  'CREATE TABLE class_group_members (student_id TEXT PRIMARY KEY REFERENCES students(id) ON DELETE CASCADE, group_id TEXT NOT NULL REFERENCES class_groups(id) ON DELETE CASCADE)',
+  'CREATE INDEX class_group_members_group ON class_group_members(group_id)'
+]
+
+function migrateDatabase(db: Database.Database) {
+  const version = db.pragma('user_version', { simple: true }) as number
+  if (version > 11) throw new Error('数据库版本高于当前应用版本')
+  if (version === 11) return
+  db.transaction(() => {
+    const current = db.pragma('user_version', { simple: true }) as number
+    if (current === 11) return
+    if (current < 10) migrateVersionTen(db)
+    for (const sql of classGroupStatements) db.exec(sql)
+    db.pragma('user_version = 11')
   }).immediate()
 }
 

@@ -35,7 +35,7 @@ async function fixture(statements?: string[]) {
   const migrations = await loadMigrations(migrationDirectory, statements ? 9 : 8)
   const filename = path.join(directory, 'source.db')
   const db = createDatabase(filename)
-  db.exec('ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; PRAGMA user_version = 8')
+  db.exec('DROP TABLE class_group_members; DROP TABLE class_groups; ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; PRAGMA user_version = 8')
   db.exec(`
     CREATE TABLE _pet_bloom_schema (id INTEGER PRIMARY KEY, version INTEGER NOT NULL, initialized_at INTEGER NOT NULL);
     INSERT INTO _pet_bloom_schema VALUES (1,8,123);

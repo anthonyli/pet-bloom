@@ -110,6 +110,14 @@ async function handler(request: NextRequest, context: { params: Promise<{ path: 
       await garden.renameClass(actor, parts[1], await body(request))
     } else if (method === 'DELETE' && parts[0] === 'classes' && parts.length === 2) {
       await garden.deleteClass(actor, parts[1])
+    } else if (method === 'POST' && parts[0] === 'classes' && parts[2] === 'groups' && parts.length === 3) {
+      result = await garden.createGroup(actor, parts[1], await body(request))
+    } else if (method === 'PATCH' && parts[0] === 'groups' && parts.length === 2) {
+      await garden.renameGroup(actor, parts[1], await body(request))
+    } else if (method === 'POST' && parts[0] === 'groups' && parts[2] === 'members' && parts.length === 4) {
+      await garden.setGroupMember(actor, parts[1], parts[3], true)
+    } else if (method === 'DELETE' && parts[0] === 'groups' && parts[2] === 'members' && parts.length === 4) {
+      await garden.setGroupMember(actor, parts[1], parts[3], false)
     } else if (method === 'POST' && parts[0] === 'students' && ['archive', 'restore'].includes(parts[2]) && parts.length === 3) {
       await garden.setStudentArchived(actor, parts[1], parts[2] === 'archive', parts[2] === 'archive' ? await body(request) : {})
     } else if (method === 'GET' && parts[0] === 'students' && parts[2] === 'history' && parts.length === 3) {

@@ -16,12 +16,13 @@ export interface Pet {
 export interface Rule { id: string; name: Localized; points: number; category: Category; custom?: boolean }
 export type TeachingRole = 'homeroom' | 'subject' | 'other'
 export interface Classroom { id: string; name: string; created_at: number; owner_id: string; role: 'owner' | 'admin' | 'global_admin' }
+export interface ClassGroup { id: string; class_id: string; name: string; created_at: number }
 export interface ClassTeacher { user_id: string; display_name: string; subject: string; teaching_role: TeachingRole | null; role: 'owner' | 'admin'; joined_at: number }
 export interface ClassTeachers { teachers: ClassTeacher[]; invitation: { created_at: number; expires_at: number } | null }
 export interface InvitationPreview { id: string; name: string; owner_name: string; already_member: boolean; expires_at: number }
 export interface OperationActor { actor_user_id: string | null; actor_name: string; actor_subject: string; undone_by_user_id: string | null; undone_by_name: string; undone_by_subject: string; can_undo: boolean }
 export interface Student {
-  id: string; class_id: string; name: string; student_no: string; archived_at: number | null; archive_reason: StudentArchiveReason | null; archive_note: string | null;
+  id: string; class_id: string; name: string; student_no: string; archived_at: number | null; archive_reason: StudentArchiveReason | null; archive_note: string | null; group_id: string | null;
   points: number; pet_id: string | null; pet_exp: number; generation: number;
   badge_count: number; spent_badges: number; status?: PetStatus;
   background_id: string | null; owned_background_ids: string[];
@@ -39,7 +40,7 @@ export interface Upgrade { id: string; name: string; level: number; previousLeve
 export interface User { id: string; username: string; display_name: string; subject: string; teaching_role: TeachingRole | null; profile_complete: boolean }
 export interface FestivalBackgroundOffer { background_id: string; expires_at: number }
 export interface FestivalBackgroundAvailability { server_now: number; valid_until: number; time_zone: string; backgrounds: FestivalBackgroundOffer[]; unsupported_background_ids: string[] }
-export interface Snapshot { user: User; settings: SettingsVersion; classes: Classroom[]; students: Student[]; archived_students: Student[]; badges: Badge[]; rules: Rule[]; records: Evaluation[]; items: ShopItem[]; redemptions: Redemption[]; festival_backgrounds: FestivalBackgroundAvailability }
+export interface Snapshot { user: User; settings: SettingsVersion; classes: Classroom[]; groups: ClassGroup[]; students: Student[]; archived_students: Student[]; badges: Badge[]; rules: Rule[]; records: Evaluation[]; items: ShopItem[]; redemptions: Redemption[]; festival_backgrounds: FestivalBackgroundAvailability }
 
 export interface StudentHistoryEntry {
   id: string; kind: 'evaluation' | 'redemption'; description: Localized; amount: number;
