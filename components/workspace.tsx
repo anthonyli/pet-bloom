@@ -169,12 +169,10 @@ export function Workspace({ locale, initialClassId = '' }: { locale: Locale; ini
         <span className="flex items-center gap-2 text-sm font-semibold"><PawPrint size={17} className="text-primary" />{t('我们的成长伙伴', 'Our growing companions')}<span className="ml-1 hidden text-xs font-normal text-muted sm:inline">{t('点击卡片领养或评价', 'Select a card to adopt or encourage')}</span></span>
         <div className="flex min-w-0 flex-wrap gap-2">
           <Button variant="ghost" className="min-h-9 px-3 py-1 text-xs" onClick={() => setModal('import')}><Upload size={14} />{t('导入名单', 'Import')}</Button>
-          <div className="flex min-w-0 flex-wrap gap-2">
-            <Button className="min-h-9 px-3 py-1 text-xs" aria-haspopup="dialog" disabled={client.busy} onClick={() => { client.setNotice(null); setModal('groups') }}><UsersRound size={15} aria-hidden="true" />{t('小组管理', 'Group management')}</Button>
-            <div className="flex gap-2">
-              <Button variant={batch ? 'primary' : 'secondary'} className="min-h-9 px-3 py-1 text-xs" aria-pressed={batch} disabled={client.busy || !client.state.students.length} onClick={() => { setBatch(!batch); setSelected(new Set()) }}><ListChecks size={15} aria-hidden="true" />{t('批量评价', 'Batch')}</Button>
-              <Button variant="primary" className="min-h-9 px-3 py-1 text-xs" onClick={() => { setEditing(undefined); setModal('student') }}><Plus size={15} />{t('添加学生', 'Add student')}</Button>
-            </div>
+          <Button className="min-h-9 px-3 py-1 text-xs" aria-haspopup="dialog" disabled={client.busy} onClick={() => { client.setNotice(null); setModal('groups') }}><UsersRound size={15} aria-hidden="true" />{t('小组管理', 'Group management')}</Button>
+          <div className="flex gap-2">
+            <Button variant={batch ? 'primary' : 'secondary'} className="min-h-9 px-3 py-1 text-xs" aria-pressed={batch} disabled={client.busy || !client.state.students.length} onClick={() => { setBatch(!batch); setSelected(new Set()) }}><ListChecks size={15} aria-hidden="true" />{t('批量评价', 'Batch')}</Button>
+            <Button variant="primary" className="min-h-9 px-3 py-1 text-xs" onClick={() => { setEditing(undefined); setModal('student') }}><Plus size={15} />{t('添加学生', 'Add student')}</Button>
           </div>
         </div>
       </div>}
