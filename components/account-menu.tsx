@@ -1,15 +1,15 @@
 'use client'
 import { useEffect, useId, useRef, useState } from 'react'
+import Link from 'next/link'
 import { GraduationCap, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { translator } from '@/lib/i18n'
 import type { Locale } from '@/lib/types'
 
-export function AccountMenu({ locale, name, busy, onGraduated, onSignOut }: {
+export function AccountMenu({ locale, name, busy, onSignOut }: {
   locale: Locale
   name: string
   busy: boolean
-  onGraduated: () => void
   onSignOut: () => void
 }) {
   const t = translator(locale)
@@ -32,8 +32,8 @@ export function AccountMenu({ locale, name, busy, onGraduated, onSignOut }: {
     return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', onKey) }
   }, [open])
   function onMenuKey(event: React.KeyboardEvent<HTMLDivElement>) {
-    const items = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')]
-    const index = items.indexOf(document.activeElement as HTMLButtonElement)
+    const items = [...event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]')]
+    const index = items.indexOf(document.activeElement as HTMLElement)
     if (event.key === 'ArrowDown') { event.preventDefault(); items[(index + 1) % items.length]?.focus() }
     else if (event.key === 'ArrowUp') { event.preventDefault(); items[(index - 1 + items.length) % items.length]?.focus() }
     else if (event.key === 'Home') { event.preventDefault(); items[0]?.focus() }
@@ -46,7 +46,7 @@ export function AccountMenu({ locale, name, busy, onGraduated, onSignOut }: {
     </Button>
     {open && <div id={menuId} role="menu" aria-label={t('账号菜单', 'Account menu')} className="absolute right-0 top-full z-40 mt-2 w-56 rounded-2xl border border-line bg-white p-2 shadow-lg" onKeyDown={onMenuKey}>
       <p className="truncate px-3 py-2 text-sm font-semibold">{name}</p>
-      <Button role="menuitem" variant="ghost" className="w-full justify-start" onClick={() => { setOpen(false); onGraduated() }}><GraduationCap size={16} aria-hidden="true" />{t('毕业班级', 'Graduated classes')}</Button>
+      <Link role="menuitem" href={`/${locale}/classes?status=graduated`} className="button button-ghost w-full justify-start" onClick={() => setOpen(false)}><GraduationCap size={16} aria-hidden="true" />{t('毕业班级', 'Graduated classes')}</Link>
       <Button role="menuitem" variant="ghost" className="w-full justify-start" disabled={busy} onClick={() => { setOpen(false); onSignOut() }}><LogOut size={16} aria-hidden="true" />{t('退出登录', 'Sign out')}</Button>
     </div>}
   </div>

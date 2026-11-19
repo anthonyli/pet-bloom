@@ -82,6 +82,7 @@ tests/                  业务与接口测试
 ### 部署与扩展
 
 - [部署与数据维护](docs/deployment.md)：单服务器、Docker、Vercel / Turso、备份与迁移。本地 SQLite 部署需要持久化磁盘。
+- [合并后自动发布](docs/automatic-production.md)：主分支自动构建、加密备份、迁移与发布，以及凭据配置和备份恢复。
 - [桌面开发与发布](docs/desktop.md)：Windows / macOS 打包、测试和更新发布。
 - [全局管理员配置](docs/admin-classes.md)：服务端白名单、全部班级及管理权限；用户名为 `admin` 不会自动获得权限。
 

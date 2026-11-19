@@ -6,7 +6,8 @@ import { target } from './deploy-config.mjs'
 
 export { target }
 const root = fileURLToPath(new URL('..', import.meta.url))
-const requireCondition = (condition, message) => { if (!condition) throw new Error(message) }
+export class ReleaseError extends Error {}
+const requireCondition = (condition, message) => { if (!condition) throw new ReleaseError(message) }
 
 export function validateLocal(pkg, config, link) {
   requireCondition(pkg.name === 'pet-bloom', '项目名称不匹配 / Unexpected package name')
@@ -42,7 +43,7 @@ export function validateRelease(deployment, alias, expectedId) {
 export function testEnvironment(source) {
   const env = { ...source }
   for (const key of Object.keys(env)) {
-    if (/^(TURSO_|VERCEL_|NEXT_PUBLIC_CLOUD_DEPLOYMENT$|DATABASE_PATH$|DESKTOP_TOKEN$)/.test(key) || key === 'VERCEL') delete env[key]
+    if (/^(TURSO_|VERCEL_|BACKUP_|ACTIONS_|GITHUB_TOKEN$|GH_TOKEN$|NEXT_PUBLIC_CLOUD_DEPLOYMENT$|DATABASE_PATH$|DESKTOP_TOKEN$)/.test(key) || key === 'VERCEL') delete env[key]
   }
   return env
 }
@@ -51,23 +52,64 @@ export function testEnvironment(source) {
 function run(command, args, { capture = false, env = process.env, timeout = 30 * 60_000 } = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { cwd: root, env, shell: false, stdio: capture ? ['ignore', 'pipe', 'pipe'] : 'inherit', timeout })
-    let output = ''
+    let output = '', diagnostics = ''
     if (capture) {
       child.stdout.on('data', chunk => { output += chunk })
-      child.stderr.resume()
+      child.stderr.on('data', chunk => { diagnostics = (diagnostics + chunk).slice(-16_384) })
     }
-    child.on('error', () => reject(new Error(`${command} 无法启动 / Could not start command`)))
-    child.on('close', code => code === 0 ? resolve(output) : reject(new Error(
-      `${command} 执行失败（${code}）/ Command failed; check authentication, network, or the Vercel dashboard`)))
+    child.on('error', () => reject(new ReleaseError(`${command} 无法启动 / Could not start command`)))
+    child.on('close', code => code === 0 ? resolve(output) : reject(new ReleaseError(
+      `${command} 执行失败（${code}）/ Command failed: ${commandFailureCategory(diagnostics + '\n' + output)}\n${redactDiagnostics(diagnostics + '\n' + output, env)}`)))
   })
 }
 
-const cli = args => run('pnpm', ['dlx', target.cli, ...args, '--scope', target.scope], { capture: true })
+export function redactDiagnostics(text, env) {
+  for (const [name, value] of Object.entries(env)) {
+    if (/token|secret|password|key|auth/i.test(name) && value) text = text.split(value).join('[REDACTED]')
+  }
+  return text.replace(/(?:Bearer\s+)[^\s"']+/gi, 'Bearer [REDACTED]')
+    .replace(/[A-Za-z0-9_+\/-]{32,}(?:\.[A-Za-z0-9_+\/-]+)*/g, '[REDACTED]')
+    .slice(-2500)
+}
+
+export function commandFailureCategory(stderr) {
+  // Return fixed categories only: CLI errors may contain tokens or private data.
+  const packageCode = stderr.match(/\bERR_PNPM_[A-Z_]+\b/)
+  if (packageCode) return `package-manager setup (${packageCode[0]})`
+  if (/no existing credentials|not authorized|unauthorized|invalid token|forbidden/i.test(stderr)) return 'authentication or token permissions'
+  if (/scope|team.*not found/i.test(stderr)) return 'team scope resolution'
+  if (/ENOTFOUND|ETIMEDOUT|ECONNRESET|fetch failed/i.test(stderr)) return 'network connection'
+  const reason = stderr.match(/"reason"\s*:\s*"([a-z_]{1,80})"/)
+  if (reason) return `Vercel CLI ${reason[1]}`
+  if (/Cannot find module|Cannot find package|ERR_MODULE_NOT_FOUND/.test(stderr)) return 'CLI dependency missing'
+  if (/NODE_MODULE_VERSION|Could not locate the bindings/.test(stderr)) return 'native module binding missing'
+  return 'check authentication, network, or the Vercel dashboard'
+}
+const cli = args => run(process.execPath, [path.join(root, 'node_modules/vercel/dist/vc.js'), ...args, '--scope', target.scope, '--non-interactive'], { capture: true })
 const json = async promise => {
   const output = await promise
-  try { return JSON.parse(output) } catch { throw new Error('CLI 响应不是有效 JSON / Invalid CLI JSON response') }
+  try { return JSON.parse(output) } catch { throw new ReleaseError('CLI 响应不是有效 JSON / Invalid CLI JSON response') }
 }
-const api = endpoint => json(cli(['api', `${endpoint}?teamId=${target.team}`]))
+export async function vercelApi(endpoint, { token = process.env.VERCEL_TOKEN, request = fetch, method = 'GET', body } = {}) {
+  if (!token) {
+    requireCondition(method === 'GET', 'Vercel API mutations require a configured token')
+    return json(cli(['api', `${endpoint}?teamId=${target.team}`]))
+  }
+  let response
+  try {
+    response = await request(`https://api.vercel.com${endpoint}?teamId=${target.team}`, {
+      method, body: body === undefined ? undefined : JSON.stringify(body),
+      headers: { Authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) }, signal: AbortSignal.timeout(30_000)
+    })
+  } catch { throw new ReleaseError('Vercel API network request failed') }
+  // Do not include response bodies: project responses contain environment values.
+  if (!response.ok) throw new ReleaseError(`Vercel API request failed (HTTP ${response.status})`)
+  if (response.status === 204) return undefined
+  const output = await response.text()
+  if (!output && method !== 'GET') return undefined
+  try { return JSON.parse(output) } catch { throw new ReleaseError('Vercel API returned invalid JSON') }
+}
+const api = endpoint => vercelApi(endpoint)
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 export async function verifyLive(expectedId, { get = api, health, sleep = delay, attempts = 6 } = {}) {
@@ -99,7 +141,7 @@ export async function release({ stage, migrate, promote, verify }) {
   return id
 }
 
-export async function main(args = process.argv.slice(2)) {
+export async function main(args = process.argv.slice(2), { migrateDatabase = () => run('pnpm', ['db:migrate']), beforePromote = async () => {}, stageDeployment, promoteDeployment = id => cli(['promote', id, '--yes']) } = {}) {
   requireCondition(args.every(arg => ['--check', '--dry-run', '--help'].includes(arg)) && args.length <= 1,
     '用法 / Usage: pnpm deploy:vercel [--check | --dry-run | --help]')
   if (args.includes('--help')) {
@@ -137,7 +179,7 @@ export async function main(args = process.argv.slice(2)) {
   let promoting = false
   try {
     await release({
-      stage: async () => {
+      stage: stageDeployment ?? (async () => {
         const result = await json(cli(['deploy', '--project', target.project, '--prod', '--skip-domain', '--regions', target.region, '--yes', '--json']))
         const id = result.deployment?.id
         requireCondition(typeof id === 'string' && /^dpl_[A-Za-z0-9]+$/.test(id), '部署响应缺少 ID / Deployment response is missing its ID')
@@ -145,12 +187,13 @@ export async function main(args = process.argv.slice(2)) {
         validateRelease(deployment, { projectId: target.project, deploymentId: id }, id)
         console.log(`待发布版本已就绪 / Staged deployment ready: ${id}`)
         return id
-      },
-      migrate: () => run('pnpm', ['db:migrate']),
+      }),
+      migrate: migrateDatabase,
       promote: async id => {
+        await beforePromote()
         promoting = true
         console.log('迁移成功，切换生产域名 / Migration succeeded; promoting production…')
-        await cli(['promote', id, '--yes'])
+        await promoteDeployment(id)
       },
       verify: verifyLive
     })

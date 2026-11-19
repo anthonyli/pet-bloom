@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 // @ts-expect-error Deployment entry point is a standalone Node.js module.
-import { target, validateLocal, validateRemote, validateRelease, verifyLive, testEnvironment, release } from '../scripts/deploy-vercel.mjs'
+import { target, validateLocal, validateRemote, validateRelease, verifyLive, testEnvironment, release, commandFailureCategory, vercelApi, redactDiagnostics } from '../scripts/deploy-vercel.mjs'
 
 const project = { id: target.project, accountId: target.team, resourceConfig: { functionDefaultRegions: ['sin1'] } }
 const envs = [
@@ -12,6 +12,21 @@ const deployment = { id: 'dpl_test', projectId: target.project, readyState: 'REA
 const alias = { projectId: target.project, deploymentId: deployment.id }
 
 describe('production deployment safeguards', () => {
+  it('redacts configured secrets and bearer tokens from CLI diagnostics', () => {
+    const result = redactDiagnostics('failure private-api-value Bearer other-value abcdefghijklmnopqrstuvwxyz0123456789', { VERCEL_TOKEN: 'private-api-value' })
+    expect(result).toBe('failure [REDACTED] Bearer [REDACTED] [REDACTED]')
+  })
+  it('classifies CLI failures without disclosing raw diagnostics', () => {
+    expect(commandFailureCategory('Error: Not authorized; token=private-value')).toBe('authentication or token permissions')
+    expect(commandFailureCategory('ERR_PNPM_FETCH_NOT_FOUND private-value')).toBe('package-manager setup (ERR_PNPM_FETCH_NOT_FOUND)')
+    expect(commandFailureCategory('Unknown error containing private-value')).not.toContain('private-value')
+  })
+  it('queries the intended team with the CI token and never exposes API error bodies', async () => {
+    const request = vi.fn(async () => new Response(JSON.stringify({ id: target.project }), { status: 200 }))
+    await expect(vercelApi(`/v9/projects/${target.project}`, { token: 'test-secret', request })).resolves.toEqual({ id: target.project })
+    expect(request).toHaveBeenCalledWith(`https://api.vercel.com/v9/projects/${target.project}?teamId=${target.team}`, expect.objectContaining({ headers: { Authorization: 'Bearer test-secret' } }))
+    await expect(vercelApi('/v9/projects/test', { token: 'test-secret', request: async () => new Response('private-value', { status: 403 }) })).rejects.toThrow('Vercel API request failed (HTTP 403)')
+  })
   it('builds first, migrates second, and only then promotes and verifies', async () => {
     const steps: string[] = []
     await release({
@@ -67,7 +82,7 @@ describe('production deployment safeguards', () => {
   })
 
   it('does not pass production or optional cloud-test credentials into tests', () => {
-    const source = { PATH: '/bin', TURSO_AUTH_TOKEN: 'secret', TURSO_TEST_DATABASE_URL: 'production', VERCEL_TOKEN: 'secret', VERCEL: '1', DATABASE_PATH: 'production.db' }
+    const source = { PATH: '/bin', TURSO_AUTH_TOKEN: 'secret', TURSO_TEST_DATABASE_URL: 'production', VERCEL_TOKEN: 'secret', VERCEL: '1', DATABASE_PATH: 'production.db', BACKUP_ENCRYPTION_KEY: 'secret', ACTIONS_RUNTIME_TOKEN: 'secret', GITHUB_TOKEN: 'secret' }
     expect(testEnvironment(source)).toEqual({ PATH: '/bin' })
     expect(source.TURSO_AUTH_TOKEN).toBe('secret')
   })

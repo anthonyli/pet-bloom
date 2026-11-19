@@ -61,6 +61,21 @@ async function fixture(statements?: string[]) {
 }
 
 describe('Turso migrations preserve existing data', () => {
+  it('backs up every automatic release and stops before DDL if durable backup storage fails', async () => {
+    const f = await fixture(['ALTER TABLE classes ADD COLUMN example TEXT'])
+    await expect(migrate(f.client, f.migrations, async (state: unknown) => {
+      await f.backup(state)
+      throw new Error('artifact upload failed')
+    }, { backupAlways: true })).rejects.toThrow('artifact upload failed')
+    expect((await inspectState(f.client, f.migrations)).version).toBe(8)
+    expect((await f.client.execute('PRAGMA table_info(classes)')).rows.map(row => row.name)).not.toContain('example')
+    await migrate(f.client, f.migrations, f.backup)
+    // Export crosses libSQL and better-sqlite3 in this local fixture.
+    await f.client.execute('PRAGMA wal_checkpoint(TRUNCATE)')
+    const result = await migrate(f.client, f.migrations, f.backup, { backupAlways: true })
+    expect(result.applied).toEqual([])
+    expect(result.backup).toContain('snapshot.db')
+  })
   it('applies the committed archive expansion to v8 with a verified backup and no history loss', async () => {
     const f = await fixture()
     const migrations = await loadMigrations(path.join(root, 'migrations/turso'), schemaVersion.current)

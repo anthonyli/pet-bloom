@@ -82,6 +82,14 @@ async function handler(request: NextRequest, context: { params: Promise<{ path: 
       result = (await garden.saveProfile(actor, await body(request)))
     } else if (method === 'GET' && path === 'state') {
       result = (await garden.snapshot(actor, request.nextUrl.searchParams.get('classId') || undefined))
+    } else if (method === 'GET' && path === 'classes') {
+      const query = request.nextUrl.searchParams
+      result = await garden.classDirectory(actor, {
+        page: query.get('page') ?? undefined, pageSize: query.get('pageSize') ?? undefined,
+        search: query.get('search') ?? undefined, status: query.get('status') ?? undefined
+      })
+    } else if (method === 'GET' && parts[0] === 'classes' && parts[2] === 'summary' && parts.length === 3) {
+      result = await garden.classSummary(actor, parts[1])
     } else if (method === 'POST' && path === 'invitations/preview') {
       result = (await garden.previewInvitation(actor, await body(request)))
     } else if (method === 'POST' && path === 'invitations/join') {

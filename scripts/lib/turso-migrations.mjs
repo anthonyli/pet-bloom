@@ -168,7 +168,7 @@ export function rehearseBackup(filename, state) {
     // Always roll the rehearsal back: the backup must remain pre-migration.
     db.exec('BEGIN IMMEDIATE')
     try {
-      for (const statement of migrationBatch(state)) db.prepare(statement.sql).run(...statement.args)
+      for (const statement of state.pending.length ? migrationBatch(state) : []) db.prepare(statement.sql).run(...statement.args)
       for (const table of tables) assert(stringify(fingerprint(db, table.name, table.columns)) === stringify({ count: table.count, sha256: table.sha256 }),
         '迁移演练改变了已有数据 / Rehearsal changed existing data')
       assert(db.pragma('integrity_check', { simple: true }) === 'ok', '迁移后完整性检查失败 / Post-migration integrity check failed')
@@ -199,12 +199,13 @@ export async function createVerifiedBackup({ directory, exportDatabase, state, s
   return { filename: snapshot, ...metadata }
 }
 
-export async function migrate(client, migrations, backup) {
+export async function migrate(client, migrations, backup, { backupAlways = false } = {}) {
   const state = await inspectState(client, migrations)
-  if (!state.pending.length) return { version: state.version, applied: [], backup: null }
+  if (!state.pending.length && !backupAlways) return { version: state.version, applied: [], backup: null }
   // Backup and restore rehearsal must succeed before the first cloud write.
   const snapshot = await backup(state)
   assert(snapshot?.filename && snapshot?.sha256, '未取得已验证备份，迁移中止 / No verified backup; migration aborted')
+  if (!state.pending.length) return { version: state.version, applied: [], backup: snapshot.filename }
   await client.batch(migrationBatch(state), 'write')
   const after = await inspectState(client, migrations)
   assert(!after.pending.length, '提交结果尚未确认，请重新检查状态 / Commit outcome unconfirmed; check migration status')
