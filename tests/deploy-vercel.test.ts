@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 // @ts-expect-error Deployment entry point is a standalone Node.js module.
-import { target, validateLocal, validateRemote, validateRelease, verifyLive, testEnvironment, release, commandFailureCategory, vercelApi } from '../scripts/deploy-vercel.mjs'
+import { target, validateLocal, validateRemote, validateRelease, verifyLive, testEnvironment, release, commandFailureCategory, vercelApi, redactDiagnostics } from '../scripts/deploy-vercel.mjs'
 
 const project = { id: target.project, accountId: target.team, resourceConfig: { functionDefaultRegions: ['sin1'] } }
 const envs = [
@@ -12,6 +12,10 @@ const deployment = { id: 'dpl_test', projectId: target.project, readyState: 'REA
 const alias = { projectId: target.project, deploymentId: deployment.id }
 
 describe('production deployment safeguards', () => {
+  it('redacts configured secrets and bearer tokens from CLI diagnostics', () => {
+    const result = redactDiagnostics('failure private-api-value Bearer other-value abcdefghijklmnopqrstuvwxyz0123456789', { VERCEL_TOKEN: 'private-api-value' })
+    expect(result).toBe('failure [REDACTED] Bearer [REDACTED] [REDACTED]')
+  })
   it('classifies CLI failures without disclosing raw diagnostics', () => {
     expect(commandFailureCategory('Error: Not authorized; token=private-value')).toBe('authentication or token permissions')
     expect(commandFailureCategory('ERR_PNPM_FETCH_NOT_FOUND private-value')).toBe('package-manager setup (ERR_PNPM_FETCH_NOT_FOUND)')

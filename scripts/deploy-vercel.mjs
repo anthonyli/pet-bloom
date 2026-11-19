@@ -59,8 +59,17 @@ function run(command, args, { capture = false, env = process.env, timeout = 30 *
     }
     child.on('error', () => reject(new ReleaseError(`${command} 无法启动 / Could not start command`)))
     child.on('close', code => code === 0 ? resolve(output) : reject(new ReleaseError(
-      `${command} 执行失败（${code}）/ Command failed: ${commandFailureCategory(diagnostics + '\n' + output)}`)))
+      `${command} 执行失败（${code}）/ Command failed: ${commandFailureCategory(diagnostics + '\n' + output)}\n${redactDiagnostics(diagnostics + '\n' + output, env)}`)))
   })
+}
+
+export function redactDiagnostics(text, env) {
+  for (const [name, value] of Object.entries(env)) {
+    if (/token|secret|password|key|auth/i.test(name) && value) text = text.split(value).join('[REDACTED]')
+  }
+  return text.replace(/(?:Bearer\s+)[^\s"']+/gi, 'Bearer [REDACTED]')
+    .replace(/[A-Za-z0-9_+\/-]{32,}(?:\.[A-Za-z0-9_+\/-]+)*/g, '[REDACTED]')
+    .slice(-2500)
 }
 
 export function commandFailureCategory(stderr) {
