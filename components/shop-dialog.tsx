@@ -11,7 +11,7 @@ import { PetScene } from './pet-scene'
 import { api, ApiError, type GardenClient } from './use-garden'
 
 export type ShopTab = 'shop' | 'backgrounds' | 'history'
-type BackgroundRecovery = { result: 'saved' | 'unknown'; studentName: string; backgroundName: string }
+type RedemptionRecovery = { result: 'saved' | 'unknown'; studentName: string; itemName: string }
 
 function ShopArtwork({ item, locale }: { item: ShopItem; locale: Locale }) {
   const [failed, setFailed] = useState(false)
@@ -48,13 +48,13 @@ export function ShopDialog({ client, locale, onClose, open = true, initialStuden
   useEffect(() => { client.setNotice(null) }, [client.setNotice])
   const id = useId()
   const addButton = useRef<HTMLButtonElement>(null), backgroundSearch = useRef<HTMLInputElement>(null), recoveryButton = useRef<HTMLButtonElement>(null)
-  const backgroundSubmitting = useRef(false), recoveryLock = useRef<BackgroundRecovery | null>(null)
+  const submitting = useRef(false), recoveryLock = useRef<RedemptionRecovery | null>(null)
   const [selected, setSelected] = useState(initialStudentId || client.state!.students[0]?.id || '')
   const [tab, setTab] = useState<ShopTab>(initialTab)
   const [backgroundCategory, setBackgroundCategory] = useState<BackgroundFilter>('all'), [backgroundQuery, setBackgroundQuery] = useState('')
   const [editor, setEditor] = useState<{ item?: ShopItem; trigger: HTMLButtonElement } | null>(null)
   const [priceEditor, setPriceEditor] = useState<ShopItem | null>(null)
-  const [recovery, setRecovery] = useState<BackgroundRecovery | null>(null), [backgroundWorking, setBackgroundWorking] = useState(false)
+  const [recovery, setRecovery] = useState<RedemptionRecovery | null>(null), [backgroundWorking, setBackgroundWorking] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
   const [redeeming, setRedeeming] = useState<string | null>(null)
   const [refunding, setRefunding] = useState<string | null>(null)
@@ -93,44 +93,44 @@ export function ShopDialog({ client, locale, onClose, open = true, initialStuden
   }
 
   async function redeem(item: ShopItem) {
-    if (!student || writesDisabled || backgroundSubmitting.current || recoveryLock.current || item.stock === 0 || available < item.cost) return
+    if (!student || writesDisabled || submitting.current || recoveryLock.current || item.stock === 0 || available < item.cost) return
     if (item.background_id && student.owned_background_ids.includes(item.background_id)) return
+    const background = Boolean(item.background_id)
     setRedeeming(item.id)
-    if (!item.background_id) {
-      try { await client.run(() => api('redemptions', 'POST', { studentId: student.id, itemId: item.id }), t(`已为${student.name}兑换「${item.name.zh}」。`, `${item.name.en} redeemed for ${student.name}.`)) }
-      finally { setRedeeming(null) }
-      return
-    }
-    backgroundSubmitting.current = true; setBackgroundWorking(true)
+    if (background) setBackgroundWorking(true)
+    submitting.current = true
     let saved = false, unknown = false
     try {
       const ok = await client.run(async () => {
         try { await api('redemptions', 'POST', { studentId: student.id, itemId: item.id }); saved = true }
         catch (error) { unknown = error instanceof ApiError && error.status === 0; throw error }
-      }, t(`已为${student.name}解锁「${item.name.zh}」，可去装扮中选用。`, `${item.name.en} unlocked for ${student.name}. Apply it in Dress up.`))
+      }, background
+        ? t(`已为${student.name}解锁「${item.name.zh}」，可去装扮中选用。`, `${item.name.en} unlocked for ${student.name}. Apply it in Dress up.`)
+        : t(`已为${student.name}兑换「${item.name.zh}」。`, `${item.name.en} redeemed for ${student.name}.`))
       if (!ok && (saved || unknown)) {
-        const next: BackgroundRecovery = { result: saved ? 'saved' : 'unknown', studentName: student.name, backgroundName: item.name[locale] }
+        const next: RedemptionRecovery = { result: saved ? 'saved' : 'unknown', studentName: student.name, itemName: item.name[locale] }
         recoveryLock.current = next; setRecovery(next); setRemoving(null)
+        client.setNotice(null)
       }
-    } finally { backgroundSubmitting.current = false; setBackgroundWorking(false); setRedeeming(null) }
+    } finally { submitting.current = false; if (background) setBackgroundWorking(false); setRedeeming(null) }
   }
 
   async function removeItem(item: ShopItem) {
-    if (writesDisabled || backgroundSubmitting.current || recoveryLock.current) return
+    if (writesDisabled || submitting.current || recoveryLock.current) return
     if (await client.run(() => api(`items/${item.id}`, 'DELETE'), item.background_id ? t('背景已下架，已拥有的学生仍可使用。', 'Background removed from the shop. Students who own it can still use it.') : t('商品已移除。', 'Reward removed.'))) {
       setRemoving(null)
       requestAnimationFrame(() => item.background_id ? document.getElementById(`${id}-tab-backgrounds`)?.focus() : addButton.current?.focus())
     }
   }
 
-  return <Dialog open={open} wide onClose={() => { if (!editor && !priceEditor && !backgroundSubmitting.current && !recoveryLock.current) onClose() }} icon={ShoppingBag} title={t('班级小商店', 'Class reward shop')} description={t('用成长获得的徽章兑换奖励，或为宠物解锁新的背景。', 'Exchange growth badges for classroom rewards or unlock new pet backgrounds.')} className={cn(recovery && '[&>div:first-child>button]:hidden')}>
+  return <Dialog open={open} wide onClose={() => { if (!editor && !priceEditor && !submitting.current && !recoveryLock.current) onClose() }} icon={ShoppingBag} title={t('班级小商店', 'Class reward shop')} description={t('用成长获得的徽章兑换奖励，或为宠物解锁新的背景。', 'Exchange growth badges for classroom rewards or unlock new pet backgrounds.')} className={cn(recovery && '[&>div:first-child>button]:hidden')}>
     <div role="tablist" aria-label={t('商店内容', 'Shop views')} className="section-tabs mb-5">
       <button type="button" role="tab" id={`${id}-tab-shop`} aria-selected={tab === 'shop'} aria-controls={`${id}-panel-shop`} tabIndex={tab === 'shop' ? 0 : -1} onKeyDown={switchTab} onClick={() => setTab('shop')} className={cn('tab inline-flex min-h-11 items-center gap-2 text-sm', tab === 'shop' && 'tab-active')}><ShoppingBag size={16} aria-hidden="true" />{t('奖励商店', 'Rewards')}</button>
       <button type="button" role="tab" id={`${id}-tab-backgrounds`} aria-selected={tab === 'backgrounds'} aria-controls={`${id}-panel-backgrounds`} tabIndex={tab === 'backgrounds' ? 0 : -1} onKeyDown={switchTab} onClick={() => setTab('backgrounds')} className={cn('tab inline-flex min-h-11 items-center gap-2 text-sm', tab === 'backgrounds' && 'tab-active')}><Palette size={16} aria-hidden="true" />{t('宠物背景', 'Backgrounds')}</button>
       <button type="button" role="tab" id={`${id}-tab-history`} aria-selected={tab === 'history'} aria-controls={`${id}-panel-history`} tabIndex={tab === 'history' ? 0 : -1} onKeyDown={switchTab} onClick={() => setTab('history')} className={cn('tab inline-flex min-h-11 items-center gap-2 text-sm', tab === 'history' && 'tab-active')}><History size={16} aria-hidden="true" />{t('兑换记录', 'Redemptions')}</button>
     </div>
     {recovery && <div role="alert" className="mb-5 space-y-3 rounded-xl border border-line bg-[#f5f2ff] p-4">
-      <p className="text-sm leading-relaxed">{recovery.result === 'saved' ? t(`${recovery.studentName} 的「${recovery.backgroundName}」兑换已保存，但最新数据未能加载。请重新加载核对记录，不要再次兑换或退款。`, `The redemption of ${recovery.backgroundName} for ${recovery.studentName} was saved, but the latest data could not load. Reload and check the records. Do not redeem or refund again.`) : t(`连接中断，暂时无法确认${recovery.studentName}是否已兑换「${recovery.backgroundName}」。已暂停兑换、退款及商品修改；请重新加载并核对记录，避免重复扣除徽章。`, `The connection was interrupted. The redemption of ${recovery.backgroundName} for ${recovery.studentName} is not confirmed. Redemptions, refunds and reward changes are paused. Reload and check the records to avoid spending badges twice.`)}</p>
+      <p className="text-sm leading-relaxed">{recovery.result === 'saved' ? t(`${recovery.studentName} 的「${recovery.itemName}」兑换已保存，但最新数据未能加载。请重新加载核对记录，不要再次兑换或退款。`, `The redemption of ${recovery.itemName} for ${recovery.studentName} was saved, but the latest data could not load. Reload and check the records. Do not redeem or refund again.`) : t(`连接中断，暂时无法确认${recovery.studentName}是否已兑换「${recovery.itemName}」。已暂停兑换、退款及商品修改；请重新加载并核对记录，避免重复扣除徽章。`, `The connection was interrupted. The redemption of ${recovery.itemName} for ${recovery.studentName} is not confirmed. Redemptions, refunds and reward changes are paused. Reload and check the records to avoid spending badges twice.`)}</p>
       <div className="flex flex-wrap gap-2"><Button ref={recoveryButton} className="min-h-11 text-xs" busy={client.busy} onClick={async () => { if (await client.run(async () => {}, t('最新兑换记录已加载，请核对后继续。', 'Latest redemptions loaded. Check the records before continuing.'))) { recoveryLock.current = null; setRecovery(null); setTab('history'); requestAnimationFrame(() => document.getElementById(`${id}-tab-history`)?.focus()) } }}><RefreshCw size={15} aria-hidden="true" />{t('重新加载并核对记录', 'Reload and check records')}</Button><Button variant="ghost" className="min-h-11 text-xs" onClick={() => { setTab('history'); document.getElementById(`${id}-tab-history`)?.focus() }}><History size={15} aria-hidden="true" />{t('查看已有记录', 'View loaded records')}</Button></div>
     </div>}
     {tab !== 'history' && <>
@@ -230,7 +230,7 @@ export function ShopDialog({ client, locale, onClose, open = true, initialStuden
         <td className="min-w-32 break-words">{redemption.item_name[locale]}{redemption.background_id && <span className="mt-1 block text-xs leading-relaxed text-muted">{t('宠物背景 · 退款后撤销解锁', 'Pet background · refund revokes access')}</span>}</td>
         <td className="min-w-32 break-words text-xs leading-relaxed">{operationActorName(redemption, locale)}</td>
         <td className="tabular">{redemption.cost}</td>
-        <td className="whitespace-nowrap">{redemption.undone ? <span className="block max-w-48 whitespace-normal text-xs leading-relaxed">{t('已退款', 'Refunded')}{redemption.undone_by_name && <span className="mt-1 block">{t('退款者：', 'Refunded by: ')}{operationActorName(redemption, locale, true)}</span>}</span> : redemption.can_undo ? <Button variant="ghost" className="min-h-11 text-xs" disabled={writesDisabled} busy={refunding === redemption.id && client.busy} aria-label={t(`为${redemption.student_name}退回「${redemption.item_name.zh}」的 ${redemption.cost} 枚徽章`, `Refund ${redemption.cost} ${redemption.cost === 1 ? 'badge' : 'badges'} to ${redemption.student_name} for ${redemption.item_name.en}`)} onClick={async () => { if (backgroundSubmitting.current || recoveryLock.current || writesDisabled) return; setRefunding(redemption.id); try { if (await client.run(() => api(`redemptions/${redemption.id}/undo`, 'POST', {}), t('兑换已退款，徽章已退回。', 'Redemption refunded. Badges returned.'))) document.getElementById(`${id}-tab-history`)?.focus() } finally { setRefunding(null) } }}><Undo2 size={15} aria-hidden="true" />{t('退款', 'Refund')}</Button> : <span className="text-xs text-muted">{t('仅本人或负责人可退款', 'Author or owner only')}</span>}</td>
+        <td className="whitespace-nowrap">{redemption.undone ? <span className="block max-w-48 whitespace-normal text-xs leading-relaxed">{t('已退款', 'Refunded')}{redemption.undone_by_name && <span className="mt-1 block">{t('退款者：', 'Refunded by: ')}{operationActorName(redemption, locale, true)}</span>}</span> : redemption.can_undo ? <Button variant="ghost" className="min-h-11 text-xs" disabled={writesDisabled} busy={refunding === redemption.id && client.busy} aria-label={t(`为${redemption.student_name}退回「${redemption.item_name.zh}」的 ${redemption.cost} 枚徽章`, `Refund ${redemption.cost} ${redemption.cost === 1 ? 'badge' : 'badges'} to ${redemption.student_name} for ${redemption.item_name.en}`)} onClick={async () => { if (submitting.current || recoveryLock.current || writesDisabled) return; setRefunding(redemption.id); try { if (await client.run(() => api(`redemptions/${redemption.id}/undo`, 'POST', {}), t('兑换已退款，徽章已退回。', 'Redemption refunded. Badges returned.'))) document.getElementById(`${id}-tab-history`)?.focus() } finally { setRefunding(null) } }}><Undo2 size={15} aria-hidden="true" />{t('退款', 'Refund')}</Button> : <span className="text-xs text-muted">{t('仅本人或负责人可退款', 'Author or owner only')}</span>}</td>
       </tr>)}</tbody></table></div>}
     </section>
     {priceEditor && <BackgroundPriceDialog key={priceEditor.id} client={client} locale={locale} item={priceEditor} onClose={() => setPriceEditor(null)} />}
