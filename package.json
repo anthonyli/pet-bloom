@@ -48,6 +48,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@actions/artifact": "2.3.2",
     "@electron/rebuild": "4.2.1",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.15.0",

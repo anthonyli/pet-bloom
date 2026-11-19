@@ -27,11 +27,14 @@ async function tursoCommand() {
   try { await access(installed); return installed } catch { return 'turso' }
 }
 
-export async function main(args = process.argv.slice(2)) {
+export async function main(args = process.argv.slice(2), { persistBackup, backupAlways = false } = {}) {
   if (args.length > 1 || args.some(arg => !['--check', '--status', '--help'].includes(arg))) throw new MigrationError('用法 / Usage: pnpm db:migrate [--check | --status | --help]')
   if (args.includes('--help')) {
     console.log('pnpm db:check       只检查版本、历史及表结构 / Inspect version, history and schema\npnpm db:migrate     备份、恢复演练、事务迁移 / Backup, rehearse and migrate atomically')
     return
+  }
+  if (process.env.GITHUB_ACTIONS === 'true' && !args.includes('--check') && !args.includes('--status') && !persistBackup) {
+    throw new MigrationError('Actions 迁移必须先持久保存加密备份 / Actions migrations require durable encrypted backups')
   }
   const { current } = JSON.parse(await readFile(path.join(root, 'lib/server/schema-version.json'), 'utf8'))
   const migrations = await loadMigrations(path.join(root, 'migrations/turso'), current)
@@ -58,8 +61,9 @@ export async function main(args = process.argv.slice(2)) {
         exportDatabase: filename => capture(command, ['db', 'export', target.databaseName, '--output-file', filename])
       })
       console.log(`备份已验证 / Backup verified: ${backup.filename}`)
+      if (persistBackup) await persistBackup(backup)
       return backup
-    })
+    }, { backupAlways })
     console.log(result.applied.length
       ? `迁移完成 / Migration complete: v${result.version}; applied: ${result.applied.join(', ')}`
       : `数据库已是最新版本 / Database is current: v${result.version}`)

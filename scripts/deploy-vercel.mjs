@@ -42,7 +42,7 @@ export function validateRelease(deployment, alias, expectedId) {
 export function testEnvironment(source) {
   const env = { ...source }
   for (const key of Object.keys(env)) {
-    if (/^(TURSO_|VERCEL_|NEXT_PUBLIC_CLOUD_DEPLOYMENT$|DATABASE_PATH$|DESKTOP_TOKEN$)/.test(key) || key === 'VERCEL') delete env[key]
+    if (/^(TURSO_|VERCEL_|BACKUP_|ACTIONS_|GITHUB_TOKEN$|GH_TOKEN$|NEXT_PUBLIC_CLOUD_DEPLOYMENT$|DATABASE_PATH$|DESKTOP_TOKEN$)/.test(key) || key === 'VERCEL') delete env[key]
   }
   return env
 }
@@ -99,7 +99,7 @@ export async function release({ stage, migrate, promote, verify }) {
   return id
 }
 
-export async function main(args = process.argv.slice(2)) {
+export async function main(args = process.argv.slice(2), { migrateDatabase = () => run('pnpm', ['db:migrate']), beforePromote = async () => {} } = {}) {
   requireCondition(args.every(arg => ['--check', '--dry-run', '--help'].includes(arg)) && args.length <= 1,
     '用法 / Usage: pnpm deploy:vercel [--check | --dry-run | --help]')
   if (args.includes('--help')) {
@@ -146,8 +146,9 @@ export async function main(args = process.argv.slice(2)) {
         console.log(`待发布版本已就绪 / Staged deployment ready: ${id}`)
         return id
       },
-      migrate: () => run('pnpm', ['db:migrate']),
+      migrate: migrateDatabase,
       promote: async id => {
+        await beforePromote()
         promoting = true
         console.log('迁移成功，切换生产域名 / Migration succeeded; promoting production…')
         await cli(['promote', id, '--yes'])

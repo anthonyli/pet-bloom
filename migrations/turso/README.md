@@ -44,6 +44,8 @@ pnpm db:migrate  # 备份 → 迁移演练 → 原子迁移
 
 ## 数据保护与恢复
 
+合并到 main 后的 Actions 发布会在迁移前加密上传完整备份，确认上传成功才继续；即使没有待执行迁移也备份。配置、90 天留存及解密恢复说明见 [自动生产发布](../../docs/automatic-production.md)。以下本地快照路径适用于手动发布，Actions 临时文件在任务结束时清理。
+
 - 快照位于 `data/backups/turso/<时间-随机标识>/snapshot.db`，`manifest.json` 记录 SHA-256、版本和各表摘要。它包含所有教师账号、密码哈希、会话、班级、学生、评分、兑换和迁移元数据，不是网页中仅针对某位教师的 JSON 备份。目录权限为 `0700`，快照为 `0600`，并排除 Git/Vercel 上传。请将所需快照额外保存到受控备份存储；脚本不自动上传或清理备份。
 - Turso 导出可能带 WAL；脚本通过 SQLite backup API 合并为可独立打开的 `snapshot.db`，校验完整性和外键。演练核对原有字段、行数、rowid 和完整值摘要，随后回滚演练，保留迁移前快照。
 - 生产迁移在单个服务器端写事务批次中完成，使用结构/版本/历史断言阻止并发迁移，核对业务表行数和外键，最后才提交版本标记。迁移期间写入可能短暂等待。超限、约束错误或并发冲突会中止整批操作。
@@ -51,6 +53,8 @@ pnpm db:migrate  # 备份 → 迁移演练 → 原子迁移
 - 需要灾难恢复时，先保留当前数据库及新增数据，再校验快照 SHA-256 和 `PRAGMA integrity_check`，把快照导入**新的新加坡数据库**，验证账号和业务记录后再切换应用连接。不要直接覆盖活跃生产库，否则会丢掉快照之后产生的数据。恢复数据库名称变化时须同步更新部署目标配置和 Vercel 环境变量。
 
 ## English
+
+Automatic main-branch releases upload an encrypted, verified backup before migration, including releases without pending DDL. See [automatic production releases](../../docs/automatic-production.md) for secrets, retention and recovery. Local snapshots described below apply to manual deployments; Actions removes temporary copies after release.
 
 `pnpm db:check` inspects schema, migration history and pending files without database writes. `pnpm db:migrate` creates a verified full backup, rehearses the migration, then commits it atomically. The deployment script calls the same command after a successful staged build and before promotion. An authenticated Turso CLI and writable backup storage are required. Tokens expire after one day and remain in memory; application secrets are not retrieved.
 
