@@ -261,7 +261,7 @@ function migrateVersionNine(db: Database.Database) {
   }).immediate()
 }
 
-function migrateDatabase(db: Database.Database) {
+function migrateVersionTen(db: Database.Database) {
   const version = db.pragma('user_version', { simple: true }) as number
   if (version > 10) throw new Error('数据库版本高于当前应用版本')
   if (version === 10) return
@@ -272,6 +272,19 @@ function migrateDatabase(db: Database.Database) {
     db.exec('ALTER TABLE students ADD COLUMN archive_reason TEXT')
     db.exec('ALTER TABLE students ADD COLUMN archive_note TEXT')
     db.pragma('user_version = 10')
+  }).immediate()
+}
+
+function migrateDatabase(db: Database.Database) {
+  const version = db.pragma('user_version', { simple: true }) as number
+  if (version > 11) throw new Error('数据库版本高于当前应用版本')
+  if (version === 11) return
+  db.transaction(() => {
+    const current = db.pragma('user_version', { simple: true }) as number
+    if (current === 11) return
+    if (current < 10) migrateVersionTen(db)
+    db.exec('ALTER TABLE classes ADD COLUMN graduated_at INTEGER')
+    db.pragma('user_version = 11')
   }).immediate()
 }
 

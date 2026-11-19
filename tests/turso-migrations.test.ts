@@ -35,7 +35,7 @@ async function fixture(statements?: string[]) {
   const migrations = await loadMigrations(migrationDirectory, statements ? 9 : 8)
   const filename = path.join(directory, 'source.db')
   const db = createDatabase(filename)
-  db.exec('ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; PRAGMA user_version = 8')
+  db.exec('ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; ALTER TABLE classes DROP COLUMN graduated_at; PRAGMA user_version = 8')
   db.exec(`
     CREATE TABLE _pet_bloom_schema (id INTEGER PRIMARY KEY, version INTEGER NOT NULL, initialized_at INTEGER NOT NULL);
     INSERT INTO _pet_bloom_schema VALUES (1,8,123);
@@ -61,12 +61,28 @@ async function fixture(statements?: string[]) {
 }
 
 describe('Turso migrations preserve existing data', () => {
+  it('backs up every automatic release and stops before DDL if durable backup storage fails', async () => {
+    const f = await fixture(['ALTER TABLE classes ADD COLUMN example TEXT'])
+    await expect(migrate(f.client, f.migrations, async (state: unknown) => {
+      await f.backup(state)
+      throw new Error('artifact upload failed')
+    }, { backupAlways: true })).rejects.toThrow('artifact upload failed')
+    expect((await inspectState(f.client, f.migrations)).version).toBe(8)
+    expect((await f.client.execute('PRAGMA table_info(classes)')).rows.map(row => row.name)).not.toContain('example')
+    await migrate(f.client, f.migrations, f.backup)
+    // Export crosses libSQL and better-sqlite3 in this local fixture.
+    await f.client.execute('PRAGMA wal_checkpoint(TRUNCATE)')
+    const result = await migrate(f.client, f.migrations, f.backup, { backupAlways: true })
+    expect(result.applied).toEqual([])
+    expect(result.backup).toContain('snapshot.db')
+  })
   it('applies the committed archive expansion to v8 with a verified backup and no history loss', async () => {
     const f = await fixture()
     const migrations = await loadMigrations(path.join(root, 'migrations/turso'), schemaVersion.current)
     const before = (await f.client.execute('SELECT * FROM evaluations')).rows
     await migrate(f.client, migrations, f.backup)
     expect((await f.client.execute('SELECT archived_at, archive_reason, archive_note, points FROM students')).rows[0]).toEqual({ archived_at: null, archive_reason: null, archive_note: null, points: 40n })
+    expect((await f.client.execute('SELECT graduated_at FROM classes')).rows[0].graduated_at).toBeNull()
     expect((await f.client.execute('SELECT * FROM evaluations')).rows).toEqual(before)
     expect((await inspectState(f.client, migrations)).pending).toEqual([])
   })

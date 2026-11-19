@@ -19,7 +19,7 @@ import { normalizeItemImage } from './item-images'
 import { DomainError } from './errors'
 import { credentials, credentialError } from '../credentials'
 import { isGlobalAdmin } from './admin-access'
-import { hasClassOwnerAccess } from '../class-access'
+import { hasClassOwnerAccess, selectWorkspaceClass } from '../class-access'
 import type { AdminClassPage, AdminClassDetail, AdminClassSummary } from '../admin-types'
 export { credentials } from '../credentials'
 
@@ -54,7 +54,7 @@ export class Garden {
     // ABCD-14 owns the archived_at migration. Work before and after it lands.
     const columns = await this.db.prepare('PRAGMA table_info(students)').all() as { name: string }[]
     const archiveSupported = columns.some(column => column.name === 'archived_at')
-    const sql = `SELECT c.id, c.name, c.owner_id, c.created_at,
+    const sql = `SELECT c.id, c.name, c.owner_id, c.created_at, c.graduated_at,
       u.display_name AS owner_name, u.subject AS owner_subject,
       (SELECT COUNT(*) FROM students s WHERE s.class_id = c.id ${archiveSupported ? 'AND s.archived_at IS NULL' : ''}) AS active_students,
       ${archiveSupported ? '(SELECT COUNT(*) FROM students s WHERE s.class_id = c.id AND s.archived_at IS NOT NULL)' : '0'} AS archived_students,
@@ -76,22 +76,39 @@ export class Garden {
   }
   async adminClasses(actor: string, input: unknown): Promise<AdminClassPage> {
     await this.requireGlobalAdmin(actor)
-    const { page, pageSize, search } = z.object({
+    return this.listClassSummaries(actor, input, true)
+  }
+
+  async classDirectory(actor: string, input: unknown) {
+    await this.requireProfile(actor)
+    const globalAdmin = isGlobalAdmin(actor)
+    return { ...await this.listClassSummaries(actor, input, globalAdmin), globalAdmin }
+  }
+
+  private async listClassSummaries(actor: string, input: unknown, globalAdmin: boolean): Promise<AdminClassPage> {
+    const { page, pageSize, search, status } = z.object({
       page: z.coerce.number().int().min(1).max(1000000).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
-      search: z.string().trim().max(80).default('')
+      search: z.string().trim().max(80).default(''),
+      status: z.enum(['all', 'graduated']).default('all')
     }).parse(input)
     const { sql, archiveSupported } = await this.adminClassProjection()
     // Literal substring search: %, _ and backslash are not wildcard operators.
     const pattern = `%${search.replace(/[\\%_]/g, value => `\\${value}`)}%`
-    const where = " WHERE c.name LIKE ? ESCAPE '\\'"
-    const { total } = await this.db.prepare(`SELECT COUNT(*) AS total FROM classes c${where}`).get(pattern) as { total: number }
-    const classes = await this.db.prepare(`${sql}${where} ORDER BY c.created_at DESC, c.id ASC LIMIT ? OFFSET ?`).all(pattern, pageSize, (page - 1) * pageSize) as AdminClassSummary[]
+    const where = " WHERE c.name LIKE ? ESCAPE '\\'" + (globalAdmin ? '' : ' AND EXISTS (SELECT 1 FROM class_members m WHERE m.class_id = c.id AND m.user_id = ?)') + (status === 'graduated' ? ' AND c.graduated_at IS NOT NULL' : '')
+    const args = globalAdmin ? [pattern] : [pattern, actor]
+    const { total } = await this.db.prepare(`SELECT COUNT(*) AS total FROM classes c${where}`).get(...args) as { total: number }
+    const classes = await this.db.prepare(`${sql}${where} ORDER BY c.created_at DESC, c.id ASC LIMIT ? OFFSET ?`).all(...args, pageSize, (page - 1) * pageSize) as AdminClassSummary[]
     await this.attachAdminTeachers(classes)
     return { classes, total, page, pageSize, archiveSupported }
   }
   async adminClass(actor: string, id: string): Promise<AdminClassDetail> {
     await this.requireGlobalAdmin(actor)
+    return this.classSummary(actor, id)
+  }
+
+  async classSummary(actor: string, id: string): Promise<AdminClassDetail> {
+    await this.classroom(actor, id)
     const { sql, archiveSupported } = await this.adminClassProjection()
     const classroom = await this.db.prepare(`${sql} WHERE c.id = ?`).get(id) as AdminClassSummary | undefined
     if (!classroom) throw new DomainError('notFound', 404)
@@ -270,6 +287,14 @@ export class Garden {
     await this.db.transaction(async () => {
       await this.classroom(actor, id, true)
       await this.db.prepare('DELETE FROM classes WHERE id = ?').run(id)
+    }).immediate()
+  }
+  async graduateClass(actor: string, id: string) {
+    return await this.db.transaction(async () => {
+      await this.classroom(actor, id, true)
+      await this.db.prepare('UPDATE classes SET graduated_at = ? WHERE id = ? AND graduated_at IS NULL').run(now(), id)
+      const row = await this.db.prepare('SELECT graduated_at FROM classes WHERE id = ?').get(id) as { graduated_at: number }
+      return { id, graduated_at: row.graduated_at }
     }).immediate()
   }
   async classTeachers(actor: string, classId: string): Promise<ClassTeachers> {
@@ -566,7 +591,7 @@ export class Garden {
       const user = await this.user(actor)
       const globalAdmin = isGlobalAdmin(actor) ? 1 : 0
       const classes = user.profile_complete ? await this.db.prepare("SELECT c.*, CASE WHEN c.owner_id = ? THEN 'owner' WHEN ? = 1 THEN 'global_admin' ELSE 'admin' END AS role FROM classes c WHERE ? = 1 OR EXISTS (SELECT 1 FROM class_members m WHERE m.class_id = c.id AND m.user_id = ?) ORDER BY c.created_at, c.id").all(actor, globalAdmin, globalAdmin, actor) as Classroom[] : []
-      const selected = user.profile_complete ? classId || classes[0]?.id : undefined
+      const selected = user.profile_complete ? (classId || selectWorkspaceClass(classes)) || undefined : undefined
       const classroom = selected ? (await this.classroom(actor, selected)) : undefined
       const settings = await this.latestSettings(actor, selected)
       const festival_backgrounds = getFestivalBackgrounds(timestamp, settings.value.hunger.timeZone)

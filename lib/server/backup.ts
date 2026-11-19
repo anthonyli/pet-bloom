@@ -104,6 +104,11 @@ const archiveDetailsSchema = archiveSchema.extend({
   }).refine(row => row.archived_at !== null || (row.archive_reason === null && row.archive_note === null))).max(10000)
 })
 type ArchiveDetailsBackup = z.infer<typeof archiveDetailsSchema>
+const graduationSchema = archiveDetailsSchema.extend({
+  version: z.literal(10),
+  classes: z.array(common.classes.element.extend({ graduated_at: positive.nullable() }).strict()).max(200)
+})
+type GraduationBackup = z.infer<typeof graduationSchema>
 
 function upgradeBackgrounds(data: ScopedBackup): BackgroundBackup {
   return {
@@ -302,7 +307,7 @@ function validateCurrent(data: CurrentBackup) {
   for (const row of data.redemptions) if (row.stock_deducted && (!row.item_id || !itemIds.has(row.item_id))) fail()
 }
 
-function validateIds(data: CurrentBackup | ScopedBackup | BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup) {
+function validateIds(data: CurrentBackup | ScopedBackup | BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup | GraduationBackup) {
   for (const kind of rowKinds) {
     const ids = new Set<string>()
     for (const row of data[kind]) {
@@ -361,7 +366,7 @@ function exceedsScopedRecordLimits(data: Pick<ScopedBackup, 'rules' | 'settings'
   return false
 }
 
-function validateScoped(data: ScopedBackup | BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup) {
+function validateScoped(data: ScopedBackup | BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup | GraduationBackup) {
   validateIds(data)
   const fail = () => { throw new DomainError('invalidBackup') }
   if (exceedsScopedRecordLimits(data)) fail()
@@ -414,7 +419,7 @@ function validateScoped(data: ScopedBackup | BackgroundBackup | ArchiveBackup | 
   }
 }
 
-function validateBackgrounds(data: BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup) {
+function validateBackgrounds(data: BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup | GraduationBackup) {
   const fail = () => { throw new DomainError('invalidBackup') }
   const items = new Map(data.items.map(row => [row.id, row]))
   const scoped = new Map<string | null, Set<string>>()
@@ -470,19 +475,19 @@ export async function exportBackup(garden: Garden, owner: string) {
       WHERE (r.class_id IS NULL AND r.owner_id = ?) OR c.owner_id = ? OR (? = 1 AND c.id IS NOT NULL)
       ORDER BY CASE WHEN r.class_id IS NULL THEN 0 ELSE 1 END, c.rowid, ${order}
     `).all(owner, owner, globalAdmin))
-    const data: ArchiveDetailsBackup = {
-      version: 9, exportedAt: new Date().toISOString(),
+    const data: GraduationBackup = {
+      version: 10, exportedAt: new Date().toISOString(),
       settings: (await resources('settings_versions', 'r.id, r.class_id, r.version, r.value, r.created_at', 'r.version') as { id: string; class_id: string | null; version: number; value: string; created_at: number }[]).map(row => ({ ...row, value: JSON.parse(row.value) })),
       rules: await resources('rules', 'r.id, r.class_id, r.name, r.points, r.category, r.custom') as ScopedBackup['rules'],
       items: await resources('items', 'r.id, r.class_id, r.name, r.cost, r.active, r.description, r.category, r.icon, r.image, r.image_key, r.image_bytes, r.stock, r.background_id') as BackgroundBackup['items'],
-      classes: await db.prepare('SELECT id, name, created_at FROM classes WHERE owner_id = ? OR ? = 1 ORDER BY rowid').all(owner, globalAdmin) as ScopedBackup['classes'],
+      classes: await db.prepare('SELECT id, name, created_at, graduated_at FROM classes WHERE owner_id = ? OR ? = 1 ORDER BY rowid').all(owner, globalAdmin) as GraduationBackup['classes'],
       students: await db.prepare('SELECT s.id, s.class_id, s.name, s.student_no, s.points, s.pet_id, s.pet_exp, s.generation, s.spent_badges, s.created_at, s.background_id, s.archived_at, s.archive_reason, s.archive_note FROM students s JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY s.rowid').all(owner, globalAdmin) as ArchiveDetailsBackup['students'],
       evaluations: await db.prepare('SELECT e.id, e.batch_id, e.student_id, e.points, e.reason, e.category, e.generation, e.created_at, e.undone, e.actor_name, e.actor_subject, e.undone_by_name, e.undone_by_subject FROM evaluations e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY e.rowid').all(owner, globalAdmin) as ScopedBackup['evaluations'],
       badges: await db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY b.rowid').all(owner, globalAdmin) as ScopedBackup['badges'],
       redemptions: await db.prepare('SELECT r.id, r.student_id, r.item_id, r.item_name, r.cost, r.created_at, r.undone, r.stock_deducted, r.actor_name, r.actor_subject, r.undone_by_name, r.undone_by_subject, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY r.rowid').all(owner, globalAdmin) as BackgroundBackup['redemptions'],
       events: await db.prepare('SELECT e.* FROM growth_events e JOIN students s ON s.id = e.student_id JOIN classes c ON c.id = s.class_id WHERE (c.owner_id = ? OR ? = 1) ORDER BY e.seq').all(owner, globalAdmin) as ScopedBackup['events']
     }
-    if (exceedsScopedRecordLimits(data) || !archiveDetailsSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
+    if (exceedsScopedRecordLimits(data) || !graduationSchema.safeParse(data).success || Buffer.byteLength(JSON.stringify(data, null, 2)) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
     return data
   }).deferred()
 }
@@ -493,9 +498,13 @@ export async function restoreBackup(garden: Garden, owner: string, input: unknow
   try { serialized = JSON.stringify(input) } catch { throw new DomainError('invalidBackup') }
   if (serialized === undefined) throw new DomainError('invalidBackup')
   if (Buffer.byteLength(serialized) > MAX_BACKUP_BYTES) throw new DomainError('backupTooLarge', 413)
-  const version = z.object({ version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9)]) }).parse(input).version
-  let data: BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup
-  if (version === 9) {
+  const version = z.object({ version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10)]) }).parse(input).version
+  let data: BackgroundBackup | ArchiveBackup | ArchiveDetailsBackup | GraduationBackup
+  if (version === 10) {
+    const parsed = graduationSchema.safeParse(input)
+    if (!parsed.success) throw new DomainError('invalidBackup')
+    data = parsed.data
+  } else if (version === 9) {
     const parsed = archiveDetailsSchema.safeParse(input)
     if (!parsed.success) throw new DomainError('invalidBackup')
     data = parsed.data
@@ -550,7 +559,8 @@ export async function restoreBackup(garden: Garden, owner: string, input: unknow
     const statements: Statement[] = []
     for (const row of data.classes) {
       const classId = ref('classes', row.id)
-      statements.push({ sql: 'INSERT INTO classes (id, owner_id, name, created_at) VALUES (?, ?, ?, ?)', args: [classId, owner, row.name, row.created_at] })
+      const graduatedAt = 'graduated_at' in row && typeof row.graduated_at === 'number' ? row.graduated_at : null
+      statements.push({ sql: 'INSERT INTO classes (id, owner_id, name, created_at, graduated_at) VALUES (?, ?, ?, ?, ?)', args: [classId, owner, row.name, row.created_at, graduatedAt] })
       statements.push({ sql: 'INSERT INTO class_members (class_id, user_id, joined_at) VALUES (?, ?, ?)', args: [classId, owner, Date.now()] })
     }
     for (const row of data.settings) if (row.class_id !== null) statements.push({ sql: 'INSERT INTO settings_versions (id, owner_id, class_id, version, value, created_at) VALUES (?, ?, ?, ?, ?, ?)', args: [ref('settings', row.id), owner, ref('classes', row.class_id), row.version, JSON.stringify(row.value), row.created_at] })

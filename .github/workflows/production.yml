@@ -1,0 +1,61 @@
+name: 生产发布 / Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pet-bloom-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'anthonyli/pet-bloom' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: production
+    steps:
+      # Always use the newest approved main, including on reruns of old workflows.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+      - name: 安装依赖 / Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: 安装固定版本 Turso CLI / Install pinned Turso CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/turso-cli"
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/tursodatabase/turso-cli/releases/download/v1.0.34/turso-cli_Linux_x86_64.tar.gz \
+            -o "$RUNNER_TEMP/turso-cli.tar.gz"
+          echo "9eb67f3efece578a6407d1fa535a75e8d7b5cde4f6af3ac1dd79929e99768dc9  $RUNNER_TEMP/turso-cli.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/turso-cli.tar.gz" -C "$RUNNER_TEMP/turso-cli"
+          echo "$RUNNER_TEMP/turso-cli" >> "$GITHUB_PATH"
+      # A JavaScript action provides the artifact runtime credentials to its child.
+      # Secrets are scoped to this step, never dependency installation or test jobs.
+      - name: 构建、备份、迁移并发布 / Build, back up, migrate and publish
+        uses: actions/github-script@v7
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          TURSO_API_TOKEN: ${{ secrets.TURSO_API_TOKEN }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+          NEXT_TELEMETRY_DISABLED: '1'
+        with:
+          script: |
+            for (const key of ['VERCEL_TOKEN', 'TURSO_API_TOKEN', 'BACKUP_ENCRYPTION_KEY']) {
+              if (!process.env[key]) throw new Error(`Missing production secret: ${key}`)
+              core.setSecret(process.env[key])
+            }
+            await exec.exec('node', ['scripts/deploy-github.mjs'])
