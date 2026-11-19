@@ -40,6 +40,7 @@ const errors: Record<string, [string, string]> = {
   notFound: ['找不到该数据，或你没有访问权限，请刷新后重试。', 'This item is unavailable. Please refresh and try again.'],
   studentArchived: ['该学生已归档。请在“归档”中恢复后再操作。', 'This student is archived. Restore them from Archive before continuing.'],
   groupNameTaken: ['这个班级里已经有同名小组，请换一个名称。', 'This class already has a group with that name. Choose another name.'],
+  groupMembersChanged: ['小组成员已更新，请刷新班级后重新选择。', 'Group membership has changed. Refresh the class and select the students again.'],
   groupLimit: ['这个班级的小组已达 200 个上限。', 'This class has reached the limit of 200 groups.'],
   petNotGraduated: ['当前宠物还未毕业，达到 8 级后可以领养新宠物。', 'Your current pet must reach level 8 before you adopt another.'],
   badgeAlreadySpent: ['这次撤回会收回已用于兑换的徽章，请先撤销对应兑换。', 'This undo would remove badges already spent. Undo the corresponding redemption first.'],

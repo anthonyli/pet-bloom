@@ -1,86 +1,200 @@
 'use client'
-import { useId, useState } from 'react'
-import { Plus, Save, Users, X } from 'lucide-react'
-import { Button, Checkbox, Field, Input } from '@/components/ui'
+
+import { useEffect, useId, useRef, useState } from 'react'
+import { CircleAlert, Pencil, Plus, Save, Search, UsersRound } from 'lucide-react'
+import { Button, Checkbox, Dialog, Field, Input } from '@/components/ui'
 import { translator } from '@/lib/i18n'
-import type { ClassGroup, Locale } from '@/lib/types'
-import { api, type GardenClient } from './use-garden'
+import type { ClassGroup, Locale, Student } from '@/lib/types'
+import { api, ApiError, type GardenClient } from './use-garden'
 
-export function ClassGroupsPanel({ client, locale, classId }: { client: GardenClient; locale: Locale; classId: string }) {
+type GroupEditor = {
+  group?: ClassGroup
+  name: string
+  selectedIds: Set<string>
+  previousMemberIds: string[]
+}
+
+type GroupMember = { studentId: string; groupId: string | null }
+type GroupReview = {
+  members: GroupMember[]
+  transfers: { student: Student; from: string }[]
+}
+
+export function ClassGroupsDialog({ client, locale, classId, onClose }: { client: GardenClient; locale: Locale; classId: string; onClose: () => void }) {
   const t = translator(locale), id = useId()
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [draft, setDraft] = useState(''), [nameError, setNameError] = useState('')
-  const [membersOf, setMembersOf] = useState<string | null>(null)
+  const [editor, setEditor] = useState<GroupEditor | null>(null)
+  const [query, setQuery] = useState('')
+  const [review, setReview] = useState<GroupReview | null>(null)
+  const [stale, setStale] = useState(false)
+  const [reloading, setReloading] = useState(false)
+  const busy = client.busy || reloading
+  const reviewHeading = useRef<HTMLHeadingElement>(null)
   const groups = (client.state?.groups || []).filter(group => group.class_id === classId)
-  const students = client.state?.students || []
-  const groupName = (groupId: string | null | undefined) => groups.find(group => group.id === groupId)?.name
+  const students = (client.state?.students || []).filter(student => student.class_id === classId)
+  const groupNames = new Map(groups.map(group => [group.id, group.name]))
 
-  async function createGroup() {
-    setNameError('')
-    await client.run(() => api(`classes/${classId}/groups`, 'POST', { locale }), t('小组已创建。', 'Group created.'))
-  }
-  function edit(group: ClassGroup) {
-    setEditingId(group.id); setDraft(group.name); setNameError(''); client.setNotice(null)
-  }
-  async function save(group: ClassGroup) {
-    if (!draft.trim()) { setNameError(t('小组名称不能为空。', 'Enter a group name.')); return }
-    setNameError('')
-    const ok = await client.run(() => api(`groups/${group.id}`, 'PATCH', { name: draft }), t('小组名称已保存。', 'Group name saved.'))
-    if (ok) setEditingId(null)
-  }
-  async function toggle(groupId: string, studentId: string, assigned: boolean) {
-    await client.run(() => api(`groups/${groupId}/members/${studentId}`, assigned ? 'POST' : 'DELETE'), assigned ? t('学生已加入小组。', 'Student added to the group.') : t('学生已移出小组。', 'Student removed from the group.'))
+  useEffect(() => {
+    if (review) reviewHeading.current?.focus()
+  }, [review])
+
+  function edit(group?: ClassGroup, roster = students) {
+    const previousMemberIds = group ? roster.filter(student => student.group_id === group.id).map(student => student.id) : []
+    setEditor({ group, name: group?.name || '', selectedIds: new Set(previousMemberIds), previousMemberIds })
+    setQuery('')
+    setReview(null)
+    setStale(false)
+    client.setNotice(null)
   }
 
-  return <section className="mt-7 border-t border-line pt-5" aria-labelledby={`${id}-title`}>
-    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-      <div className="min-w-0 flex-1">
-        <h3 id={`${id}-title`} className="flex items-center gap-2 text-base font-bold"><Users size={18} className="text-primary" aria-hidden="true" />{t('小组', 'Groups')}</h3>
-        <p id={`${id}-hint`} className="mt-2 text-sm leading-relaxed text-muted">{t('把在班学生分到小组。未分组的学生仍留在班名单中，一名学生同时只属于一个小组。', 'Organize active students into groups. Students without a group stay on the class roster. A student belongs to only one group.')}</p>
+  function back() {
+    setEditor(null)
+    setReview(null)
+    setStale(false)
+    client.setNotice(null)
+  }
+
+  function toggle(studentId: string, checked: boolean) {
+    setEditor(current => {
+      if (!current) return current
+      const selectedIds = new Set(current.selectedIds)
+      if (checked) selectedIds.add(studentId)
+      else selectedIds.delete(studentId)
+      return { ...current, selectedIds }
+    })
+  }
+
+  async function save(draft: GroupEditor, members: GroupMember[]) {
+    const name = draft.name.trim()
+    const group = draft.group
+    let hasConflict = false
+    const ok = await client.run(async () => {
+      try {
+        await (group
+          ? api(`groups/${group.id}`, 'PATCH', { name, members, previousMemberIds: draft.previousMemberIds })
+          : api(`classes/${classId}/groups`, 'POST', { locale, name: name || undefined, members }))
+      } catch (error) {
+        hasConflict = error instanceof ApiError && ['groupMembersChanged', 'studentArchived'].includes(error.code)
+        throw error
+      }
+    }, group ? t('小组已保存。', 'Group saved.') : t('小组已创建。', 'Group created.'))
+    if (ok) {
+      setEditor(null)
+      setReview(null)
+    } else if (hasConflict) {
+      setStale(true)
+      setReview(null)
+    }
+  }
+
+  async function reload(draft: GroupEditor) {
+    setReloading(true)
+    client.setNotice(null)
+    try {
+      const next = await client.refresh(classId)
+      if (!next?.classes.some(item => item.id === classId)) return
+      const group = next.groups.find(item => item.id === draft.group?.id)
+      if (group) edit(group, next.students)
+      else if (draft.group) back()
+      else {
+        const activeIds = new Set(next.students.map(student => student.id))
+        setEditor({ ...draft, selectedIds: new Set([...draft.selectedIds].filter(studentId => activeIds.has(studentId))) })
+        setStale(false)
+      }
+    } catch (error) {
+      client.report(error)
+    } finally {
+      setReloading(false)
+    }
+  }
+
+  function submit(draft: GroupEditor) {
+    if (busy || stale) return
+    const selected = students.filter(student => draft.selectedIds.has(student.id))
+    const members = selected.map(student => ({ studentId: student.id, groupId: student.group_id ?? null }))
+    const transfers = selected.flatMap(student => {
+      const from = student.group_id && student.group_id !== draft.group?.id ? groupNames.get(student.group_id) : undefined
+      return from ? [{ student, from }] : []
+    })
+    if (transfers.length) setReview({ members, transfers })
+    else void save(draft, members)
+  }
+
+  const title = !editor ? t('小组管理', 'Group management') : editor.group ? t('编辑小组', 'Edit group') : t('新建小组', 'New group')
+  const matching = students.filter(student => `${student.name} ${student.student_no}`.toLowerCase().includes(query.trim().toLowerCase()))
+  const selectedCount = students.filter(student => editor?.selectedIds.has(student.id)).length
+  const error = client.notice?.error ? client.notice.text : ''
+
+  return <Dialog open onClose={() => { if (!busy) onClose() }} icon={UsersRound} title={title}>
+    {!editor ? <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button type="button" variant="primary" disabled={client.busy} onClick={() => edit()}><Plus size={16} aria-hidden="true" />{t('新建小组', 'New group')}</Button>
       </div>
-      <Button type="button" variant="primary" busy={client.busy} aria-describedby={`${id}-hint`} onClick={() => { void createGroup() }}><Plus size={16} />{t('新建小组', 'New group')}</Button>
-    </div>
-    {!groups.length ? <p className="text-sm text-muted">{t('还没有小组。新建后会自动命名，无需先填写名称，之后可以修改。', 'No groups yet. A new group is named automatically, with no need to type a name first. You can rename it afterwards.')}</p> : <ul className="space-y-3">
-      {groups.map(group => {
-        const count = students.filter(student => student.group_id === group.id).length
-        const editing = editingId === group.id
-        const errorText = editing ? nameError || (client.notice?.error ? client.notice.text : '') : ''
-        return <li key={group.id} className="rounded-2xl border border-line p-3">
-          {editing ? <form className="space-y-3" onSubmit={event => { event.preventDefault(); void save(group) }}>
-            <Field id={`${id}-name-${group.id}`} label={t('小组名称', 'Group name')}>
-              <Input id={`${id}-name-${group.id}`} value={draft} maxLength={80} required autoFocus disabled={client.busy} aria-invalid={!!errorText} aria-describedby={errorText ? `${id}-error-${group.id}` : undefined} onChange={event => { setDraft(event.target.value); setNameError(''); client.setNotice(null) }} />
-            </Field>
-            {errorText && <p id={`${id}-error-${group.id}`} role="alert" className="text-sm text-danger">{errorText}</p>}
-            <div className="flex flex-wrap gap-2">
-              <Button type="submit" variant="primary" busy={client.busy}><Save size={16} />{t('保存名称', 'Save name')}</Button>
-              <Button type="button" disabled={client.busy} onClick={() => { setEditingId(null); setNameError('') }}><X size={16} />{t('取消', 'Cancel')}</Button>
-            </div>
-          </form> : <div className="flex flex-wrap items-center justify-between gap-2">
+      {groups.length ? <ul className="divide-y divide-line border-y border-line">
+        {groups.map(group => {
+          const count = students.filter(student => student.group_id === group.id).length
+          return <li key={group.id} className="flex items-center justify-between gap-3 py-3">
             <div className="min-w-0">
-              <p className="truncate font-semibold">{group.name}</p>
-              <p className="text-xs text-muted">{t(`${count} 名在班学生`, count === 1 ? '1 active student' : `${count} active students`)}</p>
+              <div className="break-words font-semibold">{group.name}</div>
+              <div className="mt-0.5 text-xs text-muted">{t(`${count} 名学生`, count === 1 ? '1 student' : `${count} students`)}</div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" disabled={client.busy} onClick={() => edit(group)}>{t('修改名称', 'Rename')}</Button>
-              <Button type="button" disabled={client.busy} aria-expanded={membersOf === group.id} onClick={() => setMembersOf(membersOf === group.id ? null : group.id)}>{t('成员', 'Members')}</Button>
-            </div>
-          </div>}
-          {membersOf === group.id && <fieldset className="mt-3 border-t border-line pt-3">
-            <legend className="mb-2 text-sm font-medium">{t(`「${group.name}」的在班学生`, `Active students in “${group.name}”`)}</legend>
-            <p className="mb-3 text-xs leading-relaxed text-muted">{t('勾选即可加入，取消勾选即可移出。勾选其他小组的学生会把他们移入当前小组。', 'Check to add a student, and clear the box to remove them. Selecting a student from another group moves them here.')}</p>
-            {!students.length ? <p className="text-sm text-muted">{t('班里还没有在班学生。', 'This class has no active students yet.')}</p> : <ul className="max-h-48 space-y-2 overflow-y-auto pr-1">
-              {students.map(student => {
-                const checked = student.group_id === group.id
-                const other = !checked ? groupName(student.group_id) : ''
-                return <li key={student.id}><label className="flex items-start gap-3 text-sm leading-relaxed">
-                  <Checkbox checked={checked} disabled={client.busy} onCheckedChange={value => { void toggle(group.id, student.id, value) }} aria-label={t(`${checked ? '移出' : '加入'} ${student.name}`, `${checked ? 'Remove' : 'Add'} ${student.name}`)} />
-                  <span className="min-w-0">{student.name}{student.student_no ? ` · ${student.student_no}` : ''}{other ? <span className="text-muted">{t(`（当前在${other}）`, ` (currently in ${other})`)}</span> : null}</span>
-                </label></li>
-              })}
-            </ul>}
-          </fieldset>}
-        </li>
-      })}
-    </ul>}
-  </section>
+            <Button type="button" variant="ghost" className="shrink-0 px-3" disabled={client.busy} onClick={() => edit(group)} aria-label={t(`编辑小组 ${group.name}`, `Edit group ${group.name}`)}><Pencil size={15} aria-hidden="true" />{t('编辑小组', 'Edit group')}</Button>
+          </li>
+        })}
+      </ul> : <p className="border-t border-line py-5 text-sm text-muted">{t('这个班级还没有小组。', 'This class has no groups yet.')}</p>}
+    </div> : review ? <div className="space-y-4">
+      <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-4 text-amber-950">
+        <CircleAlert size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
+        <div className="min-w-0">
+          <h2 ref={reviewHeading} tabIndex={-1} className="text-sm font-semibold">{t('确认转组', 'Review group transfers')}</h2>
+          <p className="mt-1 break-words text-sm leading-relaxed">{editor.name.trim() ? t(`保存后，以下学生会从原小组转入「${editor.name.trim()}」。`, `Saving moves these students from their current groups to “${editor.name.trim()}”.`) : t('保存后，以下学生会从原小组转入新小组。', 'Saving moves these students from their current groups to the new group.')}</p>
+        </div>
+      </div>
+      <ul className="max-h-44 divide-y divide-line overflow-y-auto border-y border-line">
+        {review.transfers.map(({ student, from }) => <li key={student.id} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 break-words py-2.5 text-sm">
+          <span className="min-w-0 font-medium">{student.name}{student.student_no && <span className="ml-2 font-normal text-muted">{student.student_no}</span>}</span>
+          <span className="min-w-0 text-muted">{t(`原小组：${from}`, `From ${from}`)}</span>
+        </li>)}
+      </ul>
+      {error && <p className="text-sm text-danger">{error}</p>}
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button type="button" disabled={client.busy} onClick={() => { setReview(null); client.setNotice(null) }}>{t('返回修改', 'Back to editing')}</Button>
+        <Button type="button" variant="primary" busy={client.busy} onClick={() => void save(editor, review.members)}><Save size={16} aria-hidden="true" />{t('确认转组并保存', 'Confirm transfers and save')}</Button>
+      </div>
+    </div> : <form className="space-y-4" onSubmit={event => { event.preventDefault(); submit(editor) }}>
+      <Field id={`${id}-name`} label={t('小组名称', 'Group name')}>
+        <Input id={`${id}-name`} value={editor.name} onChange={event => setEditor({ ...editor, name: event.target.value })} placeholder={editor.group ? undefined : t('留空时自动命名', 'Leave blank for an automatic name')} maxLength={80} required={!!editor.group} autoFocus disabled={busy} />
+      </Field>
+      <fieldset disabled={busy}>
+        <legend className="mb-2 text-sm font-semibold">{t('选择成员', 'Choose members')}</legend>
+        {students.length ? <>
+          <div className="relative mb-2">
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
+            <Input className="pl-9" aria-label={t('搜索小组成员', 'Search group members')} placeholder={t('搜索姓名或学号', 'Search name or student number')} value={query} onChange={event => setQuery(event.target.value)} />
+          </div>
+          <ul className="max-h-48 divide-y divide-line overflow-y-auto rounded-xl border border-line">
+            {matching.length ? matching.map(student => {
+              const studentGroup = student.group_id ? groupNames.get(student.group_id) : undefined
+              return <li key={student.id}>
+                <label className="flex min-h-11 cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-sm hover:bg-primary/5">
+                  <Checkbox checked={editor.selectedIds.has(student.id)} onCheckedChange={checked => toggle(student.id, checked)} disabled={busy} />
+                  <span className="min-w-20 flex-1 break-words font-medium">{student.name}{student.student_no && <span className="ml-2 text-xs font-normal text-muted">{student.student_no}</span>}</span>
+                  <span className="min-w-0 max-w-[45%] break-words text-xs text-muted">{studentGroup || t('未分组', 'Ungrouped')}</span>
+                </label>
+              </li>
+            }) : <li className="px-3 py-4 text-sm text-muted">{t('没有匹配的学生。', 'No matching students.')}</li>}
+          </ul>
+          <p className="mt-2 text-xs text-muted" aria-live="polite">{t(`已选 ${selectedCount} 名学生`, selectedCount === 1 ? '1 student selected' : `${selectedCount} students selected`)}</p>
+        </> : <p className="text-sm text-muted">{t('班里还没有在班学生。', 'This class has no active students yet.')}</p>}
+      </fieldset>
+      {stale ? <div className="space-y-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-950">
+        <p role="alert">{t('成员所属小组已更新，请重新加载后确认选择。', 'Group assignments have changed. Reload and review your selection.')}</p>
+        <Button type="button" busy={reloading} onClick={() => void reload(editor)}>{t('重新加载成员', 'Reload members')}</Button>
+      </div> : null}
+      {error && !stale && <p className="text-sm text-danger">{error}</p>}
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button type="button" disabled={busy} onClick={back}>{t('返回小组列表', 'Back to groups')}</Button>
+        <Button type="submit" variant="primary" busy={client.busy} disabled={stale || reloading || (!!editor.group && !editor.name.trim())}><Save size={16} aria-hidden="true" />{editor.group ? t('保存小组', 'Save group') : t('创建小组', 'Create group')}</Button>
+      </div>
+    </form>}
+  </Dialog>
 }

@@ -132,6 +132,50 @@ describe('班级小组', () => {
     expect((await state(owner, otherClass)).students[0].name).toBe('外班学生')
   })
 
+  it('小组成员变更保留归档学生，校验失败时回滚名称和成员', async () => {
+    const group = await garden.createGroup(owner, classId, { name: '红组', members: [{ studentId, groupId: null }] })
+    await garden.setStudentArchived(owner, studentId, true)
+    const otherClass = (await garden.createClass(owner, { name: '另一个班' })).id
+    const [foreignStudentId] = await garden.addStudents(owner, { classId: otherClass, students: [{ name: '外班学生' }] })
+    await expectError(() => garden.renameGroup(owner, group.id, {
+      name: '失败时回滚', previousMemberIds: [], members: [{ studentId: foreignStudentId, groupId: null }]
+    }), 'notFound', 404)
+    await expectError(() => garden.createGroup(owner, classId, {
+      name: '不能选择已归档学生', members: [{ studentId, groupId: group.id }]
+    }), 'studentArchived', 409)
+    expect((await state()).groups.map(row => row.name)).toEqual(['红组'])
+    await garden.renameGroup(owner, group.id, { name: '蓝组', previousMemberIds: [], members: [{ studentId: otherStudentId, groupId: null }] })
+    await garden.renameGroup(owner, group.id, { name: '蓝组', previousMemberIds: [otherStudentId], members: [] })
+    expect(await memberships()).toEqual([{ group_id: group.id, student_id: studentId }])
+    expect((await state()).groups.map(row => row.name)).toEqual(['蓝组'])
+  })
+
+  it('并发调整小组时拒绝过期的学生归属和成员名单', async () => {
+    const selection = [{ studentId, groupId: null }]
+    const first = await garden.createGroup(owner, classId, { name: '先保存的组', members: selection })
+    await expectError(() => garden.createGroup(admin, classId, { name: '后保存的组', members: selection }), 'groupMembersChanged', 409)
+    await garden.setGroupMember(admin, first.id, otherStudentId, true)
+    await expectError(() => garden.renameGroup(owner, first.id, {
+      name: '旧名单改名', previousMemberIds: [studentId], members: [{ studentId, groupId: first.id }]
+    }), 'groupMembersChanged', 409)
+    const current = await state()
+    expect(current.groups.map(row => row.name)).toEqual(['先保存的组'])
+    expect(current.students.every(student => student.group_id === first.id)).toBe(true)
+  })
+
+  it('新增和编辑学生时只能使用该班级的小组', async () => {
+    const otherClass = (await garden.createClass(owner, { name: '二班' })).id
+    const foreignGroup = await garden.createGroup(owner, otherClass, {})
+    await expectError(() => garden.addStudents(owner, {
+      classId, groupId: foreignGroup.id, students: [{ name: '不应新增' }, { name: '也不应新增' }]
+    }), 'notFound', 404)
+    await expectError(() => garden.updateStudent(owner, studentId, { name: '不应改名', groupId: foreignGroup.id }), 'notFound', 404)
+    const current = await state()
+    expect(current.students).toHaveLength(2)
+    expect(current.students.find(student => student.id === studentId)).toMatchObject({ name: '林小橙', group_id: null })
+    expect(await memberships()).toEqual([])
+  })
+
   it('达到上限后拒绝新建，已有小组不受影响', async () => {
     const first = await garden.createGroup(owner, classId, { locale: 'zh' })
     const insert = garden.db.prepare('INSERT INTO class_groups (id, class_id, name, created_at) VALUES (?, ?, ?, ?)')
@@ -309,5 +353,34 @@ describe('小组 HTTP 接口', () => {
     const unchanged = await (await request(`state?classId=${httpClass}`)).json()
     expect(unchanged.groups.map((group: { name: string }) => group.name)).toEqual(['蓝队', 'Group 1'])
     expect(unchanged.students[0]).toMatchObject({ name: 'HTTP学生', student_no: '01', group_id: null })
+  })
+
+  it('建组可转入学生，名单可替换，新增和编辑学生可保存分组', async () => {
+    const groupPath = `classes/${httpClass}/groups`
+    const first = await (await request(groupPath, 'POST', { name: '原来的组' })).json()
+    const { students } = await (await request(`state?classId=${httpClass}`)).json()
+    const existing = students[0].id as string
+    expect((await request(`groups/${first.id}/members/${existing}`, 'POST')).status).toBe(200)
+    const created = await request(groupPath, 'POST', { name: '新建的组', members: [{ studentId: existing, groupId: first.id }] })
+    expect(created.status).toBe(200)
+    const second = await created.json()
+    const added = await request('students', 'POST', { classId: httpClass, groupId: first.id, students: [{ name: '学生甲' }, { name: '学生乙' }] })
+    expect(added.status).toBe(200)
+    const [firstAdded, secondAdded] = (await added.json()).ids as string[]
+    expect((await request(`students/${firstAdded}`, 'PATCH', { name: '学生甲已改名' })).status).toBe(200)
+    expect((await request(`students/${secondAdded}`, 'PATCH', { name: '学生乙', groupId: second.id })).status).toBe(200)
+    expect((await request(`groups/${second.id}`, 'PATCH', {
+      name: '修改后的小组', previousMemberIds: [existing, secondAdded], members: [{ studentId: secondAdded, groupId: second.id }]
+    })).status).toBe(200)
+    const changed = await (await request(`state?classId=${httpClass}`)).json()
+    expect(changed.groups).toEqual(expect.arrayContaining([expect.objectContaining({ id: second.id, name: '修改后的小组' })]))
+    expect(changed.students).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: existing, group_id: null }),
+      expect.objectContaining({ id: firstAdded, group_id: first.id, name: '学生甲已改名' }),
+      expect.objectContaining({ id: secondAdded, group_id: second.id })
+    ]))
+    expect((await request(`students/${secondAdded}`, 'PATCH', { name: '学生乙', groupId: null })).status).toBe(200)
+    const cleared = await (await request(`state?classId=${httpClass}`)).json()
+    expect(cleared.students).toEqual(expect.arrayContaining([expect.objectContaining({ id: secondAdded, group_id: null })]))
   })
 })

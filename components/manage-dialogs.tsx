@@ -10,7 +10,6 @@ import { translator, categories, categoryName, localizedUserText, errorMessage }
 import type { Locale, Student, Classroom } from '@/lib/types'
 import { api, ApiError, type GardenClient } from './use-garden'
 import { GardenSettingsForm } from './garden-settings-form'
-import { ClassGroupsPanel } from './class-groups'
 import { TeacherProfileForm, teachingRoleName } from './teacher-profile'
 
 export function ClassDialog({ client, locale, classroom, onClose }: { client: GardenClient; locale: Locale; classroom?: Classroom; onClose: () => void }) {
@@ -21,7 +20,6 @@ export function ClassDialog({ client, locale, classroom, onClose }: { client: Ga
       <Field label={t('班级名称', 'Class name')} id="class-name"><Input id="class-name" value={name} onChange={event => setName(event.target.value)} required maxLength={80} autoFocus placeholder={t('例如：三年级一班', 'For example: Class 3A')} /></Field>
       <Button type="submit" variant="primary" busy={client.busy} className="w-full"><Save size={16} />{t('保存班级', 'Save class')}</Button>
     </form>
-    {classroom && <ClassGroupsPanel client={client} locale={locale} classId={classroom.id} />}
     {classroom?.graduated_at != null && <p className="mt-5 rounded-xl bg-[#f7f5fb] px-4 py-3 text-sm leading-relaxed text-muted" role="status">{t('此班级已毕业，数据仍保留，且不会出现在左上角切换列表。', 'This class has graduated. Its data is kept, and it stays out of the class switcher.')}</p>}
     {hasClassOwnerAccess(classroom) && classroom && classroom.graduated_at == null && <div className="mt-7 border-t border-line pt-5">{confirmGraduate && <p className="mb-3 text-sm leading-relaxed">{t('设为毕业后，此班级不再出现在左上角切换列表。学生、评价、徽章和兑换记录都会保留，可从头像菜单的「毕业班级」打开。此操作不会删除数据。', 'After graduation, this class leaves the class switcher. Students, evaluations, badges and redemptions stay and can be opened from Graduated classes in the account menu. This does not delete data.')}</p>}<Button busy={client.busy} onClick={async () => { client.setNotice(null); if (!confirmGraduate) return setConfirmGraduate(true); if (await client.run(() => api(`classes/${classroom.id}/graduate`, 'POST', {}), t('班级已设为毕业，数据已保留。', 'Class marked as graduated. Data kept.'), nextActive())) onClose() }}><GraduationCap size={16} />{confirmGraduate ? t('确认设为毕业', 'Confirm graduation') : t('设为毕业班级', 'Mark as graduated')}</Button></div>}
     {hasClassOwnerAccess(classroom) && classroom && <div className="mt-7 border-t border-line pt-5">{confirmDelete && <p className="mb-3 text-sm leading-relaxed text-danger">{t('将永久删除此班级的学生、评价、徽章和兑换记录。此操作无法撤销。', 'This permanently deletes the class, students, evaluations, badges and redemptions. This cannot be undone.')}</p>}<Button variant="danger" busy={client.busy} onClick={async () => { if (!confirmDelete) return setConfirmDelete(true); if (await client.run(() => api(`classes/${classroom.id}`, 'DELETE'), t('班级已删除。', 'Class deleted.'), '')) onClose() }}><Trash2 size={16} />{confirmDelete ? t('确认永久删除', 'Confirm permanent deletion') : t('删除这个班级', 'Delete this class')}</Button></div>}
@@ -29,14 +27,40 @@ export function ClassDialog({ client, locale, classroom, onClose }: { client: Ga
 }
 export function StudentDialog({ client, locale, student, importing, onClose }: { client: GardenClient; locale: Locale; student?: Student; importing?: boolean; onClose: () => void }) {
   const t = translator(locale), [name, setName] = useState(student?.name || ''), [number, setNumber] = useState(student?.student_no || ''), [lines, setLines] = useState(''), [confirmDelete, setConfirmDelete] = useState(false)
+  const [groupId, setGroupId] = useState(student?.group_id ?? 'ungrouped')
   const [acceptNames, setAcceptNames] = useState(false), [confirmArchive, setConfirmArchive] = useState(false)
   const [archiveReason, setArchiveReason] = useState('unspecified'), [archiveNote, setArchiveNote] = useState('')
+  const groups = client.state?.groups.filter(group => group.class_id === client.classId) ?? []
   const parsed = parseStudentList(lines)
   const ambiguous = parsed.some(row => row.ambiguous), invalid = parsed.some(row => row.invalid)
   return <Dialog open onClose={onClose} icon={importing ? Upload : UserRound} title={importing ? t('批量导入学生', 'Import students') : student ? t('编辑学生', 'Edit student') : t('添加学生', 'Add a student')} description={importing ? t('每行一名学生，姓名和学号用空格、逗号或分号分隔。每次最多 500 名。', 'One student per line. Separate the name and student number with a comma, semicolon or space. Up to 500 students.') : undefined}>
-    <form className="form-stack" onSubmit={async event => { event.preventDefault(); const ok = await client.run(() => student ? api(`students/${student.id}`, 'PATCH', { name, studentNo: number }) : api('students', 'POST', { classId: client.classId, students: importing ? parsed : [{ name, studentNo: number }] }), t('学生信息已保存。', 'Students saved.')); if (ok) onClose() }}>
+    <form className="form-stack" onSubmit={async event => {
+      event.preventDefault()
+      const details = { name, studentNo: number }
+      const nextGroupId = groupId === 'ungrouped' ? null : groupId
+      const ok = await client.run(() => {
+        if (student) {
+          return api(`students/${student.id}`, 'PATCH', {
+            ...details,
+            groupId: nextGroupId !== (student.group_id ?? null) ? nextGroupId : undefined,
+          })
+        }
+        return api('students', 'POST', {
+          classId: client.classId,
+          students: importing ? parsed : [details],
+          groupId: nextGroupId ?? undefined,
+        })
+      }, t('学生信息已保存。', 'Students saved.'))
+      if (ok) onClose()
+    }}>
       {importing ? <Field label={t('学生名单', 'Student list')} id="student-list"><Textarea id="student-list" value={lines} onChange={event => { setLines(event.target.value); setAcceptNames(false) }} required placeholder={locale === 'zh' ? '林小橙 01\n陈子禾 02' : 'Olivia, 01\nNoah, 02'} /><p className="mt-2 text-xs text-muted">{parsed.length} {t('名学生待导入', 'students to import')}</p></Field> : <><Field label={t('学生姓名', 'Student name')} id="student-name"><Input id="student-name" required maxLength={80} autoFocus value={name} onChange={event => setName(event.target.value)} placeholder={t('例如：林小橙', 'For example: Olivia')} /></Field><Field label={t('学号（选填）', 'Student number (optional)')} id="student-number"><Input id="student-number" maxLength={30} value={number} onChange={event => setNumber(event.target.value)} placeholder={t('例如：01，可留空', 'For example: 01, or leave blank')} /></Field></>}
       {importing && parsed.length > 0 && <div className="space-y-3"><div className="table-wrap max-h-40 overflow-y-auto rounded-xl border border-line"><table className="data-table"><thead><tr><th>{t('姓名预览', 'Name preview')}</th><th>{t('学号', 'Student number')}</th></tr></thead><tbody>{parsed.slice(0, 20).map((row, index) => <tr key={index}><td>{row.name}</td><td>{row.studentNo || '—'}</td></tr>)}</tbody></table></div>{invalid && <p role="alert" className="text-sm text-danger">{t('有无效行，请检查姓名、学号长度、引号以及列数（每行最多两列）。', 'Some rows are invalid. Check names, number lengths, quotes, and the two-column limit.')}</p>}{ambiguous && <label className="flex items-start gap-3 text-sm leading-relaxed"><Checkbox checked={acceptNames} onCheckedChange={setAcceptNames} /><span>{t('部分行只有空格且没有明确学号。我确认将整行作为完整姓名保留。', 'Some space-separated rows have no clear student number. Keep each entire row as the full name.')}</span></label>}</div>}
+      {(student || groups.length > 0) && <Field id="student-group" label={importing ? t('导入到小组（选填）', 'Import to group (optional)') : t('所属小组', 'Group')}>
+        <Select id="student-group" value={groupId} onValueChange={setGroupId} disabled={client.busy || groups.length === 0} options={[
+          { value: 'ungrouped', label: t('未分组', 'Ungrouped') },
+          ...groups.map(group => ({ value: group.id, label: group.name })),
+        ]} />
+      </Field>}
       <Button type="submit" variant="primary" busy={client.busy} disabled={importing && (parsed.length > 500 || !lines.trim() || invalid || (ambiguous && !acceptNames))} className="w-full">{importing ? <Upload size={16} /> : <Save size={16} />}{importing ? t('导入学生', 'Import students') : t('保存学生', 'Save student')}</Button>
     </form>
     {student && <section className="mt-6 space-y-3 border-t border-line pt-5" aria-label={t('转学或离班', 'Transfer or leave class')}>
