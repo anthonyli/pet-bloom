@@ -1,0 +1,91 @@
+# 结构来自 anthonyli/pageon-html 默认分支 main 的
+# .github/ISSUE_TEMPLATE/improvement.yml
+# https://github.com/anthonyli/pageon-html/blob/9f7fecbf8a28f8dabffbbc48b1dd793a76442d51/.github/ISSUE_TEMPLATE/improvement.yml
+# blob 4ab07432707c8378bd6338bcfe1cf27bc7fd9218（该文件在 main 上的当前内容）。
+# 已去掉「缺陷报告」表单指向，以及编辑器场景中的「内容、保存与撤销」表述。
+# 自动标签使用本仓库已有的 enhancement。
+name: 体验与功能改进
+description: 记录用户场景、现状证据、待验证判断、实施建议与可检查的验收标准。
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        标题请直接描述需要改善的场景与结果，不使用 commit 前缀。
+        已复现的功能故障不要写入本表单。本表单需区分已观察事实、设计判断与尚未验证的假设，不能将计划写成已完成工作。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题与用户场景
+      description: 说明谁在完成什么任务、遇到什么成本，以及为什么值得改进；如建议优先级，请给出依据。
+      placeholder: 用户场景、当前阻碍、影响范围与改进目标。
+    validations:
+      required: true
+  - type: textarea
+    id: baseline
+    attributes:
+      label: 基线与定位
+      description: 提供审查版本 / 固定 commit、页面入口与环境；已知源码位置使用固定提交链接。未知信息请明确说明。
+      placeholder: |
+        审查版本 / commit：
+        页面入口与环境：
+        源码定位或设计依据（如有）：
+    validations:
+      required: true
+  - type: textarea
+    id: walkthrough
+    attributes:
+      label: 复查步骤、现状与预期
+      description: 使用合成的班级、学生或规则数据给出可复查的操作步骤，不要写入真实学生个人信息、账号或密钥。分别说明现在看到什么、希望改善什么。
+      placeholder: |
+        前置条件与合成数据：
+        1. ...
+        2. ...
+        当前行为：
+        预期体验：
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 已执行验证与边界
+      description: 列出实际走查、截图、测试或用户反馈。明确哪些是观察事实，哪些是判断或待验证假设；启发式评估不能当作用户研究结果。
+      placeholder: |
+        已观察事实及证据：
+        已执行的检查与结果：
+        设计判断及依据：
+        待验证的假设 / 未覆盖范围：
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案与取舍
+      description: 说明具体改动、考虑的替代方案与代价，以及本次范围；尚无方案可以留空。
+      placeholder: |
+        建议方案：
+        替代方案与取舍：
+        本次范围及必须保留的行为：
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 用未勾选清单列出可检查的结果。界面改动应按适用范围覆盖中英文、键盘、窄屏与状态反馈；读屏和实体设备验收单独记录。
+      placeholder: |
+        - [ ] 在指定场景中，操作后得到明确结果。
+        - [ ] 现有班级、学生、评分、徽章兑换与撤回行为保持正确。
+        - [ ] 记录验证环境、步骤及结果。
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: 去重与跟踪关系
+      description: 列出实际搜索范围、相关 issue / PR 及区别。若为多项改进的跟踪单，应说明顺序与拆分方式，不能以其中一项完成代表全部完成。
+      placeholder: |
+        核对范围 / 搜索词：
+        相关 issue / PR 与范围区别：
+        实施顺序 / 拆分计划（如适用）：
+    validations:
+      required: true

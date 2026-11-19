@@ -16,6 +16,11 @@
 - 云端表结构变更追加到 migrations/turso，已执行的文件不可修改；同步 schema-version.json 与本地 SQLite 迁移。生产通过 pnpm deploy:vercel 先构建、备份及迁移，再切换域名，不得跳过备份或用旧快照自动覆盖生产数据。
 - 宠物图片来源记录见 public/pets/SOURCES.md，新增图片必须保留来源。
 
+## GitHub Issue
+- 体验与功能改进使用 `.github/ISSUE_TEMPLATE/improvement.yml`。网页或 API 提单都要按表单字段填写：用户场景、基线与定位、复查步骤、已执行验证与边界、建议方案、验收标准、去重与跟踪关系。
+- 标题直接描述需要改善的场景与结果，不使用 commit 前缀。区分已观察事实、设计判断与尚未验证的假设，不能把计划写成已完成工作。
+- 本仓库目前没有缺陷报告表单。已复现的功能故障不要用这份改进表单代替。
+
 ## 命令
 - pnpm dev：3100 端口。
 - pnpm typecheck、pnpm test、pnpm build。
