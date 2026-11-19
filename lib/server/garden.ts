@@ -6,7 +6,8 @@ import { z } from 'zod'
 import { studentArchiveReasonIds, MAX_ARCHIVE_NOTE_LENGTH } from '../data/student-archive'
 import petsData from '../data/pets.json'
 import rulesData from '../data/rules.json'
-import type { User, Student, Classroom, Rule, Evaluation, ShopItem, Redemption, Snapshot, Badge, TeachingRole, ClassTeachers, InvitationPreview, StudentHistory, StudentHistoryEntry } from '../types'
+import type { User, Student, Classroom, ClassGroup, Rule, Evaluation, ShopItem, Redemption, Snapshot, Badge, TeachingRole, ClassTeachers, InvitationPreview, StudentHistory, StudentHistoryEntry } from '../types'
+import { defaultGroupName, MAX_GROUPS_PER_CLASS } from '../class-groups'
 import { growthLevel, growthProgress, replayEvents, type GrowthEvent, type GrowthEvaluation } from '../growth'
 import { defaultGardenSettings, gardenSettingsSchema, type GardenSettings, type SettingsVersion } from '../garden-settings'
 import { petStatus } from '../pet-status'
@@ -30,6 +31,12 @@ function parseCredentials(input: unknown) {
 }
 
 const text = z.string().trim().min(1).max(80)
+const studentDetailsSchema = z.object({ name: text, studentNo: z.string().trim().max(30).default('') })
+const groupMemberSelectionSchema = z.object({ studentId: text, groupId: text.nullable() })
+const groupMembersSchema = z.array(groupMemberSelectionSchema).refine(members => new Set(members.map(member => member.studentId)).size === members.length)
+type GroupMemberSelection = z.infer<typeof groupMemberSelectionSchema>
+const assignGroupMemberSql = 'INSERT INTO class_group_members (group_id, student_id) VALUES (?, ?) ON CONFLICT(student_id) DO UPDATE SET group_id = excluded.group_id'
+const removeGroupMemberSql = 'DELETE FROM class_group_members WHERE group_id = ? AND student_id = ?'
 const localized = z.object({ zh: text, en: text })
 const category = z.enum(['study', 'behavior', 'health', 'other'])
 const petIds = new Set(petsData.map(pet => pet.id))
@@ -227,7 +234,15 @@ export class Garden {
     const row = await this.db.prepare('SELECT * FROM students WHERE id = ?').get(id) as Student | undefined
     if (!row) throw new DomainError('notFound', 404)
     await this.classroom(actor, row.class_id)
+    const membership = await this.db.prepare('SELECT group_id FROM class_group_members WHERE student_id = ?').get(id) as { group_id: string } | undefined
+    row.group_id = membership?.group_id ?? null
     return row
+  }
+  private async ownedGroup(actor: string, id: string) {
+    const group = await this.db.prepare('SELECT id, class_id, name, created_at FROM class_groups WHERE id = ?').get(id) as ClassGroup | undefined
+    if (!group) throw new DomainError('notFound', 404)
+    await this.classroom(actor, group.class_id)
+    return group
   }
   private async activeStudent(actor: string, id: string) {
     const student = await this.student(actor, id)
@@ -359,22 +374,114 @@ export class Garden {
     }).immediate()
   }
   async addStudents(actor: string, input: unknown) {
-    const data = z.object({ classId: text, students: z.array(z.object({ name: text, studentNo: z.string().trim().max(30).default('') })).min(1).max(500) }).parse(input)
+    const { classId, students, groupId } = z.object({
+      classId: text,
+      students: z.array(studentDetailsSchema).min(1).max(500),
+      groupId: text.nullable().optional()
+    }).parse(input)
     return await this.db.transaction(async () => {
-      await this.classroom(actor, data.classId)
-      const ids = data.students.map(() => uuid())
-      await this.db.batch(data.students.map((student, index) => ({
+      await this.classroom(actor, classId)
+      if (groupId) await this.requireClassGroup(classId, groupId)
+      const ids = students.map(() => uuid())
+      const statements: Statement[] = students.map((student, index) => ({
         sql: 'INSERT INTO students (id, class_id, name, student_no, created_at) VALUES (?, ?, ?, ?, ?)',
-        args: [ids[index], data.classId, student.name, student.studentNo, now()]
-      })))
+        args: [ids[index], classId, student.name, student.studentNo, now()]
+      }))
+      if (groupId) for (const id of ids) statements.push({ sql: assignGroupMemberSql, args: [groupId, id] })
+      await this.db.batch(statements)
       return ids
     }).immediate()
   }
   async updateStudent(actor: string, id: string, input: unknown) {
-    const data = z.object({ name: text, studentNo: z.string().trim().max(30).default('') }).parse(input)
+    const { name, studentNo, groupId } = studentDetailsSchema.extend({ groupId: text.nullable().optional() }).parse(input)
     await this.db.transaction(async () => {
-      await this.activeStudent(actor, id)
-      await this.db.prepare('UPDATE students SET name = ?, student_no = ? WHERE id = ?').run(data.name, data.studentNo, id)
+      const student = await this.activeStudent(actor, id)
+      if (groupId && groupId !== student.group_id) {
+        await this.requireClassGroup(student.class_id, groupId)
+        await this.db.prepare(assignGroupMemberSql).run(groupId, id)
+      } else if (groupId === null && student.group_id) {
+        await this.db.prepare(removeGroupMemberSql).run(student.group_id, id)
+      }
+      await this.db.prepare('UPDATE students SET name = ?, student_no = ? WHERE id = ?').run(name, studentNo, id)
+    }).immediate()
+  }
+  private async requireClassGroup(classId: string, groupId: string) {
+    if (!(await this.db.prepare('SELECT 1 FROM class_groups WHERE id = ? AND class_id = ?').get(groupId, classId))) {
+      throw new DomainError('notFound', 404)
+    }
+  }
+  private async updateGroupMembers(classId: string, groupId: string, members: GroupMemberSelection[], previousMemberIds?: string[]) {
+    const students = await this.db.prepare(`SELECT s.id, s.archived_at, m.group_id
+      FROM students s LEFT JOIN class_group_members m ON m.student_id = s.id WHERE s.class_id = ?`)
+      .all(classId) as { id: string; archived_at: number | null; group_id: string | null }[]
+    const studentById = new Map(students.map(student => [student.id, student]))
+    const activeMemberIds = students.filter(student => student.archived_at === null && student.group_id === groupId).map(student => student.id)
+    if (previousMemberIds !== undefined) {
+      const previous = new Set(previousMemberIds)
+      if (activeMemberIds.length !== previous.size || activeMemberIds.some(id => !previous.has(id))) {
+        throw new DomainError('groupMembersChanged', 409)
+      }
+    }
+
+    const statements: Statement[] = []
+    for (const member of members) {
+      const student = studentById.get(member.studentId)
+      if (!student) throw new DomainError('notFound', 404)
+      if (student.archived_at !== null) throw new DomainError('studentArchived', 409)
+      if (student.group_id !== member.groupId) throw new DomainError('groupMembersChanged', 409)
+      if (student.group_id !== groupId) statements.push({ sql: assignGroupMemberSql, args: [groupId, student.id] })
+    }
+    const selectedIds = new Set(members.map(member => member.studentId))
+    for (const id of activeMemberIds) {
+      if (!selectedIds.has(id)) statements.push({ sql: removeGroupMemberSql, args: [groupId, id] })
+    }
+    await this.db.batch(statements)
+  }
+  async createGroup(actor: string, classId: string, input: unknown) {
+    const { locale = 'zh', name: requestedName, members } = z.object({
+      locale: z.enum(['zh', 'en']).optional(),
+      name: text.optional(),
+      members: groupMembersSchema.optional()
+    }).parse(input ?? {})
+    return await this.db.transaction(async () => {
+      await this.classroom(actor, classId)
+      const names = new Set((await this.db.prepare('SELECT name FROM class_groups WHERE class_id = ?').all(classId) as { name: string }[]).map(row => row.name))
+      if (names.size >= MAX_GROUPS_PER_CLASS) throw new DomainError('groupLimit', 409)
+      if (requestedName && names.has(requestedName)) throw new DomainError('groupNameTaken', 409)
+      let index = 1
+      let name = requestedName ?? defaultGroupName(locale, index)
+      while (names.has(name)) name = defaultGroupName(locale, ++index)
+      const id = uuid()
+      await this.db.prepare('INSERT INTO class_groups (id, class_id, name, created_at) VALUES (?, ?, ?, ?)').run(id, classId, name, now())
+      if (members?.length) await this.updateGroupMembers(classId, id, members)
+      return { id, name }
+    }).immediate()
+  }
+  async renameGroup(actor: string, id: string, input: unknown) {
+    const { name, members, previousMemberIds } = z.object({
+      name: text,
+      members: groupMembersSchema.optional(),
+      previousMemberIds: z.array(text).optional()
+    }).parse(input)
+    await this.db.transaction(async () => {
+      const group = await this.ownedGroup(actor, id)
+      if (group.name !== name) {
+        if (await this.db.prepare('SELECT 1 FROM class_groups WHERE class_id = ? AND name = ?').get(group.class_id, name)) throw new DomainError('groupNameTaken', 409)
+        await this.db.prepare('UPDATE class_groups SET name = ? WHERE id = ?').run(name, id)
+      }
+      if (members !== undefined) await this.updateGroupMembers(group.class_id, id, members, previousMemberIds)
+    }).immediate()
+  }
+  async setGroupMember(actor: string, groupId: string, studentId: string, assigned: boolean) {
+    await this.db.transaction(async () => {
+      const group = await this.ownedGroup(actor, groupId)
+      const student = assigned ? await this.activeStudent(actor, studentId) : await this.student(actor, studentId)
+      if (student.class_id !== group.class_id) throw new DomainError('notFound', 404)
+      if (assigned) {
+        await this.db.prepare(assignGroupMemberSql).run(groupId, studentId)
+      } else {
+        await this.db.prepare(removeGroupMemberSql).run(groupId, studentId)
+      }
     }).immediate()
   }
   async deleteStudent(actor: string, id: string) {
@@ -597,6 +704,9 @@ export class Garden {
       const festival_backgrounds = getFestivalBackgrounds(timestamp, settings.value.hunger.timeZone)
       const offers = new Map(festival_backgrounds.backgrounds.map(offer => [offer.background_id, offer.expires_at]))
       const students = selected ? await this.db.prepare('SELECT s.*, (SELECT COALESCE(SUM(amount), 0) FROM badges b WHERE b.student_id = s.id AND b.active = 1) AS badge_count FROM students s WHERE class_id = ? ORDER BY created_at, id').all(selected) as Student[] : []
+      const groups = selected ? await this.db.prepare('SELECT id, class_id, name, created_at FROM class_groups WHERE class_id = ? ORDER BY created_at, rowid').all(selected) as ClassGroup[] : []
+      const memberships = selected ? await this.db.prepare('SELECT m.student_id, m.group_id FROM class_group_members m JOIN class_groups g ON g.id = m.group_id WHERE g.class_id = ?').all(selected) as { student_id: string; group_id: string }[] : []
+      const groupByStudent = new Map(memberships.map(row => [row.student_id, row.group_id]))
       const owned = new Map<string, string[]>()
       const backgroundRedemptions = selected ? await this.db.prepare('SELECT r.student_id, r.background_id FROM redemptions r JOIN students s ON s.id = r.student_id WHERE s.class_id = ? AND r.undone = 0 AND r.background_id IS NOT NULL ORDER BY r.rowid').all(selected) as { student_id: string; background_id: string }[] : []
       for (const row of backgroundRedemptions) {
@@ -605,6 +715,7 @@ export class Garden {
         owned.set(row.student_id, backgrounds)
       }
       for (const student of students) {
+        student.group_id = groupByStudent.get(student.id) ?? null
         student.owned_background_ids = owned.get(student.id) || []
         const expiresAt = student.festival_background_id ? offers.get(student.festival_background_id) : undefined
         if (expiresAt !== undefined && student.festival_background_expires_at !== null && student.festival_background_expires_at > timestamp) {
@@ -620,7 +731,7 @@ export class Garden {
       const items = selected ? (await this.db.prepare('SELECT id, name, cost, active, description, category, icon, image_key, stock, background_id FROM items WHERE class_id = ? AND active = 1 ORDER BY rowid').all(selected) as (Omit<ShopItem, 'name' | 'description' | 'image'> & { name: string; description: string; image_key: string | null })[]).map(({ image_key, ...item }) => ({ ...item, name: JSON.parse(item.name), description: JSON.parse(item.description), image: image_key ? `/api/items/${item.id}/image?v=${image_key}` : null })) : []
       const badges = selected ? await this.db.prepare('SELECT b.* FROM badges b JOIN students s ON s.id = b.student_id WHERE s.class_id = ? AND b.active = 1 ORDER BY b.earned_at DESC, b.level DESC').all(selected) as Badge[] : []
       const redemptions = selected ? (await this.db.prepare('SELECT r.*, s.name AS student_name FROM redemptions r JOIN students s ON s.id = r.student_id WHERE s.class_id = ? ORDER BY r.rowid DESC LIMIT 200').all(selected) as (Omit<Redemption, 'item_name'> & { item_name: string })[]).map(item => ({ ...item, item_name: JSON.parse(item.item_name), can_undo: !item.undone && (hasClassOwnerAccess(classroom) || item.actor_user_id === actor) })) : []
-      return { user, settings, classes, students: students.filter(student => student.archived_at === null), archived_students: students.filter(student => student.archived_at !== null), badges, rules, records, items, redemptions, festival_backgrounds }
+      return { user, settings, classes, groups, students: students.filter(student => student.archived_at === null), archived_students: students.filter(student => student.archived_at !== null), badges, rules, records, items, redemptions, festival_backgrounds }
     }).deferred()
   }
   async demo(owner: string, locale: string) {

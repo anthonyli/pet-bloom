@@ -19,6 +19,8 @@ pnpm db:migrate  # 备份 → 迁移演练 → 原子迁移
 
 `011-class-graduation.json` 为班级追加可空 `graduated_at`。空值表示仍在教；已有班级保持在教，不删除学生或记录。Migration 011 adds nullable `graduated_at` on classes. Null stays active, and existing rows are not deleted.
 
+`012-class-groups.json` 新增班级小组表 `class_groups` 与成员表 `class_group_members`。已有班级和学生行不改写；没有成员记录的学生保持未分组。Migration 012 adds class group tables after graduation. Existing class and student rows stay unchanged, and students without a membership remain ungrouped.
+
 未来新增字段的文件例如 `010-student-note.json`：
 
 ```json

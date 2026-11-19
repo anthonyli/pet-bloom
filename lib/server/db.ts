@@ -275,7 +275,7 @@ function migrateVersionTen(db: Database.Database) {
   }).immediate()
 }
 
-function migrateDatabase(db: Database.Database) {
+function migrateVersionEleven(db: Database.Database) {
   const version = db.pragma('user_version', { simple: true }) as number
   if (version > 11) throw new Error('数据库版本高于当前应用版本')
   if (version === 11) return
@@ -285,6 +285,30 @@ function migrateDatabase(db: Database.Database) {
     if (current < 10) migrateVersionTen(db)
     db.exec('ALTER TABLE classes ADD COLUMN graduated_at INTEGER')
     db.pragma('user_version = 11')
+  }).immediate()
+}
+
+const classGroupStatements = [
+  'CREATE TABLE class_groups (id TEXT PRIMARY KEY, class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE, name TEXT NOT NULL, created_at INTEGER NOT NULL)',
+  'CREATE INDEX class_groups_class ON class_groups(class_id)',
+  'CREATE UNIQUE INDEX class_groups_class_name ON class_groups(class_id, name)',
+  'CREATE TABLE class_group_members (student_id TEXT PRIMARY KEY REFERENCES students(id) ON DELETE CASCADE, group_id TEXT NOT NULL REFERENCES class_groups(id) ON DELETE CASCADE)',
+  'CREATE INDEX class_group_members_group ON class_group_members(group_id)'
+]
+
+function migrateDatabase(db: Database.Database) {
+  const version = db.pragma('user_version', { simple: true }) as number
+  if (version > 12) throw new Error('数据库版本高于当前应用版本')
+  if (version === 12) return
+  db.transaction(() => {
+    const current = db.pragma('user_version', { simple: true }) as number
+    if (current === 12) return
+    if (current < 11) migrateVersionEleven(db)
+    const graduated = (db.prepare('PRAGMA table_info(classes)').all() as { name: string }[]).some(column => column.name === 'graduated_at')
+    if (!graduated) db.exec('ALTER TABLE classes ADD COLUMN graduated_at INTEGER')
+    const groups = db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'class_groups'").get()
+    if (!groups) for (const sql of classGroupStatements) db.exec(sql)
+    db.pragma('user_version = 12')
   }).immediate()
 }
 

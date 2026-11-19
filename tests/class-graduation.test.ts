@@ -111,7 +111,7 @@ describe('班级毕业', () => {
   it('备份往返保留毕业时间，旧版备份恢复为在教班级', async () => {
     await garden.graduateClass(owner, older)
     const backup = await exportBackup(garden, owner)
-    expect(backup.version).toBe(10)
+    expect(backup.version).toBe(11)
     expect(backup.classes.find(item => item.id === older)).toMatchObject({ name: '已毕业的旧班', graduated_at: stamp })
     const restored = await restoreBackup(garden, outsider, backup)
     const index = backup.classes.findIndex(item => item.id === older)
@@ -120,7 +120,8 @@ describe('班级毕业', () => {
     expect(copy.classes.find(item => item.id === copyId)?.graduated_at).toBe(stamp)
     expect(copy.students.map(student => student.name)).toEqual(['旧班学生'])
     expect((await garden.snapshot(owner, older)).students).toHaveLength(1)
-    const legacy = { ...backup, version: 9 as const, classes: backup.classes.map(({ graduated_at, ...row }) => row) }
+    const { groups, group_students, ...withoutGroups } = backup
+    const legacy = { ...withoutGroups, version: 9 as const, classes: backup.classes.map(({ graduated_at, ...row }) => row) }
     const legacyResult = await restoreBackup(garden, outsider, legacy)
     const legacyId = legacyResult.classIds[index]
     expect((await garden.snapshot(outsider, legacyId)).classes.find(item => item.id === legacyId)?.graduated_at).toBeNull()
@@ -137,6 +138,7 @@ describe('班级毕业', () => {
         INSERT INTO classes (id, owner_id, name, created_at) VALUES ('class', 'teacher', '历史班', 2);
         INSERT INTO students (id, class_id, name, points, created_at) VALUES ('student', 'class', '历史学生', 8, 3);
         INSERT INTO evaluations (id, batch_id, student_id, points, reason, category, generation, created_at) VALUES ('score', 'batch', 'student', 8, '{}', 'other', 0, 4);
+        DROP TABLE class_group_members; DROP TABLE class_groups;
         ALTER TABLE classes DROP COLUMN graduated_at;
         PRAGMA user_version = 10;
       `)
@@ -145,7 +147,7 @@ describe('班级毕业', () => {
       const history = db.prepare('SELECT * FROM evaluations').all()
       db.close()
       db = createDatabase(filename)
-      expect(db.pragma('user_version', { simple: true })).toBe(11)
+      expect(db.pragma('user_version', { simple: true })).toBe(12)
       expect(db.prepare('SELECT * FROM classes').get()).toEqual({ ...classroom as object, graduated_at: null })
       expect(db.prepare('SELECT * FROM students').get()).toEqual(student)
       expect(db.prepare('SELECT * FROM evaluations').all()).toEqual(history)

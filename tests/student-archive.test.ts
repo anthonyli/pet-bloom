@@ -137,7 +137,7 @@ for (const driver of ['sqlite', 'libsql'] as const) describe(`student archive ($
     await garden.setStudentArchived(owner, studentId, false)
     await garden.setStudentArchived(owner, studentId, true, { reason: 'transfer', note: '随家人搬迁' })
     const backup = await exportBackup(garden, owner)
-    expect(backup.version).toBe(10)
+    expect(backup.version).toBe(11)
     const { classIds } = await restoreBackup(garden, outsider, backup)
     const copy = await garden.snapshot(outsider, classIds[0])
     expect(copy.students).toHaveLength(1); expect(copy.archived_students).toHaveLength(1)
@@ -146,10 +146,11 @@ for (const driver of ['sqlite', 'libsql'] as const) describe(`student archive ($
     expect((await garden.studentHistory(outsider, copy.archived_students[0].id)).entries).toHaveLength(2)
     await garden.setStudentArchived(outsider, copy.archived_students[0].id, false)
     expect((await garden.snapshot(outsider, classIds[0])).students).toHaveLength(2)
-    const legacy = { ...backup, version: 7, classes: backup.classes.map(({ graduated_at, ...row }) => row), students: backup.students.map(({ archived_at, archive_reason, archive_note, ...row }) => row) }
+    const { groups, group_students, ...withoutGroups } = backup
+    const legacy = { ...withoutGroups, version: 7 as const, classes: backup.classes.map(({ graduated_at, ...row }) => row), students: backup.students.map(({ archived_at, archive_reason, archive_note, ...row }) => row) }
     const old = await restoreBackup(garden, outsider, legacy)
     expect((await garden.snapshot(outsider, old.classIds[0])).archived_students).toEqual([])
-    const v8 = { ...backup, version: 8, classes: backup.classes.map(({ graduated_at, ...row }) => row), students: backup.students.map(({ archive_reason, archive_note, ...row }) => row) }
+    const v8 = { ...withoutGroups, version: 8 as const, classes: backup.classes.map(({ graduated_at, ...row }) => row), students: backup.students.map(({ archive_reason, archive_note, ...row }) => row) }
     const oldArchive = await restoreBackup(garden, outsider, v8)
     expect((await garden.snapshot(outsider, oldArchive.classIds[0])).archived_students[0]).toMatchObject({ archive_reason: null, archive_note: null, points: 100 })
     for (const archived_at of [-1, 'yesterday', 1.5, Number.MAX_SAFE_INTEGER + 1]) {
@@ -165,7 +166,7 @@ it('v8 local migration preserves all rows, defaults to active, and persists arch
   const directory = mkdtempSync(join(tmpdir(), 'archive-migration-')), filename = join(directory, 'test.db')
   let db = createDatabase(filename)
   try {
-    db.exec(`ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; ALTER TABLE classes DROP COLUMN graduated_at; PRAGMA user_version = 8;
+    db.exec(`DROP TABLE class_group_members; DROP TABLE class_groups; ALTER TABLE classes DROP COLUMN graduated_at; ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; PRAGMA user_version = 8;
       INSERT INTO users (id, username, password, created_at) VALUES ('u', 'migration-fixture', 'unused', 1);
       INSERT INTO classes (id, owner_id, name, created_at) VALUES ('c', 'u', 'Class', 2);
       INSERT INTO students (id, class_id, name, points, created_at) VALUES ('s', 'c', 'Student', 12, 3);
@@ -173,7 +174,7 @@ it('v8 local migration preserves all rows, defaults to active, and persists arch
     `)
     const student = db.prepare('SELECT * FROM students').get(), history = db.prepare('SELECT * FROM evaluations').all()
     db.close(); db = createDatabase(filename)
-    expect(db.pragma('user_version', { simple: true })).toBe(11)
+    expect(db.pragma('user_version', { simple: true })).toBe(12)
     expect(db.prepare('SELECT * FROM students').get()).toEqual({ ...student as object, archived_at: null, archive_reason: null, archive_note: null })
     expect(db.prepare('SELECT * FROM evaluations').all()).toEqual(history)
     db.prepare('UPDATE students SET archived_at = 123 WHERE id = ?').run('s')
@@ -188,14 +189,14 @@ it('v9 migration preserves existing archived students and persists their new det
   const directory = mkdtempSync(join(tmpdir(), 'archive-details-migration-')), filename = join(directory, 'test.db')
   let db = createDatabase(filename)
   try {
-    db.exec(`ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE classes DROP COLUMN graduated_at; PRAGMA user_version = 9;
+    db.exec(`DROP TABLE class_group_members; DROP TABLE class_groups; ALTER TABLE classes DROP COLUMN graduated_at; ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; PRAGMA user_version = 9;
       INSERT INTO users (id, username, password, created_at) VALUES ('u', 'migration-fixture', 'unused', 1);
       INSERT INTO classes (id, owner_id, name, created_at) VALUES ('c', 'u', 'Class', 2);
       INSERT INTO students (id, class_id, name, points, created_at, archived_at) VALUES ('s', 'c', 'Student', 12, 3, 123);
     `)
     const before = db.prepare('SELECT * FROM students').get()
     db.close(); db = createDatabase(filename)
-    expect(db.pragma('user_version', { simple: true })).toBe(11)
+    expect(db.pragma('user_version', { simple: true })).toBe(12)
     expect(db.prepare('SELECT * FROM students').get()).toEqual({ ...before as object, archive_reason: null, archive_note: null })
     db.prepare('UPDATE students SET archive_reason = ?, archive_note = ? WHERE id = ?').run('transfer', '搬迁', 's')
     db.close(); db = createDatabase(filename)

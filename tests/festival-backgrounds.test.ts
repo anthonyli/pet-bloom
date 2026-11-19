@@ -36,8 +36,8 @@ function snapshotAt(date: string, overrides: Partial<Student> = {}): Snapshot {
   return {
     user: { id: 'teacher', username: 'teacher', display_name: '教师', subject: '语文', teaching_role: 'homeroom', profile_complete: true },
     settings: { id: 'settings', version: 1, value: defaultGardenSettings(), created_at: 0 },
-    classes: [], archived_students: [], badges: [], rules: [], records: [], items: [], redemptions: [],
-    students: [{ id: 'student', archived_at: null, archive_reason: null, archive_note: null, class_id: 'class', name: '学生', student_no: '', pet_id: 'panda', points: 0, pet_exp: 0, generation: 0, badge_count: 0, spent_badges: 0, background_id: 'garden', owned_background_ids: ['garden'], festival_background_id: null, festival_background_expires_at: null, ...overrides }],
+    classes: [], groups: [], archived_students: [], badges: [], rules: [], records: [], items: [], redemptions: [],
+    students: [{ id: 'student', archived_at: null, archive_reason: null, archive_note: null, class_id: 'class', name: '学生', student_no: '', pet_id: 'panda', points: 0, pet_exp: 0, generation: 0, badge_count: 0, spent_badges: 0, background_id: 'garden', owned_background_ids: ['garden'], festival_background_id: null, festival_background_expires_at: null, ...overrides, group_id: overrides.group_id ?? null }],
     festival_backgrounds: getFestivalBackgrounds(time(date), 'Asia/Shanghai')
   }
 }

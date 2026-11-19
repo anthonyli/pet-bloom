@@ -1,0 +1,12 @@
+{
+  "version": 12,
+  "name": "class-groups",
+  "kind": "expand",
+  "statements": [
+    "CREATE TABLE class_groups (id TEXT PRIMARY KEY, class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE, name TEXT NOT NULL, created_at INTEGER NOT NULL)",
+    "CREATE INDEX class_groups_class ON class_groups(class_id)",
+    "CREATE UNIQUE INDEX class_groups_class_name ON class_groups(class_id, name)",
+    "CREATE TABLE class_group_members (student_id TEXT PRIMARY KEY REFERENCES students(id) ON DELETE CASCADE, group_id TEXT NOT NULL REFERENCES class_groups(id) ON DELETE CASCADE)",
+    "CREATE INDEX class_group_members_group ON class_group_members(group_id)"
+  ]
+}

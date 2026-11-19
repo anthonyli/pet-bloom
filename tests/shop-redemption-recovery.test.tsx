@@ -26,7 +26,7 @@ function json(body: unknown, status = 200) {
 }
 function snapshot(): Snapshot {
   const student: Student = {
-    id: 'student-1', class_id: 'class-1', name: studentName, student_no: '01', archived_at: null, archive_reason: null, archive_note: null,
+    id: 'student-1', class_id: 'class-1', group_id: null, name: studentName, student_no: '01', archived_at: null, archive_reason: null, archive_note: null,
     points: 100, pet_id: 'panda', pet_exp: 100, generation: 1, badge_count: 3, spent_badges: 1, background_id: null, owned_background_ids: [],
     festival_background_id: null, festival_background_expires_at: null
   }
@@ -41,7 +41,7 @@ function snapshot(): Snapshot {
     user: { id: 'user-1', username: 'teacher', display_name: '兑换复现教师', subject: '科学', teaching_role: 'homeroom', profile_complete: true },
     settings: { id: 'settings-1', version: 1, value: defaultGardenSettings(), created_at: 1 },
     classes: [{ id: 'class-1', name: '兑换复现班', created_at: 1, graduated_at: null, owner_id: 'user-1', role: 'owner' }],
-    students: [student], archived_students: [], badges: [], rules: [], records: [], items: [reward, background], redemptions: [previous],
+    students: [student], archived_students: [], groups: [], badges: [], rules: [], records: [], items: [reward, background], redemptions: [previous],
     festival_backgrounds: { server_now: Date.now(), valid_until: Date.now() + 86_400_000, time_zone: 'Asia/Shanghai', backgrounds: [], unsupported_background_ids: [] }
   }
 }
