@@ -59,13 +59,14 @@ function run(command, args, { capture = false, env = process.env, timeout = 30 *
     }
     child.on('error', () => reject(new ReleaseError(`${command} 无法启动 / Could not start command`)))
     child.on('close', code => code === 0 ? resolve(output) : reject(new ReleaseError(
-      `${command} 执行失败（${code}）/ Command failed: ${commandFailureCategory(diagnostics)}`)))
+      `${command} 执行失败（${code}）/ Command failed: ${commandFailureCategory(diagnostics + '\n' + output)}`)))
   })
 }
 
 export function commandFailureCategory(stderr) {
   // Return fixed categories only: CLI errors may contain tokens or private data.
-  if (/ERR_PNPM/.test(stderr)) return 'package-manager setup'
+  const packageCode = stderr.match(/\bERR_PNPM_[A-Z_]+\b/)
+  if (packageCode) return `package-manager setup (${packageCode[0]})`
   if (/no existing credentials|not authorized|unauthorized|invalid token|forbidden/i.test(stderr)) return 'authentication or token permissions'
   if (/scope|team.*not found/i.test(stderr)) return 'team scope resolution'
   if (/ENOTFOUND|ETIMEDOUT|ECONNRESET|fetch failed/i.test(stderr)) return 'network connection'
@@ -76,7 +77,19 @@ const json = async promise => {
   const output = await promise
   try { return JSON.parse(output) } catch { throw new ReleaseError('CLI 响应不是有效 JSON / Invalid CLI JSON response') }
 }
-const api = endpoint => json(cli(['api', `${endpoint}?teamId=${target.team}`]))
+export async function vercelApi(endpoint, { token = process.env.VERCEL_TOKEN, request = fetch } = {}) {
+  if (!token) return json(cli(['api', `${endpoint}?teamId=${target.team}`]))
+  let response
+  try {
+    response = await request(`https://api.vercel.com${endpoint}?teamId=${target.team}`, {
+      headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30_000)
+    })
+  } catch { throw new ReleaseError('Vercel API network request failed') }
+  // Do not include response bodies: project responses contain environment values.
+  if (!response.ok) throw new ReleaseError(`Vercel API request failed (HTTP ${response.status})`)
+  try { return await response.json() } catch { throw new ReleaseError('Vercel API returned invalid JSON') }
+}
+const api = endpoint => vercelApi(endpoint)
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 export async function verifyLive(expectedId, { get = api, health, sleep = delay, attempts = 6 } = {}) {
