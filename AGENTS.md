@@ -14,7 +14,13 @@
 - 不提交数据库、会话、测试账号密码或环境密钥。
 - 桌面安装包统一发布到当前仓库 anthonyli/pet-bloom 的 Releases，自动更新源与下载入口保持一致；不再使用独立的 class-pet 发布仓库。
 - 云端表结构变更追加到 migrations/turso，已执行的文件不可修改；同步 schema-version.json 与本地 SQLite 迁移。生产通过 pnpm deploy:vercel 先构建、备份及迁移，再切换域名，不得跳过备份或用旧快照自动覆盖生产数据。
+- main 更新由 .github/workflows/production.yml 自动发布；加密备份上传成功后才能迁移并切换域名。不得重新启用 main 的 Vercel Git 直发或上传明文数据库；配置与恢复见 docs/automatic-production.md。
 - 宠物图片来源记录见 public/pets/SOURCES.md，新增图片必须保留来源。
+
+## GitHub Issue
+- 体验与功能改进使用 `.github/ISSUE_TEMPLATE/improvement.yml`。网页或 API 提单都要按表单字段填写：用户场景、基线与定位、复查步骤、已执行验证与边界、建议方案、验收标准、去重与跟踪关系。
+- 标题直接描述需要改善的场景与结果，不使用 commit 前缀。区分已观察事实、设计判断与尚未验证的假设，不能把计划写成已完成工作。
+- 本仓库目前没有缺陷报告表单。已复现的功能故障不要用这份改进表单代替。
 
 ## 命令
 - pnpm dev：3100 端口。

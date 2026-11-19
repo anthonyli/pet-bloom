@@ -67,7 +67,7 @@ describe('production deployment safeguards', () => {
   })
 
   it('does not pass production or optional cloud-test credentials into tests', () => {
-    const source = { PATH: '/bin', TURSO_AUTH_TOKEN: 'secret', TURSO_TEST_DATABASE_URL: 'production', VERCEL_TOKEN: 'secret', VERCEL: '1', DATABASE_PATH: 'production.db' }
+    const source = { PATH: '/bin', TURSO_AUTH_TOKEN: 'secret', TURSO_TEST_DATABASE_URL: 'production', VERCEL_TOKEN: 'secret', VERCEL: '1', DATABASE_PATH: 'production.db', BACKUP_ENCRYPTION_KEY: 'secret', ACTIONS_RUNTIME_TOKEN: 'secret', GITHUB_TOKEN: 'secret' }
     expect(testEnvironment(source)).toEqual({ PATH: '/bin' })
     expect(source.TURSO_AUTH_TOKEN).toBe('secret')
   })

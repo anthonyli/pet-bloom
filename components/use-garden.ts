@@ -1,5 +1,6 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { selectWorkspaceClass } from '@/lib/class-access'
 import type { Snapshot, Locale, Upgrade, ScoreEffect } from '@/lib/types'
 import { errorMessage, growth, petById } from '@/lib/i18n'
 import { expireFestivalBackgrounds } from '@/lib/pet-backgrounds'
@@ -58,7 +59,7 @@ export function useGarden(locale: Locale, initialClassId = '') {
       const currentTime = Math.max(serverTime(), data.festival_backgrounds.server_now + Math.max(0, receivedAt - sentAt, receivedWall - sentWall))
       clock.current = { serverNow: currentTime, monotonic: receivedAt, wallTime: receivedWall }
       data = expireFestivalBackgrounds(data, currentTime)
-      const next = !accessLost && data.classes.some(item => item.id === selected) ? selected : data.classes[0]?.id || ''
+      const next = !accessLost && selected && data.classes.some(item => item.id === selected) ? selected : selectWorkspaceClass(data.classes)
       activeClass.current = next; setClassId(next); setState(data); setRefreshFailed(false)
       return data
     } catch (error) {

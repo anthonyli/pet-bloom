@@ -5,6 +5,7 @@ export interface AdminClassSummary {
   owner_name: string
   owner_subject: string
   created_at: number
+  graduated_at: number | null
   active_students: number
   archived_students: number
   teacher_count: number

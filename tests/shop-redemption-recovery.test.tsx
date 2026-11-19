@@ -40,7 +40,7 @@ function snapshot(): Snapshot {
   return {
     user: { id: 'user-1', username: 'teacher', display_name: '兑换复现教师', subject: '科学', teaching_role: 'homeroom', profile_complete: true },
     settings: { id: 'settings-1', version: 1, value: defaultGardenSettings(), created_at: 1 },
-    classes: [{ id: 'class-1', name: '兑换复现班', created_at: 1, owner_id: 'user-1', role: 'owner' }],
+    classes: [{ id: 'class-1', name: '兑换复现班', created_at: 1, graduated_at: null, owner_id: 'user-1', role: 'owner' }],
     students: [student], archived_students: [], badges: [], rules: [], records: [], items: [reward, background], redemptions: [previous],
     festival_backgrounds: { server_now: Date.now(), valid_until: Date.now() + 86_400_000, time_zone: 'Asia/Shanghai', backgrounds: [], unsupported_background_ids: [] }
   }
