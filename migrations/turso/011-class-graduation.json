@@ -1,0 +1,8 @@
+{
+  "version": 11,
+  "name": "class-graduation",
+  "kind": "expand",
+  "statements": [
+    "ALTER TABLE classes ADD COLUMN graduated_at INTEGER"
+  ]
+}

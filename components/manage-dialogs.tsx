@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState } from 'react'
 import { hasClassOwnerAccess } from '@/lib/class-access'
-import { Archive, Trash2, Plus, Download, Database, ShieldCheck, Settings2, School, UserRound, Upload, Save, Check, X, Sparkles, BookOpen, HandHeart, HeartPulse, Shapes, RefreshCw } from 'lucide-react'
+import { Archive, Trash2, Plus, Download, Database, ShieldCheck, Settings2, School, UserRound, Upload, Save, Check, X, Sparkles, BookOpen, HandHeart, HeartPulse, Shapes, RefreshCw, GraduationCap } from 'lucide-react'
 import { Button, Checkbox, Dialog, Field, FileInput, Input, Select, Textarea } from '@/components/ui'
 import { studentArchiveReasonIds, studentArchiveReasons, MAX_ARCHIVE_NOTE_LENGTH } from '@/lib/data/student-archive'
 import { parseStudentList } from '@/lib/student-import'
@@ -13,12 +13,15 @@ import { GardenSettingsForm } from './garden-settings-form'
 import { TeacherProfileForm, teachingRoleName } from './teacher-profile'
 
 export function ClassDialog({ client, locale, classroom, onClose }: { client: GardenClient; locale: Locale; classroom?: Classroom; onClose: () => void }) {
-  const t = translator(locale), [name, setName] = useState(classroom?.name || ''), [confirmDelete, setConfirmDelete] = useState(false)
+  const t = translator(locale), [name, setName] = useState(classroom?.name || ''), [confirmDelete, setConfirmDelete] = useState(false), [confirmGraduate, setConfirmGraduate] = useState(false)
+  const nextActive = () => client.state?.classes.find(item => item.id !== classroom?.id && item.graduated_at == null)?.id || ''
   return <Dialog open onClose={onClose} icon={School} title={classroom ? t('管理班级', 'Manage class') : t('创建班级', 'Create a class')}>
     <form className="form-stack" onSubmit={async event => { event.preventDefault(); let created = ''; const ok = await client.run(async () => { const result = await api(classroom ? `classes/${classroom.id}` : 'classes', classroom ? 'PATCH' : 'POST', { name }); created = result.id || '' }, t('班级已保存。', 'Class saved.'), () => created || classroom?.id || client.classId); if (ok) onClose() }}>
       <Field label={t('班级名称', 'Class name')} id="class-name"><Input id="class-name" value={name} onChange={event => setName(event.target.value)} required maxLength={80} autoFocus placeholder={t('例如：三年级一班', 'For example: Class 3A')} /></Field>
       <Button type="submit" variant="primary" busy={client.busy} className="w-full"><Save size={16} />{t('保存班级', 'Save class')}</Button>
     </form>
+    {classroom?.graduated_at != null && <p className="mt-5 rounded-xl bg-[#f7f5fb] px-4 py-3 text-sm leading-relaxed text-muted" role="status">{t('此班级已毕业，数据仍保留，且不会出现在左上角切换列表。', 'This class has graduated. Its data is kept, and it stays out of the class switcher.')}</p>}
+    {hasClassOwnerAccess(classroom) && classroom && classroom.graduated_at == null && <div className="mt-7 border-t border-line pt-5">{confirmGraduate && <p className="mb-3 text-sm leading-relaxed">{t('设为毕业后，此班级不再出现在左上角切换列表。学生、评价、徽章和兑换记录都会保留，可从头像菜单的「毕业班级」打开。此操作不会删除数据。', 'After graduation, this class leaves the class switcher. Students, evaluations, badges and redemptions stay and can be opened from Graduated classes in the account menu. This does not delete data.')}</p>}<Button busy={client.busy} onClick={async () => { client.setNotice(null); if (!confirmGraduate) return setConfirmGraduate(true); if (await client.run(() => api(`classes/${classroom.id}/graduate`, 'POST', {}), t('班级已设为毕业，数据已保留。', 'Class marked as graduated. Data kept.'), nextActive())) onClose() }}><GraduationCap size={16} />{confirmGraduate ? t('确认设为毕业', 'Confirm graduation') : t('设为毕业班级', 'Mark as graduated')}</Button></div>}
     {hasClassOwnerAccess(classroom) && classroom && <div className="mt-7 border-t border-line pt-5">{confirmDelete && <p className="mb-3 text-sm leading-relaxed text-danger">{t('将永久删除此班级的学生、评价、徽章和兑换记录。此操作无法撤销。', 'This permanently deletes the class, students, evaluations, badges and redemptions. This cannot be undone.')}</p>}<Button variant="danger" busy={client.busy} onClick={async () => { if (!confirmDelete) return setConfirmDelete(true); if (await client.run(() => api(`classes/${classroom.id}`, 'DELETE'), t('班级已删除。', 'Class deleted.'), '')) onClose() }}><Trash2 size={16} />{confirmDelete ? t('确认永久删除', 'Confirm permanent deletion') : t('删除这个班级', 'Delete this class')}</Button></div>}
   </Dialog>
 }

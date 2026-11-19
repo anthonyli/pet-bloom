@@ -35,7 +35,7 @@ async function fixture(statements?: string[]) {
   const migrations = await loadMigrations(migrationDirectory, statements ? 9 : 8)
   const filename = path.join(directory, 'source.db')
   const db = createDatabase(filename)
-  db.exec('ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; PRAGMA user_version = 8')
+  db.exec('ALTER TABLE students DROP COLUMN archive_reason; ALTER TABLE students DROP COLUMN archive_note; ALTER TABLE students DROP COLUMN archived_at; ALTER TABLE classes DROP COLUMN graduated_at; PRAGMA user_version = 8')
   db.exec(`
     CREATE TABLE _pet_bloom_schema (id INTEGER PRIMARY KEY, version INTEGER NOT NULL, initialized_at INTEGER NOT NULL);
     INSERT INTO _pet_bloom_schema VALUES (1,8,123);
@@ -67,6 +67,7 @@ describe('Turso migrations preserve existing data', () => {
     const before = (await f.client.execute('SELECT * FROM evaluations')).rows
     await migrate(f.client, migrations, f.backup)
     expect((await f.client.execute('SELECT archived_at, archive_reason, archive_note, points FROM students')).rows[0]).toEqual({ archived_at: null, archive_reason: null, archive_note: null, points: 40n })
+    expect((await f.client.execute('SELECT graduated_at FROM classes')).rows[0].graduated_at).toBeNull()
     expect((await f.client.execute('SELECT * FROM evaluations')).rows).toEqual(before)
     expect((await inspectState(f.client, migrations)).pending).toEqual([])
   })

@@ -106,6 +106,8 @@ async function handler(request: NextRequest, context: { params: Promise<{ path: 
       result = (await garden.saveSettings(actor, await body(request)))
     } else if (method === 'POST' && path === 'classes') {
       result = (await garden.createClass(actor, await body(request)))
+    } else if (method === 'POST' && parts[0] === 'classes' && parts[2] === 'graduate' && parts.length === 3) {
+      result = await garden.graduateClass(actor, parts[1])
     } else if (method === 'PATCH' && parts[0] === 'classes' && parts.length === 2) {
       await garden.renameClass(actor, parts[1], await body(request))
     } else if (method === 'DELETE' && parts[0] === 'classes' && parts.length === 2) {
