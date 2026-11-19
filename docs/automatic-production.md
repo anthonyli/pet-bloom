@@ -4,6 +4,8 @@
 
 流程：配置与类型检查、测试 → 云库只读预检 → 构建待发布版本（不切域名）→ 完整快照与恢复演练 → 加密上传备份 → 事务迁移 → 切换生产域名 → 核对部署 ID 与数据库健康。
 
+CI 使用 Vercel 项目 API 构建固定 `main` 提交，明确关闭自动域名分配；构建完成后复核提交 SHA、区域和生产域名未变化，迁移完成后才调用提升 API。项目级令牌无需访问个人账户资料。Vercel CLI 仅供本机发布使用。
+
 任何备份、加密、上传或迁移失败都会阻止上线。即使没有新迁移，自动发布也创建备份。已提交的兼容迁移不会因发布失败而回滚；禁止用旧快照自动覆盖生产数据。连续合并不取消正在运行的迁移。
 
 `vercel.json` 禁用 `main` 的 Git 自动部署，保留其他分支的预览，防止自动部署绕过上述流程。手动本地发布仍使用 `pnpm deploy:vercel`。
@@ -36,6 +38,8 @@ node scripts/decrypt-backup.mjs manifest.json.enc manifest.json
 ## English
 
 Changes merged or pushed to `main` trigger a serialized production workflow. It checks out the latest main branch and refuses stale promotion. Tests and a staged build run before a verified full backup is encrypted and durably uploaded, then migrations commit atomically, production is promoted and verified. Every automatic release backs up, even with no pending migrations. Failure stops promotion; committed additive migrations remain compatible with the previous application.
+
+CI uses project APIs with a pinned Git commit and automatic domain assignment disabled. It verifies the built commit and unchanged production alias before migrating, then promotes through the project API. The project token does not need access to a user profile; the CLI remains available for local releases.
 
 Configure the three secrets above, restrict the `production` Environment to `main`, and omit manual reviewers for unattended releases. Only encrypted snapshots and manifests are retained as GitHub Actions artifacts for 90 days. Preserve the matching encryption keys separately. Restoration is a manual operation into a new database, never an automatic overwrite of production. Native Vercel Git deployment is disabled only for main; preview branches continue to build.
 

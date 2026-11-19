@@ -90,17 +90,24 @@ const json = async promise => {
   const output = await promise
   try { return JSON.parse(output) } catch { throw new ReleaseError('CLI 响应不是有效 JSON / Invalid CLI JSON response') }
 }
-export async function vercelApi(endpoint, { token = process.env.VERCEL_TOKEN, request = fetch } = {}) {
-  if (!token) return json(cli(['api', `${endpoint}?teamId=${target.team}`]))
+export async function vercelApi(endpoint, { token = process.env.VERCEL_TOKEN, request = fetch, method = 'GET', body } = {}) {
+  if (!token) {
+    requireCondition(method === 'GET', 'Vercel API mutations require a configured token')
+    return json(cli(['api', `${endpoint}?teamId=${target.team}`]))
+  }
   let response
   try {
     response = await request(`https://api.vercel.com${endpoint}?teamId=${target.team}`, {
-      headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30_000)
+      method, body: body === undefined ? undefined : JSON.stringify(body),
+      headers: { Authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) }, signal: AbortSignal.timeout(30_000)
     })
   } catch { throw new ReleaseError('Vercel API network request failed') }
   // Do not include response bodies: project responses contain environment values.
   if (!response.ok) throw new ReleaseError(`Vercel API request failed (HTTP ${response.status})`)
-  try { return await response.json() } catch { throw new ReleaseError('Vercel API returned invalid JSON') }
+  if (response.status === 204) return undefined
+  const output = await response.text()
+  if (!output && method !== 'GET') return undefined
+  try { return JSON.parse(output) } catch { throw new ReleaseError('Vercel API returned invalid JSON') }
 }
 const api = endpoint => vercelApi(endpoint)
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -134,7 +141,7 @@ export async function release({ stage, migrate, promote, verify }) {
   return id
 }
 
-export async function main(args = process.argv.slice(2), { migrateDatabase = () => run('pnpm', ['db:migrate']), beforePromote = async () => {} } = {}) {
+export async function main(args = process.argv.slice(2), { migrateDatabase = () => run('pnpm', ['db:migrate']), beforePromote = async () => {}, stageDeployment, promoteDeployment = id => cli(['promote', id, '--yes']) } = {}) {
   requireCondition(args.every(arg => ['--check', '--dry-run', '--help'].includes(arg)) && args.length <= 1,
     '用法 / Usage: pnpm deploy:vercel [--check | --dry-run | --help]')
   if (args.includes('--help')) {
@@ -172,7 +179,7 @@ export async function main(args = process.argv.slice(2), { migrateDatabase = () 
   let promoting = false
   try {
     await release({
-      stage: async () => {
+      stage: stageDeployment ?? (async () => {
         const result = await json(cli(['deploy', '--project', target.project, '--prod', '--skip-domain', '--regions', target.region, '--yes', '--json']))
         const id = result.deployment?.id
         requireCondition(typeof id === 'string' && /^dpl_[A-Za-z0-9]+$/.test(id), '部署响应缺少 ID / Deployment response is missing its ID')
@@ -180,13 +187,13 @@ export async function main(args = process.argv.slice(2), { migrateDatabase = () 
         validateRelease(deployment, { projectId: target.project, deploymentId: id }, id)
         console.log(`待发布版本已就绪 / Staged deployment ready: ${id}`)
         return id
-      },
+      }),
       migrate: migrateDatabase,
       promote: async id => {
         await beforePromote()
         promoting = true
         console.log('迁移成功，切换生产域名 / Migration succeeded; promoting production…')
-        await cli(['promote', id, '--yes'])
+        await promoteDeployment(id)
       },
       verify: verifyLive
     })

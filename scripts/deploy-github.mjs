@@ -7,6 +7,7 @@ import { promisify } from 'node:util'
 import { main as deploy, ReleaseError } from './deploy-vercel.mjs'
 import { main as migrate } from './migrate-turso.mjs'
 import { backupKey, cryptFile } from './lib/encrypted-backup.mjs'
+import { stageGitDeployment, promoteGitDeployment } from './lib/vercel-git-release.mjs'
 
 export function validateCI(env) {
   if (env.GITHUB_ACTIONS !== 'true' || env.GITHUB_REPOSITORY !== 'anthonyli/pet-bloom' || env.GITHUB_REF !== 'refs/heads/main' || !['push', 'workflow_dispatch'].includes(env.GITHUB_EVENT_NAME)) {
@@ -45,6 +46,8 @@ export async function main() {
   console.log(`Deploying main commit: ${commit}`)
   try {
     await deploy([], {
+      stageDeployment: () => stageGitDeployment(commit),
+      promoteDeployment: promoteGitDeployment,
       beforePromote: async () => {
         const result = await exec('git', ['ls-remote', 'https://github.com/anthonyli/pet-bloom.git', 'refs/heads/main'], { timeout: 30_000 })
         if (result.stdout.split(/\s/)[0] !== commit) throw new Error('A newer main commit is waiting; skip stale promotion')
