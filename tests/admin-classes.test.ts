@@ -15,6 +15,9 @@ let first: string, second: string
 async function read(path: string, cookie = adminCookie) {
   return GET(new NextRequest(`http://localhost/api/admin/${path}`, { headers: { Cookie: cookie } }), { params: Promise.resolve({ path: path.split('?')[0].split('/') }) })
 }
+async function directory(path = 'classes', cookie = teacherCookie) {
+  return ordinaryGET(new NextRequest(`http://localhost/api/${path}`, { headers: { Cookie: cookie } }), { params: Promise.resolve({ path: path.split('?')[0].split('/') }) })
+}
 beforeEach(async () => {
   vi.stubEnv('DATABASE_PATH', ':memory:')
   vi.stubEnv('PET_GARDEN_ADMIN_USER_IDS', '')
@@ -39,6 +42,38 @@ afterEach(() => {
 })
 
 describe('global class admin', () => {
+  it('scopes the shared directory and summaries to membership, including graduated classes', async () => {
+    await garden.db.prepare('UPDATE classes SET graduated_at = ? WHERE id = ?').run(123, first)
+    const response = await directory('classes?status=graduated&admin=true')
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Cache-Control')).toBe('no-store')
+    const result = await response.json()
+    expect(result).toMatchObject({ total: 1, globalAdmin: false })
+    expect(result.classes.map((row: { id: string }) => row.id)).toEqual([first])
+    expect(result.classes[0]).toMatchObject({ graduated_at: 123, active_students: 2 })
+    expect((await directory(`classes/${first}/summary`, coadminCookie)).status).toBe(200)
+    expect((await directory(`classes/${second}/summary`)).status).toBe(404)
+    expect((await (await directory('classes', coadminCookie)).json()).total).toBe(2)
+    await garden.removeTeacher(teacher, first, coadmin)
+    expect((await (await directory('classes?status=graduated', coadminCookie)).json()).total).toBe(0)
+    expect((await directory(`classes/${first}/summary`, coadminCookie)).status).toBe(404)
+    for (const path of ['classes', `classes/${first}/summary`]) expect((await directory(path, '')).status).toBe(401)
+  })
+  it('filters graduation before counting and paging, and checks global access on every request', async () => {
+    await garden.db.prepare('UPDATE classes SET graduated_at = ? WHERE id = ?').run(123, first)
+    const all = await (await directory('classes?pageSize=1', adminCookie)).json()
+    expect(all).toMatchObject({ total: 2, globalAdmin: true })
+    expect(all.classes).toHaveLength(1)
+    const graduates = await (await directory('classes?status=graduated&pageSize=1', adminCookie)).json()
+    expect(graduates.total).toBe(1)
+    expect(graduates.classes[0].id).toBe(first)
+    expect((await (await directory('classes?status=graduated&pageSize=1&page=2', adminCookie)).json()).classes).toEqual([])
+    expect((await (await directory('classes?status=graduated&search=Beta', adminCookie)).json()).total).toBe(0)
+    expect((await directory('classes?status=unknown', adminCookie)).status).toBe(400)
+    vi.stubEnv('PET_GARDEN_ADMIN_USER_IDS', '')
+    expect(await (await directory('classes', adminCookie)).json()).toMatchObject({ total: 0, globalAdmin: false })
+    expect((await directory(`classes/${first}/summary`, adminCookie)).status).toBe(404)
+  })
   it('defaults off, fails closed on malformed configuration, and never matches a substring', async () => {
     for (const value of ['', 'admin', `${admin},invalid`, `${admin}0`]) {
       vi.stubEnv('PET_GARDEN_ADMIN_USER_IDS', value)
@@ -67,7 +102,7 @@ describe('global class admin', () => {
     expect(response.headers.get('Cache-Control')).toBe('no-store')
     expect(response.headers.get('Vary')).toBe('Cookie')
     expect(result.classroom).toMatchObject({ name: 'Alpha 100%_班', owner_id: teacher, active_students: 2, archived_students: 0, teacher_count: 2 })
-    expect(Object.keys(result.classroom).sort()).toEqual(['id', 'name', 'owner_id', 'owner_name', 'owner_subject', 'created_at', 'active_students', 'archived_students', 'teacher_count', 'teachers'].sort())
+    expect(Object.keys(result.classroom).sort()).toEqual(['id', 'name', 'owner_id', 'owner_name', 'owner_subject', 'created_at', 'graduated_at', 'active_students', 'archived_students', 'teacher_count', 'teachers'].sort())
     expect(JSON.stringify(result)).not.toContain('PRIVATE')
     expect(result.archiveSupported).toBe(true)
     expect((await read('classes/missing')).status).toBe(404)
