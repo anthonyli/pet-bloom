@@ -70,6 +70,10 @@ export function commandFailureCategory(stderr) {
   if (/no existing credentials|not authorized|unauthorized|invalid token|forbidden/i.test(stderr)) return 'authentication or token permissions'
   if (/scope|team.*not found/i.test(stderr)) return 'team scope resolution'
   if (/ENOTFOUND|ETIMEDOUT|ECONNRESET|fetch failed/i.test(stderr)) return 'network connection'
+  const reason = stderr.match(/"reason"\s*:\s*"([a-z_]{1,80})"/)
+  if (reason) return `Vercel CLI ${reason[1]}`
+  if (/Cannot find module|Cannot find package|ERR_MODULE_NOT_FOUND/.test(stderr)) return 'CLI dependency missing'
+  if (/NODE_MODULE_VERSION|Could not locate the bindings/.test(stderr)) return 'native module binding missing'
   return 'check authentication, network, or the Vercel dashboard'
 }
 const cli = args => run(process.execPath, [path.join(root, 'node_modules/vercel/dist/vc.js'), ...args, '--scope', target.scope, '--non-interactive'], { capture: true })
