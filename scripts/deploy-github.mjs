@@ -4,7 +4,7 @@ import { mkdir, appendFile, rm } from 'node:fs/promises'
 import { DefaultArtifactClient } from '@actions/artifact'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { main as deploy } from './deploy-vercel.mjs'
+import { main as deploy, ReleaseError } from './deploy-vercel.mjs'
 import { main as migrate } from './migrate-turso.mjs'
 import { backupKey, cryptFile } from './lib/encrypted-backup.mjs'
 
@@ -65,8 +65,9 @@ export async function main() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  main().catch(() => {
+  main().catch(error => {
     // Database/CLI errors can include private values. Never dump the raw error.
+    if (error instanceof ReleaseError) console.error(error.message)
     console.error('Automatic release stopped. Check configuration and the last completed step; production was not promoted unless the promotion step had started.')
     process.exitCode = 1
   })

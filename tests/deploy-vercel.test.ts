@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 // @ts-expect-error Deployment entry point is a standalone Node.js module.
-import { target, validateLocal, validateRemote, validateRelease, verifyLive, testEnvironment, release } from '../scripts/deploy-vercel.mjs'
+import { target, validateLocal, validateRemote, validateRelease, verifyLive, testEnvironment, release, commandFailureCategory } from '../scripts/deploy-vercel.mjs'
 
 const project = { id: target.project, accountId: target.team, resourceConfig: { functionDefaultRegions: ['sin1'] } }
 const envs = [
@@ -12,6 +12,11 @@ const deployment = { id: 'dpl_test', projectId: target.project, readyState: 'REA
 const alias = { projectId: target.project, deploymentId: deployment.id }
 
 describe('production deployment safeguards', () => {
+  it('classifies CLI failures without disclosing raw diagnostics', () => {
+    expect(commandFailureCategory('Error: Not authorized; token=private-value')).toBe('authentication or token permissions')
+    expect(commandFailureCategory('ERR_PNPM_FETCH_404 private-value')).toBe('package-manager setup')
+    expect(commandFailureCategory('Unknown error containing private-value')).not.toContain('private-value')
+  })
   it('builds first, migrates second, and only then promotes and verifies', async () => {
     const steps: string[] = []
     await release({

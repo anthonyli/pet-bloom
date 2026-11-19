@@ -6,7 +6,8 @@ import { target } from './deploy-config.mjs'
 
 export { target }
 const root = fileURLToPath(new URL('..', import.meta.url))
-const requireCondition = (condition, message) => { if (!condition) throw new Error(message) }
+export class ReleaseError extends Error {}
+const requireCondition = (condition, message) => { if (!condition) throw new ReleaseError(message) }
 
 export function validateLocal(pkg, config, link) {
   requireCondition(pkg.name === 'pet-bloom', '项目名称不匹配 / Unexpected package name')
@@ -51,21 +52,29 @@ export function testEnvironment(source) {
 function run(command, args, { capture = false, env = process.env, timeout = 30 * 60_000 } = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { cwd: root, env, shell: false, stdio: capture ? ['ignore', 'pipe', 'pipe'] : 'inherit', timeout })
-    let output = ''
+    let output = '', diagnostics = ''
     if (capture) {
       child.stdout.on('data', chunk => { output += chunk })
-      child.stderr.resume()
+      child.stderr.on('data', chunk => { diagnostics = (diagnostics + chunk).slice(-16_384) })
     }
-    child.on('error', () => reject(new Error(`${command} 无法启动 / Could not start command`)))
-    child.on('close', code => code === 0 ? resolve(output) : reject(new Error(
-      `${command} 执行失败（${code}）/ Command failed; check authentication, network, or the Vercel dashboard`)))
+    child.on('error', () => reject(new ReleaseError(`${command} 无法启动 / Could not start command`)))
+    child.on('close', code => code === 0 ? resolve(output) : reject(new ReleaseError(
+      `${command} 执行失败（${code}）/ Command failed: ${commandFailureCategory(diagnostics)}`)))
   })
 }
 
-const cli = args => run('pnpm', ['dlx', target.cli, ...args, '--scope', target.scope], { capture: true })
+export function commandFailureCategory(stderr) {
+  // Return fixed categories only: CLI errors may contain tokens or private data.
+  if (/ERR_PNPM/.test(stderr)) return 'package-manager setup'
+  if (/no existing credentials|not authorized|unauthorized|invalid token|forbidden/i.test(stderr)) return 'authentication or token permissions'
+  if (/scope|team.*not found/i.test(stderr)) return 'team scope resolution'
+  if (/ENOTFOUND|ETIMEDOUT|ECONNRESET|fetch failed/i.test(stderr)) return 'network connection'
+  return 'check authentication, network, or the Vercel dashboard'
+}
+const cli = args => run('pnpm', ['--reporter=silent', 'dlx', target.cli, ...args, '--scope', target.scope], { capture: true })
 const json = async promise => {
   const output = await promise
-  try { return JSON.parse(output) } catch { throw new Error('CLI 响应不是有效 JSON / Invalid CLI JSON response') }
+  try { return JSON.parse(output) } catch { throw new ReleaseError('CLI 响应不是有效 JSON / Invalid CLI JSON response') }
 }
 const api = endpoint => json(cli(['api', `${endpoint}?teamId=${target.team}`]))
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
