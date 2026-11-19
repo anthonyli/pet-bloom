@@ -20,7 +20,7 @@ import { normalizeItemImage } from './item-images'
 import { DomainError } from './errors'
 import { credentials, credentialError } from '../credentials'
 import { isGlobalAdmin } from './admin-access'
-import { hasClassOwnerAccess } from '../class-access'
+import { hasClassOwnerAccess, selectWorkspaceClass } from '../class-access'
 import type { AdminClassPage, AdminClassDetail, AdminClassSummary } from '../admin-types'
 export { credentials } from '../credentials'
 
@@ -279,6 +279,14 @@ export class Garden {
     await this.db.transaction(async () => {
       await this.classroom(actor, id, true)
       await this.db.prepare('DELETE FROM classes WHERE id = ?').run(id)
+    }).immediate()
+  }
+  async graduateClass(actor: string, id: string) {
+    return await this.db.transaction(async () => {
+      await this.classroom(actor, id, true)
+      await this.db.prepare('UPDATE classes SET graduated_at = ? WHERE id = ? AND graduated_at IS NULL').run(now(), id)
+      const row = await this.db.prepare('SELECT graduated_at FROM classes WHERE id = ?').get(id) as { graduated_at: number }
+      return { id, graduated_at: row.graduated_at }
     }).immediate()
   }
   async classTeachers(actor: string, classId: string): Promise<ClassTeachers> {
@@ -616,7 +624,7 @@ export class Garden {
       const user = await this.user(actor)
       const globalAdmin = isGlobalAdmin(actor) ? 1 : 0
       const classes = user.profile_complete ? await this.db.prepare("SELECT c.*, CASE WHEN c.owner_id = ? THEN 'owner' WHEN ? = 1 THEN 'global_admin' ELSE 'admin' END AS role FROM classes c WHERE ? = 1 OR EXISTS (SELECT 1 FROM class_members m WHERE m.class_id = c.id AND m.user_id = ?) ORDER BY c.created_at, c.id").all(actor, globalAdmin, globalAdmin, actor) as Classroom[] : []
-      const selected = user.profile_complete ? classId || classes[0]?.id : undefined
+      const selected = user.profile_complete ? (classId || selectWorkspaceClass(classes)) || undefined : undefined
       const classroom = selected ? (await this.classroom(actor, selected)) : undefined
       const settings = await this.latestSettings(actor, selected)
       const festival_backgrounds = getFestivalBackgrounds(timestamp, settings.value.hunger.timeZone)

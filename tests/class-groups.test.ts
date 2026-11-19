@@ -148,7 +148,7 @@ describe('班级小组', () => {
     await garden.setGroupMember(owner, group.id, studentId, true)
     await garden.evaluate(owner, { studentIds: [studentId], custom: { points: 8, reason: '备份前' } })
     const backup = await exportBackup(garden, owner)
-    expect(backup.version).toBe(10)
+    expect(backup.version).toBe(11)
     expect(backup.groups).toMatchObject([{ id: group.id, class_id: classId, name: '红队' }])
     expect(backup.group_students).toEqual([{ group_id: group.id, student_id: studentId }])
     const restored = await restoreBackup(garden, owner, structuredClone(backup))
@@ -161,7 +161,7 @@ describe('班级小组', () => {
     expect(copy.records[0].reason).toEqual({ zh: '备份前', en: '备份前' })
 
     const { groups, group_students, ...withoutGroups } = backup
-    const legacy = await restoreBackup(garden, owner, { ...withoutGroups, version: 9 as const })
+    const legacy = await restoreBackup(garden, owner, { ...withoutGroups, version: 9 as const, classes: backup.classes.map(({ graduated_at, ...row }) => row) })
     const legacyCopy = await state(owner, legacy.classIds[index])
     expect(legacyCopy.groups).toEqual([])
     expect(legacyCopy.students.every(student => student.group_id === null)).toBe(true)
@@ -184,6 +184,38 @@ describe('班级小组', () => {
     expect(group_students).toHaveLength(1)
     expect(await garden.db.pragma('foreign_key_check')).toEqual([])
   })
+
+  it('毕业后小组和成员仍在，v11 备份同时恢复两者，v10 毕业备份不带小组', async () => {
+    const group = await garden.createGroup(owner, classId, { locale: 'zh' })
+    await garden.renameGroup(owner, group.id, { name: '毕业组' })
+    await garden.setGroupMember(owner, group.id, studentId, true)
+    const graduated = await garden.graduateClass(owner, classId)
+    const current = await state()
+    expect(current.classes.find(row => row.id === classId)?.graduated_at).toBe(graduated.graduated_at)
+    expect(current.groups.find(row => row.id === group.id)?.name).toBe('毕业组')
+    expect(current.students.find(row => row.id === studentId)?.group_id).toBe(group.id)
+    const backup = await exportBackup(garden, owner)
+    expect(backup.version).toBe(11)
+    expect(backup.classes.find(row => row.id === classId)?.graduated_at).toBe(graduated.graduated_at)
+    expect(backup.group_students).toEqual([{ group_id: group.id, student_id: studentId }])
+    const restored = await restoreBackup(garden, owner, structuredClone(backup))
+    const index = backup.classes.findIndex(row => row.id === classId)
+    const copyId = restored.classIds[index]
+    const copy = await state(owner, copyId)
+    const copied = copy.groups.find(row => row.name === '毕业组')
+    expect(copy.classes.find(row => row.id === copyId)?.graduated_at).toBe(graduated.graduated_at)
+    expect(copy.students.find(row => row.name === '林小橙')?.group_id).toBe(copied?.id)
+    const { groups: savedGroups, group_students, ...graduationOnly } = backup
+    const v10 = await restoreBackup(garden, owner, { ...graduationOnly, version: 10 as const })
+    const oldId = v10.classIds[index]
+    const old = await state(owner, oldId)
+    expect(old.classes.find(row => row.id === oldId)?.graduated_at).toBe(graduated.graduated_at)
+    expect(old.groups).toEqual([])
+    expect(old.students.every(row => row.group_id === null)).toBe(true)
+    expect(savedGroups.map(row => row.name)).toContain('毕业组')
+    expect(group_students).toHaveLength(1)
+    expect(await garden.db.pragma('foreign_key_check')).toEqual([])
+  })
 })
 
 it('v10 本地库升级保留原有班级和学生，并补上空白小组表', async () => {
@@ -200,12 +232,12 @@ it('v10 本地库升级保留原有班级和学生，并补上空白小组表', 
     const beforeStudent = await initial.db.prepare('SELECT * FROM students').get()
     const beforeClass = await initial.db.prepare('SELECT * FROM classes').get()
     const beforeHistory = await initial.db.prepare('SELECT * FROM evaluations').all()
-    await initial.db.exec('DROP TABLE class_group_members; DROP TABLE class_groups; PRAGMA user_version = 10')
+    await initial.db.exec('DROP TABLE class_group_members; DROP TABLE class_groups; ALTER TABLE classes DROP COLUMN graduated_at; PRAGMA user_version = 10')
     initial.db.close()
     initialOpen = false
     const upgraded = createDatabase(filename)
     try {
-      expect(upgraded.pragma('user_version', { simple: true })).toBe(11)
+      expect(upgraded.pragma('user_version', { simple: true })).toBe(12)
       expect(upgraded.prepare('SELECT * FROM students').get()).toEqual(beforeStudent)
       expect(upgraded.prepare('SELECT * FROM classes').get()).toEqual(beforeClass)
       expect(upgraded.prepare('SELECT * FROM evaluations').all()).toEqual(beforeHistory)
@@ -214,7 +246,7 @@ it('v10 本地库升级保留原有班级和学生，并补上空白小组表', 
       upgraded.close()
       const reopened = createDatabase(filename)
       try {
-        expect(reopened.pragma('user_version', { simple: true })).toBe(11)
+        expect(reopened.pragma('user_version', { simple: true })).toBe(12)
         expect(reopened.prepare('SELECT name, points FROM students').get()).toEqual({ name: '迁移学生', points: 4 })
       } finally { reopened.close() }
     } finally { if (upgraded.open) upgraded.close() }
