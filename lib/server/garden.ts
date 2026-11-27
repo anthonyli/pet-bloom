@@ -458,14 +458,16 @@ export class Garden {
     }).immediate()
   }
   async renameGroup(actor: string, id: string, input: unknown) {
-    const { name, members, previousMemberIds } = z.object({
-      name: text,
+    const { name, previousName, members, previousMemberIds } = z.object({
+      name: text.optional(),
+      previousName: text.optional(),
       members: groupMembersSchema.optional(),
       previousMemberIds: z.array(text).optional()
-    }).parse(input)
+    }).refine(update => update.name !== undefined || update.members !== undefined).parse(input)
     await this.db.transaction(async () => {
       const group = await this.ownedGroup(actor, id)
-      if (group.name !== name) {
+      if (name !== undefined && group.name !== name) {
+        if (previousName !== undefined && group.name !== previousName) throw new DomainError('groupNameChanged', 409)
         if (await this.db.prepare('SELECT 1 FROM class_groups WHERE class_id = ? AND name = ?').get(group.class_id, name)) throw new DomainError('groupNameTaken', 409)
         await this.db.prepare('UPDATE class_groups SET name = ? WHERE id = ?').run(name, id)
       }

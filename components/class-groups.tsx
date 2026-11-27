@@ -63,17 +63,17 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
     })
   }
 
-  async function save(draft: GroupEditor, members: GroupMember[]) {
+  async function save(draft: GroupEditor, members?: GroupMember[]) {
     const name = draft.name.trim()
     const group = draft.group
     let hasConflict = false
     const ok = await client.run(async () => {
       try {
         await (group
-          ? api(`groups/${group.id}`, 'PATCH', { name, members, previousMemberIds: draft.previousMemberIds })
+          ? api(`groups/${group.id}`, 'PATCH', { name: name !== group.name ? name : undefined, previousName: name !== group.name ? group.name : undefined, members, previousMemberIds: members ? draft.previousMemberIds : undefined })
           : api(`classes/${classId}/groups`, 'POST', { locale, name: name || undefined, members }))
       } catch (error) {
-        hasConflict = error instanceof ApiError && ['groupMembersChanged', 'studentArchived'].includes(error.code)
+        hasConflict = error instanceof ApiError && ['groupMembersChanged', 'groupNameChanged', 'studentArchived'].includes(error.code)
         throw error
       }
     }, group ? t('小组已保存。', 'Group saved.') : t('小组已创建。', 'Group created.'))
@@ -109,6 +109,11 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
 
   function submit(draft: GroupEditor) {
     if (busy || stale) return
+    if (draft.group && draft.selectedIds.size === draft.previousMemberIds.length && draft.previousMemberIds.every(id => draft.selectedIds.has(id))) {
+      if (draft.name.trim() === draft.group.name) back()
+      else void save(draft)
+      return
+    }
     const selected = students.filter(student => draft.selectedIds.has(student.id))
     const members = selected.map(student => ({ studentId: student.id, groupId: student.group_id ?? null }))
     const transfers = selected.flatMap(student => {
@@ -187,8 +192,8 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
         </> : <p className="text-sm text-muted">{t('班里还没有在班学生。', 'This class has no active students yet.')}</p>}
       </fieldset>
       {stale ? <div className="space-y-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-950">
-        <p role="alert">{t('成员所属小组已更新，请重新加载后确认选择。', 'Group assignments have changed. Reload and review your selection.')}</p>
-        <Button type="button" busy={reloading} onClick={() => void reload(editor)}>{t('重新加载成员', 'Reload members')}</Button>
+        <p role="alert">{t('小组信息已更新，请重新加载后确认组名和成员。', 'The group has changed. Reload and review its name and members.')}</p>
+        <Button type="button" busy={reloading} onClick={() => void reload(editor)}>{t('重新加载小组', 'Reload group')}</Button>
       </div> : null}
       {error && !stale && <p className="text-sm text-danger">{error}</p>}
       <div className="flex flex-wrap justify-end gap-2">
