@@ -26,6 +26,7 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
   const [query, setQuery] = useState('')
   const [review, setReview] = useState<GroupReview | null>(null)
   const [stale, setStale] = useState(false)
+  const [awaitingGroupList, setAwaitingGroupList] = useState(false)
   const [reloading, setReloading] = useState(false)
   const busy = client.busy || reloading
   const reviewHeading = useRef<HTMLHeadingElement>(null)
@@ -66,12 +67,14 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
   async function save(draft: GroupEditor, members: GroupMember[]) {
     const name = draft.name.trim()
     const group = draft.group
+    let created = false
     let hasConflict = false
     const ok = await client.run(async () => {
       try {
         await (group
           ? api(`groups/${group.id}`, 'PATCH', { name, members, previousMemberIds: draft.previousMemberIds })
           : api(`classes/${classId}/groups`, 'POST', { locale, name: name || undefined, members }))
+        created = !group
       } catch (error) {
         hasConflict = error instanceof ApiError && ['groupMembersChanged', 'studentArchived'].includes(error.code)
         throw error
@@ -80,6 +83,9 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
     if (ok) {
       setEditor(null)
       setReview(null)
+    } else if (created) {
+      setAwaitingGroupList(true)
+      client.setNotice(null)
     } else if (hasConflict) {
       setStale(true)
       setReview(null)
@@ -125,7 +131,12 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
   const error = client.notice?.error ? client.notice.text : ''
 
   return <Dialog open onClose={() => { if (!busy) onClose() }} icon={UsersRound} title={title}>
-    {!editor ? <div className="space-y-4">
+    {awaitingGroupList ? <div className="space-y-4">
+      <p role="status">{t('小组已创建，小组列表暂未刷新。', 'Group created. The group list could not be refreshed.')}</p>
+      <Button busy={busy} onClick={async () => {
+        if (await client.run(async () => {})) { setAwaitingGroupList(false); back() }
+      }}>{t('重新加载小组列表', 'Reload group list')}</Button>
+    </div> : !editor ? <div className="space-y-4">
       <div className="flex justify-end">
         <Button type="button" variant="primary" disabled={client.busy} onClick={() => edit()}><Plus size={16} aria-hidden="true" />{t('新建小组', 'New group')}</Button>
       </div>
