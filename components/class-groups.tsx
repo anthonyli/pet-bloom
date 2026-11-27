@@ -63,14 +63,14 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
     })
   }
 
-  async function save(draft: GroupEditor, members: GroupMember[]) {
+  async function save(draft: GroupEditor, members?: GroupMember[]) {
     const name = draft.name.trim()
     const group = draft.group
     let hasConflict = false
     const ok = await client.run(async () => {
       try {
         await (group
-          ? api(`groups/${group.id}`, 'PATCH', { name: name !== group.name ? name : undefined, previousName: name !== group.name ? group.name : undefined, members, previousMemberIds: draft.previousMemberIds })
+          ? api(`groups/${group.id}`, 'PATCH', { name: name !== group.name ? name : undefined, previousName: name !== group.name ? group.name : undefined, members, previousMemberIds: members ? draft.previousMemberIds : undefined })
           : api(`classes/${classId}/groups`, 'POST', { locale, name: name || undefined, members }))
       } catch (error) {
         hasConflict = error instanceof ApiError && ['groupMembersChanged', 'groupNameChanged', 'studentArchived'].includes(error.code)
@@ -109,6 +109,11 @@ export function ClassGroupsDialog({ client, locale, classId, onClose }: { client
 
   function submit(draft: GroupEditor) {
     if (busy || stale) return
+    if (draft.group && draft.selectedIds.size === draft.previousMemberIds.length && draft.previousMemberIds.every(id => draft.selectedIds.has(id))) {
+      if (draft.name.trim() === draft.group.name) back()
+      else void save(draft)
+      return
+    }
     const selected = students.filter(student => draft.selectedIds.has(student.id))
     const members = selected.map(student => ({ studentId: student.id, groupId: student.group_id ?? null }))
     const transfers = selected.flatMap(student => {
