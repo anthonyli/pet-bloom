@@ -9,6 +9,13 @@ describe('中英文学生导入', () => {
       expect(parseStudentList(`${name}\t`)[0]).toEqual({ name, studentNo: '', ambiguous: false, invalid: false })
     }
   })
+  it('按行优先识别引号外的 Tab，保留姓名内的标点及空学号', () => {
+    const value = 'Example, River\t007\n王；小明\t\n"Doe; ""Jay"""\t009\n"A\tB",010\nC;011'
+    expect(parseStudentList(value)).toEqual([
+      ['Example, River', '007'], ['王；小明', ''], ['Doe; "Jay"', '009'], ['A\tB', '010'], ['C', '011']
+    ].map(([name, studentNo]) => ({ name, studentNo, ambiguous: false, invalid: false })))
+    expect(parseStudentList('Name, Jr\t007\textra')[0].invalid).toBe(true)
+  })
   it('逗号分隔时保留英文姓名内部空格', () => {
     expect(parseStudentList('Mary Jane, 01')).toEqual([{ name: 'Mary Jane', studentNo: '01', ambiguous: false, invalid: false }])
   })

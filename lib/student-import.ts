@@ -6,12 +6,15 @@ export function parseStudentList(value: string): ImportRow[] {
     // Tab 是列分隔符，不能在识别列之前修剪掉。
     const line = raw.includes('\t') ? raw : raw.trim()
     if (/[,，;；\t]/.test(line)) {
+      // A quoted tab is cell content. Two escaped quotes leave the quoting state unchanged.
+      const tabSeparated = line.split('"').some((segment, index) => index % 2 === 0 && segment.includes('\t'))
+      const delimiter = tabSeparated ? /\t/ : /[,，;；]/
       const columns: string[] = []; let part = '', quoted = false
       for (let index = 0; index < line.length; index++) {
         const character = line[index]
         if (character === '"') {
           if (quoted && line[index + 1] === '"') { part += '"'; index++ } else quoted = !quoted
-        } else if (/[,，;；\t]/.test(character) && !quoted) { columns.push(part.trim()); part = '' }
+        } else if (!quoted && delimiter.test(character)) { columns.push(part.trim()); part = '' }
         else part += character
       }
       columns.push(part.trim())
