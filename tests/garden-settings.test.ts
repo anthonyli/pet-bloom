@@ -33,6 +33,23 @@ async function restoreCopy(backup: { classes: { id: string }[] }) {
 }
 
 describe('可配置成长与历史回放', () => {
+  it('读取班级的查询次数不随学生人数增长', async () => {
+    const prepare = vi.spyOn(garden.db, 'prepare')
+    async function countSnapshotQueries() {
+      prepare.mockClear()
+      await garden.snapshot(owner, classId)
+      return prepare.mock.calls.length
+    }
+    try {
+      const singleStudent = await countSnapshotQueries()
+      await garden.addStudents(owner, { classId, students: Array.from({ length: 39 }, (_, i) => ({ name: `同学${i + 2}` })) })
+      const fullClass = await countSnapshotQueries()
+      expect(fullClass).toBe(singleStudent)
+    } finally {
+      prepare.mockRestore()
+    }
+  })
+
   it('默认配置保留截零语义，不改变旧成长', async () => {
     await score(-2); await score(3)
     expect((await state()).students[0]).toMatchObject({ points: 1, pet_exp: 3, badge_count: 0 })

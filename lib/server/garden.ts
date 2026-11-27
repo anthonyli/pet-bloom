@@ -699,11 +699,21 @@ export class Garden {
       const globalAdmin = isGlobalAdmin(actor) ? 1 : 0
       const classes = user.profile_complete ? await this.db.prepare("SELECT c.*, CASE WHEN c.owner_id = ? THEN 'owner' WHEN ? = 1 THEN 'global_admin' ELSE 'admin' END AS role FROM classes c WHERE ? = 1 OR EXISTS (SELECT 1 FROM class_members m WHERE m.class_id = c.id AND m.user_id = ?) ORDER BY c.created_at, c.id").all(actor, globalAdmin, globalAdmin, actor) as Classroom[] : []
       const selected = user.profile_complete ? (classId || selectWorkspaceClass(classes)) || undefined : undefined
-      const classroom = selected ? (await this.classroom(actor, selected)) : undefined
+      const classroom = classes.find(item => item.id === selected)
+      if (selected && !classroom) throw new DomainError('notFound', 404)
       const settings = await this.latestSettings(actor, selected)
       const festival_backgrounds = getFestivalBackgrounds(timestamp, settings.value.hunger.timeZone)
       const offers = new Map(festival_backgrounds.backgrounds.map(offer => [offer.background_id, offer.expires_at]))
-      const students = selected ? await this.db.prepare('SELECT s.*, (SELECT COALESCE(SUM(amount), 0) FROM badges b WHERE b.student_id = s.id AND b.active = 1) AS badge_count FROM students s WHERE class_id = ? ORDER BY created_at, id').all(selected) as Student[] : []
+      // A pet is fed at adoption and at each positive, unrevoked evaluation in that generation.
+      const studentRows = selected ? await this.db.prepare(`
+        SELECT s.*,
+          (SELECT COALESCE(SUM(amount), 0) FROM badges WHERE student_id = s.id AND active = 1) AS badge_count,
+          CASE WHEN s.pet_id IS NULL THEN 0 ELSE MAX(
+            COALESCE((SELECT created_at FROM growth_events WHERE student_id = s.id AND generation = s.generation AND kind = 'start' ORDER BY seq LIMIT 1), 0),
+            COALESCE((SELECT MAX(created_at) FROM evaluations WHERE student_id = s.id AND generation = s.generation AND points > 0 AND undone = 0), 0)
+          ) END AS last_fed_at
+        FROM students s WHERE s.class_id = ? ORDER BY s.created_at, s.id
+      `).all(selected) as (Student & { last_fed_at: number })[] : []
       const groups = selected ? await this.db.prepare('SELECT id, class_id, name, created_at FROM class_groups WHERE class_id = ? ORDER BY created_at, rowid').all(selected) as ClassGroup[] : []
       const memberships = selected ? await this.db.prepare('SELECT m.student_id, m.group_id FROM class_group_members m JOIN class_groups g ON g.id = m.group_id WHERE g.class_id = ?').all(selected) as { student_id: string; group_id: string }[] : []
       const groupByStudent = new Map(memberships.map(row => [row.student_id, row.group_id]))
@@ -714,7 +724,7 @@ export class Garden {
         backgrounds.push(row.background_id)
         owned.set(row.student_id, backgrounds)
       }
-      for (const student of students) {
+      const students = studentRows.map(({ last_fed_at, ...student }) => {
         student.group_id = groupByStudent.get(student.id) ?? null
         student.owned_background_ids = owned.get(student.id) || []
         const expiresAt = student.festival_background_id ? offers.get(student.festival_background_id) : undefined
@@ -724,8 +734,9 @@ export class Garden {
           student.festival_background_id = null
           student.festival_background_expires_at = null
         }
-        student.status = petStatus(student.pet_id, student.points, student.pet_exp, (await this.growthHistory(student.id, student.generation)).lastFedAt, settings.value, timestamp)
-      }
+        student.status = petStatus(student.pet_id, student.points, student.pet_exp, last_fed_at, settings.value, timestamp)
+        return student
+      })
       const rules = selected ? (await this.db.prepare('SELECT id, name, points, category, custom FROM rules WHERE class_id = ? ORDER BY rowid').all(selected) as (Omit<Rule, 'name'> & { name: string })[]).map(rule => ({ ...rule, name: JSON.parse(rule.name) })) : []
       const records = selected ? (await this.db.prepare('SELECT e.*, s.name AS student_name FROM evaluations e JOIN students s ON s.id = e.student_id WHERE s.class_id = ? ORDER BY e.rowid DESC LIMIT 200').all(selected) as (Omit<Evaluation, 'reason'> & { reason: string })[]).map(record => ({ ...record, reason: JSON.parse(record.reason), can_undo: !record.undone && (hasClassOwnerAccess(classroom) || record.actor_user_id === actor) })) : []
       const items = selected ? (await this.db.prepare('SELECT id, name, cost, active, description, category, icon, image_key, stock, background_id FROM items WHERE class_id = ? AND active = 1 ORDER BY rowid').all(selected) as (Omit<ShopItem, 'name' | 'description' | 'image'> & { name: string; description: string; image_key: string | null })[]).map(({ image_key, ...item }) => ({ ...item, name: JSON.parse(item.name), description: JSON.parse(item.description), image: image_key ? `/api/items/${item.id}/image?v=${image_key}` : null })) : []

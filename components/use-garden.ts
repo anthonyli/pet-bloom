@@ -19,6 +19,7 @@ export function useGarden(locale: Locale, initialClassId = '') {
   const [ready, setReady] = useState(false)
   const [refreshFailed, setRefreshFailed] = useState(false)
   const [classId, setClassId] = useState('')
+  const [switchingTo, setSwitchingTo] = useState('')
   const [busy, setBusy] = useState(false)
   const [upgrades, setUpgrades] = useState<Upgrade[]>([])
   const [celebrations, setCelebrations] = useState<Upgrade[]>([])
@@ -135,9 +136,10 @@ export function useGarden(locale: Locale, initialClassId = '') {
   async function selectClass(id: string) {
     if (pending.current || id === activeClass.current) return
     // Unmount class-bound forms before fetching another class, including slow requests.
-    setReady(false); clearFeedback()
-    await run(async () => {}, undefined, id)
+    setSwitchingTo(id); setReady(false); clearFeedback()
+    try { await run(async () => {}, undefined, id) }
+    finally { setSwitchingTo('') }
   }
-  return { state, ready, refreshFailed, classId, busy, upgrades, setUpgrades, scoreEffects, celebrations, setCelebrations, notice, setNotice, refresh, run, selectClass, report, scope }
+  return { state, ready, refreshFailed, classId, switchingTo, busy, upgrades, setUpgrades, scoreEffects, celebrations, setCelebrations, notice, setNotice, refresh, run, selectClass, report, scope }
 }
 export type GardenClient = ReturnType<typeof useGarden>

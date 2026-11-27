@@ -6,11 +6,16 @@ const config = {
   poweredByHeader: false,
   env: { NEXT_PUBLIC_CLOUD_DEPLOYMENT: process.env.VERCEL ? 'true' : 'false' },
   async headers() {
-    return [{ source: '/:path*', headers: [
-      { key: 'X-Content-Type-Options', value: 'nosniff' },
-      { key: 'Referrer-Policy', value: 'same-origin' },
-      { key: 'X-Frame-Options', value: 'DENY' }
-    ] }]
+    const assetHeaders = { key: 'Cache-Control', value: 'public, max-age=86400' }
+    return [
+      { source: '/pets/:image(.*\\.webp)', headers: [assetHeaders] },
+      { source: '/pet-backgrounds/:image(.*\\.svg)', headers: [assetHeaders] },
+      { source: '/:path*', headers: [
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'Referrer-Policy', value: 'same-origin' },
+        { key: 'X-Frame-Options', value: 'DENY' }
+      ] }
+    ]
   }
 }
 export default config
