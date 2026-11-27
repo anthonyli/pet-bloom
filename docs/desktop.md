@@ -4,9 +4,9 @@
 
 | 平台 | 构建命令 | 产物（`dist/`） |
 | --- | --- | --- |
-| Mac Apple Silicon（M 系列） | `pnpm desktop:build:mac:arm64` | `PetBloom-0.0.2-mac-arm64.dmg`、`.zip` |
-| Mac Intel | `pnpm desktop:build:mac:x64` | `PetBloom-0.0.2-mac-x64.dmg`、`.zip` |
-| Windows x64 | `pnpm desktop:build:win` | `PetBloom-0.0.2-win-x64.exe` |
+| Mac Apple Silicon（M 系列） | `pnpm desktop:build:mac:arm64` | `PetBloom-0.0.3-mac-arm64.dmg`、`.zip` |
+| Mac Intel | `pnpm desktop:build:mac:x64` | `PetBloom-0.0.3-mac-x64.dmg`、`.zip` |
+| Windows x64 | `pnpm desktop:build:win` | `PetBloom-0.0.3-win-x64.exe` |
 
 在 macOS 上运行 `pnpm desktop:build:mac` 可依次构建两种芯片。Windows 正式版在 Windows x64 构建；需要 Node.js 22.13+、pnpm 11、Python 3 和 Visual Studio Build Tools 的「使用 C++ 的桌面开发」工作负载。macOS 也可运行 `pnpm desktop:build:win` 交叉构建未签名的 Windows x64 预览包：使用 SQLite 自带的 Windows Node-API 模块，不跨系统运行 node-gyp；正式签名构建、Windows 开发模式及真实窗口回归仍须在 Windows 执行，不能把交叉打包成功当作实机验收通过。Mac 需要 Xcode Command Line Tools。先运行 `pnpm install --frozen-lockfile`；构建会下载 Electron 与原生依赖，需要网络。`pnpm desktop:dev` 可在当前系统打开桌面应用。桌面构建使用独立 `.next-desktop/` 和 `.desktop/`，不会覆盖 `.next/` 或改写 Web 环境的 SQLite 二进制。若有应用正从旧输出目录运行，可设置 `DESKTOP_OUTPUT_DIR` 在其他目录构建，避免覆盖正在使用的程序。
 
@@ -32,7 +32,7 @@
    - `MAC_CSC_LINK`、`MAC_CSC_KEY_PASSWORD`：可选，Developer ID Application 证书（含私钥的 Base64 P12）及其密码；不配置时使用无需苹果账号的 ad-hoc 本地签名，不作为开发者身份认证。
    - `APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD`、`APPLE_TEAM_ID`：仅使用上述 Apple 证书正式分发时必需的公证凭据。
    - `WIN_CSC_LINK`、`WIN_CSC_KEY_PASSWORD`：Windows 代码签名证书（含私钥的 Base64 P12/PFX）及其密码。需要硬件或云端签名的证书应先调整签名集成，不能直接假设可导出 PFX。
-3. 提升 `package.json.version`（当前 `0.0.2`，下次例如 `0.0.3`），使用稳定的三段版本号，不复用已发布版本。手动从默认分支运行 workflow，勾选 `publish`；Windows 签名（或显式允许未签名）、可选的 Mac 开发者签名及公证、三个目标构建及回归、资产哈希校验全部成功后，流程在当前仓库以本次构建提交创建 draft Release，完整上传后才公开并设为 Latest。已有同版本 Release 不覆盖；失败留下的 draft 需人工检查处理。
+3. 提升 `package.json.version`，使用稳定的三段版本号，不复用已发布版本。手动从默认分支运行 workflow，勾选 `publish`；Windows 签名（或显式允许未签名）、可选的 Mac 开发者签名及公证、三个目标构建及回归、资产哈希校验全部成功后，流程在当前仓库以本次构建提交创建 draft Release，完整上传后才公开并设为 Latest。已有同版本 Release 不覆盖；失败留下的 draft 需人工检查处理。
 4. Mac 同时发布两种架构的 DMG **和 ZIP**，以及合并后的 `latest-mac.yml`；Windows 发布 EXE、`latest.yml`，并带上生成的 `.blockmap`。ZIP 是 Mac 自动更新必需资产，不能只上传 DMG，也不能让两个架构各自覆盖 `latest-mac.yml`。
 
 无 Windows 证书时，经发布者确认可在 workflow 勾选 `allow_unsigned_windows`，发布说明会标明未签名和未知发布者提示；该选项默认关闭。
@@ -63,7 +63,7 @@ For official releases:
    - `MAC_CSC_LINK` / `MAC_CSC_KEY_PASSWORD`: optional Base64 P12 containing a Developer ID Application certificate and private key, plus its password. Without them, builds use local ad-hoc signing, requiring no Apple account and providing no developer identity authentication.
    - `APPLE_ID` / `APPLE_APP_SPECIFIC_PASSWORD` / `APPLE_TEAM_ID`: notarization credentials, required only when distributing with that Apple developer certificate.
    - `WIN_CSC_LINK` / `WIN_CSC_KEY_PASSWORD`: Base64 P12/PFX code-signing certificate and private key, plus its password. Hardware-backed or cloud signing requires a separate signing integration; do not assume the key is exportable.
-3. Increase the stable three-part `package.json.version` (currently `0.0.2`; for example, use `0.0.3` next). Never reuse a published version. Run the workflow from the default branch with `publish` checked. Windows signing (or explicit permission for an unsigned build), optional Mac developer signing and notarization, all builds, regression tests and hash validation must pass. The final job creates a draft Release in the current repository targeting the build commit, uploads all assets, then publishes it as Latest. Existing releases are not overwritten; inspect failed drafts manually.
+3. Increase the stable three-part `package.json.version`. Never reuse a published version. Run the workflow from the default branch with `publish` checked. Windows signing (or explicit permission for an unsigned build), optional Mac developer signing and notarization, all builds, regression tests and hash validation must pass. The final job creates a draft Release in the current repository targeting the build commit, uploads all assets, then publishes it as Latest. Existing releases are not overwritten; inspect failed drafts manually.
 4. Include both Mac DMGs **and ZIPs**, merged `latest-mac.yml`, the Windows EXE and `latest.yml`, plus generated `.blockmap` files. Mac updating requires ZIPs, and separate architecture manifests must not overwrite each other.
 
 Without a Windows certificate, the publisher can explicitly enable `allow_unsigned_windows` in the workflow. It defaults to false; release notes disclose unsigned builds and the unknown publisher warning.
