@@ -150,6 +150,17 @@ describe('班级小组', () => {
     expect((await state()).groups.map(row => row.name)).toEqual(['蓝组'])
   })
 
+  it('旧表单只改成员保留新组名，同时改名冲突时整笔回滚', async () => {
+    const group = await garden.createGroup(owner, classId, { name: '红组' })
+    await garden.renameGroup(admin, group.id, { previousName: '红组', name: '蓝组' })
+    await garden.renameGroup(owner, group.id, { previousMemberIds: [], members: [{ studentId, groupId: null }] })
+    await expectError(() => garden.renameGroup(owner, group.id, {
+      previousName: '红组', name: '绿组', previousMemberIds: [studentId], members: []
+    }), 'groupNameChanged', 409)
+    expect((await state()).groups[0].name).toBe('蓝组')
+    expect(await memberships()).toEqual([{ group_id: group.id, student_id: studentId }])
+  })
+
   it('并发调整小组时拒绝过期的学生归属和成员名单', async () => {
     const selection = [{ studentId, groupId: null }]
     const first = await garden.createGroup(owner, classId, { name: '先保存的组', members: selection })
