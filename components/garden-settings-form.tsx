@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Save, Trash2 } from 'lucide-react'
+import { Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
 import { Button, Checkbox, Field, Input, cn } from '@/components/ui'
 import { gardenSettingsSchema, graduationExperience, type GardenSettings } from '@/lib/garden-settings'
 import { translator, errorMessage } from '@/lib/i18n'
@@ -12,6 +12,8 @@ export function GardenSettingsForm({ client, locale, page }: { client: GardenCli
   const [value, setValue] = useState(() => structuredClone(client.state!.settings.value))
   const [version, setVersion] = useState(client.state!.settings.version)
   const [error, setError] = useState(''), [saved, setSaved] = useState(false)
+  const [needsRefresh, setNeedsRefresh] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const days = Math.floor(value.hunger.minutes / 1440), hours = Math.floor(value.hunger.minutes % 1440 / 60), minutes = value.hunger.minutes % 60
   function update(patch: Partial<GardenSettings>) { setValue(current => ({ ...current, ...patch })); setSaved(false); setError('') }
   function hunger(patch: Partial<GardenSettings['hunger']>) { update({ hunger: { ...value.hunger, ...patch } }) }
@@ -19,13 +21,41 @@ export function GardenSettingsForm({ client, locale, page }: { client: GardenCli
     return <div className="flex items-start justify-between gap-5 py-4"><div className="min-w-0"><label htmlFor={id} className="cursor-pointer text-sm font-semibold">{label}</label>{description && <p id={`${id}-help`} className="mt-1 text-sm leading-relaxed text-muted">{description}</p>}</div><Button id={id} type="button" role="switch" aria-checked={checked} aria-describedby={description ? `${id}-help` : undefined} aria-label={label} disabled={client.busy} onClick={() => change(!checked)} className={cn('min-h-11 w-14 shrink-0 border-transparent p-1 hover:border-transparent', checked ? 'bg-primary hover:bg-primary' : 'bg-[#e8e2f3] hover:bg-[#ddd5ed]')}><span className={cn('flex w-full', checked && 'justify-end')}><span className="block size-5 rounded-full bg-white shadow-sm" /></span></Button></div>
   }
   return <form className="flex h-full min-h-0 flex-col gap-5" onSubmit={async event => {
-    event.preventDefault(); setError(''); setSaved(false)
+    event.preventDefault()
+    if (client.busy || refreshing) return
+    setError('')
+    if (needsRefresh) {
+      setRefreshing(true)
+      try {
+        const current = await client.refresh(client.classId)
+        if (current) {
+          setVersion(current.settings.version)
+          setValue(structuredClone(current.settings.value))
+          setNeedsRefresh(false)
+          setSaved(true)
+        }
+      } catch (error) { client.report(error) }
+      finally { setRefreshing(false) }
+      return
+    }
+    setSaved(false)
     if (!gardenSettingsSchema.safeParse(value).success) { setError(t('请检查经验、徽章、提醒时长、时区和假期日期；结束日期不能早于开始日期。', 'Check experience, badges, reminder duration, time zone and holiday dates. End dates must not precede start dates.')); return }
-    let nextVersion = version
-    const ok = await client.run(async () => { try { nextVersion = (await api<{ version: number }>('settings', 'PATCH', { classId: client.classId, version, value })).version } catch (error) { const code = error instanceof ApiError ? error.code === 'invalidInput' ? 'invalidSettings' : error.code : 'serverError'; setError(errorMessage(code, locale)); throw new ApiError(code, error instanceof ApiError ? error.status : 500) } })
-    if (ok) { setVersion(nextVersion); setSaved(true) }
+    let confirmed = false
+    const ok = await client.run(async () => {
+      try {
+        const receipt = await api<{ version: number }>('settings', 'PATCH', { classId: client.classId, version, value })
+        setVersion(receipt.version)
+        confirmed = true
+      } catch (error) {
+        const code = error instanceof ApiError ? error.code === 'invalidInput' ? 'invalidSettings' : error.code : 'serverError'
+        setError(errorMessage(code, locale))
+        throw new ApiError(code, error instanceof ApiError ? error.status : 500)
+      }
+    })
+    if (ok) setSaved(true)
+    else if (confirmed) { setNeedsRefresh(true); client.setNotice(null) }
   }}>
-    <fieldset disabled={client.busy} className="min-h-0 min-w-0 flex-1 space-y-5 overflow-y-auto px-1 pb-2">
+    <fieldset disabled={client.busy || needsRefresh} className="min-h-0 min-w-0 flex-1 space-y-5 overflow-y-auto px-1 pb-2">
       {page === 'growth' ? <>
         <p className="text-sm leading-relaxed text-muted">{t('保存后立即生效，保留当前等级与本级进度比例。已获徽章不追扣，每轮每级只奖励一次。', 'Changes apply immediately, preserving each pet’s level and progress within it. Existing badges are kept; each level rewards once per cycle.')}</p>
         <div className="grid grid-cols-[minmax(4rem,1fr)_1fr_1fr] gap-x-3 gap-y-3 text-sm sm:gap-x-6">
@@ -51,8 +81,8 @@ export function GardenSettingsForm({ client, locale, page }: { client: GardenCli
       </div>}
     </fieldset>
     <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-line bg-white pt-4">
-      <div className="min-w-0 flex-1 text-sm" aria-live="polite">{error ? <p role="alert" className="text-danger">{error}</p> : saved ? <p className="text-success">{t('设置已保存。', 'Settings saved.')}</p> : <p className="text-muted">{t('仅应用于当前班级，所有共管教师使用同一设置。', 'Applies only to this class, with shared settings for all its teachers.')}</p>}</div>
-      <Button type="submit" variant="primary" busy={client.busy}><Save size={16} />{t('保存设置', 'Save settings')}</Button>
+      <div className="min-w-0 flex-1 text-sm" aria-live="polite">{needsRefresh ? <p>{t('设置已保存，最新设置暂未加载。', 'Settings were saved. The latest settings could not be loaded.')}</p> : error ? <p role="alert" className="text-danger">{error}</p> : saved ? <p className="text-success">{t('设置已保存。', 'Settings saved.')}</p> : <p className="text-muted">{t('仅应用于当前班级，所有共管教师使用同一设置。', 'Applies only to this class, with shared settings for all its teachers.')}</p>}</div>
+      <Button type="submit" variant="primary" busy={client.busy || refreshing}>{needsRefresh ? <><RefreshCw size={16} />{t('重新加载设置', 'Reload settings')}</> : <><Save size={16} />{t('保存设置', 'Save settings')}</>}</Button>
     </footer>
   </form>
 }
